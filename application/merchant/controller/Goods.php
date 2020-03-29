@@ -341,6 +341,8 @@ class Goods extends Base
             'take_card_type' => input('take_card_type/d', 0),
             'visit_type' => input('visit_type/d', 0),
             'visit_password' => input('visit_password/s', ''),
+            'is_duijie' => input('is_duijie/d', 0),
+            'duijie_smilepic' => input('duijie_smilepic/s', ''),
             'contact_limit' => input('contact_limit/s', ''),
             'content' => input('content/s', ''),
             'remark' => input('remark/s', ''),
@@ -486,5 +488,11 @@ class Goods extends Base
         $this->assign('goods', $goods);
         $this->assign('short_link', $goods->shortLink);
         return $this->fetch();
+    }
+    
+    //商品对接功能
+    public function duijie()
+    {
+        $this->error('工程师正在赶工中，近期上线');
     }
 }

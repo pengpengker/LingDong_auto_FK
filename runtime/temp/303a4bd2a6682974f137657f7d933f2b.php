@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:80:"F:\MaLong\item\faka\application\templates\pc\merchant\default\user\settings.html";i:1543624690;s:71:"F:\MaLong\item\faka\application\templates\pc\merchant\default\base.html";i:1585486427;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:78:"F:\MaLong\item\faka\application\templates\pc\merchant\default\goods\index.html";i:1539744090;s:71:"F:\MaLong\item\faka\application\templates\pc\merchant\default\base.html";i:1585486427;}*/ ?>
 <!DOCTYPE html>
 <html lang="zh">
     <head>
@@ -345,359 +345,177 @@
 	<div class="col-sm-12">
 		<div class="card-box">
 			<div class="row">
-				<div class="col-lg-6">
-					<h4 class="header-title m-t-0 m-b-30">商户基本信息</h4>
-					<form class="form-horizontal" role="form" action="" method="post">
+				<div class="col-sm-6">
+					<form class="form-inline" role="form" action="" method="get">
 						<div class="form-group">
-							<label class="col-md-3 control-label">商户编号</label>
-							<div class="col-md-9">
-								<p class="form-control-static"><?php echo $_user['id']; ?></p>
-							</div>
+							<select name="cate_id" class="form-control">
+								<option value="" <?php if(\think\Request::instance()->get('cate_id')==''): ?>selected<?php endif; ?>>全部分类 </option> <?php foreach($categorys as $v): ?> <option
+								 value="<?php echo $v['id']; ?>" <?php if(\think\Request::instance()->get('cate_id')==$v['id']): ?>selected<?php endif; ?>><?php echo $v['name']; ?> </option> <?php endforeach; ?> </select> </div>
+								 <div class="form-group">
+									<input name="name" type="text" class="form-control" placeholder="商品名" value="<?php echo (\think\Request::instance()->get('name') ?: ''); ?>">
 						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">用户名</label>
-							<div class="col-md-9">
-								<p class="form-control-static"><?php echo $_user['username']; ?></p>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">电子邮箱</label>
-							<div class="col-md-9">
-								<p class="form-control-static"><?php echo $_user['email']; ?></p>
-							</div>
-						</div>
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">手机号码</label>
-                            <div class="col-md-9">
-                                <input name="mobile" type="text" class="form-control" value="<?php echo $_user['mobile']; ?>">
-                                <br>
-                                <button type="button" id="get_code" onclick="getCode()"> 获取验证码</button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">短信验证码</label>
-                            <div class="col-md-9">
-                                <input name="mobileCode" type="text" class="form-control" value="">
-                            </div>
-                        </div>
-                        <div class="form-group" style="color:red;">
-                            <label class="col-md-3 control-label">* 说明 *</label>
-                            <div class="col-md-9">
-                                修改手机号需验证旧手机号码，新增或不修改，此项留空，验证码错误时，手机号码不会修改
-                            </div>
-                        </div>
-						<?php if(sysconf('login_auth') == 1) {?>
-						<div class="form-group">
-							<label class="col-md-3 control-label">安全登录</label>
-							<div class="col-md-9">
-								<select name="login_auth" class="form-control" required>
-									<option value="1" <?php if($_user['login_auth']==1): ?>selected<?php endif; ?>>是</option>
-									<option value="0" <?php if($_user['login_auth']==0): ?>selected<?php endif; ?>>否</option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">安全登录方式</label>
-							<div class="col-md-9">
-								<select name="login_auth_type" class="form-control" required>
-									<?php if(sysconf('login_auth_type') == 0) { ?>
-									<option value="1" <?php if($_user['login_auth_type']==1): ?>selected<?php endif; ?>>短信验证</option>
-									<option value="2" <?php if($_user['login_auth_type']==2): ?>selected<?php endif; ?>>邮件验证</option>
-									<option value="3" <?php if($_user['login_auth_type']==3): ?>selected<?php endif; ?>>谷歌密码验证</option>
-									<?php } if(sysconf('login_auth_type') == 1) { ?>
-									<option value="2" <?php if($_user['login_auth_type']==2): ?>selected<?php endif; ?>>邮件验证</option>
-									<option value="3" <?php if($_user['login_auth_type']==3): ?>selected<?php endif; ?>>谷歌密码验证</option>
-									<?php } if(sysconf('login_auth_type') == 2) { ?>
-									<option value="1" <?php if($_user['login_auth_type']==1): ?>selected<?php endif; ?>>短信验证</option>
-									<option value="3" <?php if($_user['login_auth_type']==3): ?>selected<?php endif; ?>>谷歌密码验证</option>
-									<?php } ?>
-								</select>
-							</div>
-						</div>
-						<?php } ?>
-						<div class="form-group">
-							<label class="col-md-3 control-label">商户QQ</label>
-							<div class="col-md-9">
-								<input name="qq" type="text" class="form-control" value="<?php echo $_user['qq']; ?>">
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">商户网站</label>
-							<div class="col-md-9">
-								<input name="website" type="text" class="form-control" value="<?php echo $_user['website']; ?>">
-								<p class="stock_display_2_tips">网址前面加http://或https://</p>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">子域名</label>
-							<div class="col-md-9">
-								<input name="subdomain" type="text" class="form-control" value="<?php echo $_user['subdomain']; ?>">
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">店铺名称</label>
-							<div class="col-md-9">
-								<input name="shop_name" type="text" class="form-control" value="<?php echo $_user['shop_name']; ?>">
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">店铺公告</label>
-							<div class="col-md-9">
-								<textarea name="shop_notice" placeholder="" class="form-control" rows="5" maxlength="200"><?php echo $_user['shop_notice']; ?></textarea>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">系统公告自动弹出</label>
-							<div class="col-md-9">
-								<select name="shop_notice_auto_pop" class="form-control" required>
-									<option value="1" <?php if($_user['shop_notice_auto_pop']==1): ?>selected<?php endif; ?>>是</option>
-									<option value="0" <?php if($_user['shop_notice_auto_pop']==0): ?>selected<?php endif; ?>>否</option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">商家公告自动弹出</label>
-							<div class="col-md-9">
-								<select name="user_notice_auto_pop" class="form-control" required>
-									<option value="1" <?php if($_user['user_notice_auto_pop']==1): ?>selected<?php endif; ?>>是 </option>
-									<option value="0" <?php if($_user['user_notice_auto_pop']==0): ?>selected<?php endif; ?>>否 </option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">购卡协议自动弹出</label>
-							<div class="col-md-9">
-								<select name="shop_gouka_protocol_pop" class="form-control" required>
-									<option value="1" <?php if($_user['shop_gouka_protocol_pop']==1): ?>selected<?php endif; ?>>是 </option>
-									<option value="0" <?php if($_user['shop_gouka_protocol_pop']==0): ?>selected<?php endif; ?>>否 </option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">支付页面风格</label>
-							<div class="col-md-9">
-								<select name="pay_theme" class="form-control" required>
-									<!-- <?php foreach(config('pay_themes') as $theme): ?> -->
-									<option value="<?php echo $theme['alias']; ?>" <?php if($_user['pay_theme']==$theme['alias']): ?>selected<?php endif; ?>><?php echo $theme['name']; ?></option>
-									<!-- <?php endforeach; ?> -->
-								</select>
-							</div>
-						</div>
-						<!-- <div class="form-group">
-							<label class="col-md-3 control-label">取卡页售后菜单</label>
-							<div class="col-md-9">
-								<select name="pay_theme" class="form-control" required>
-									<?php foreach(config('pay_themes') as $theme): ?>
-									<option value="<?php echo $theme['alias']; ?>" <?php if($_user['pay_theme']==$theme['alias']): ?>selected<?php endif; ?>><?php echo $theme['name']; ?></option>
-									<?php endforeach; ?>
-								</select>
-							</div>
-						</div> -->
-						<div class="form-group">
-							<label class="col-md-3 control-label">库存展示方式</label>
-							<div class="col-md-9">
-								<select name="stock_display" class="form-control" required>
-									<option value="1" <?php if($_user['stock_display']==1): ?>selected<?php endif; ?>>实际库存</option>
-									<option value="2" <?php if($_user['stock_display']==2): ?>selected<?php endif; ?>>范围库存</option>
-								</select>
-								<p class="stock_display_2_tips" <?php if($_user['stock_display']==1): ?>style="display:none"<?php endif; ?>>
-									1. 库存大于100，显示 库存非常多<br>
-									2. 库存小于100、大于30，显示 库存很多<br>
-									3. 库存小于30、大于10，显示 库存一般<br>
-									4. 库存小于10，显示 库存少量<br>
-								</p>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">提现方式</label>
-							<div class="col-md-9">
-								<select name="cash_type" class="form-control">
-									<option value="1" <?php if($_user['cash_type']==1): ?>selected<?php endif; ?>>系统默认</option>
-									<option value="2" <?php if($_user['cash_type']==2): ?>selected<?php endif; ?>>手工提现</option>
-									<option value="3" <?php if($_user['cash_type']==3): ?>selected<?php endif; ?>>自动提现</option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group" style="color:red;">
-							<label class="col-md-3 control-label">* 说明 *</label>
-							<div class="col-md-9">
-								手工提现：手动申请提现。自动提现：金额满 <?php echo sysconf('auto_cash_money'); ?> 元系统自动生成提款记录无需手工操作。
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">费率承担方</label>
-							<div class="col-md-9">
-								<select name="fee_payer" class="form-control">
-									<option value="0" <?php if($_user['fee_payer']==0): ?>selected<?php endif; ?>>跟随系统</option>
-									<option value="1" <?php if($_user['fee_payer']==1): ?>selected<?php endif; ?>>商家承担</option>
-									<option value="2" <?php if($_user['fee_payer']==2): ?>selected<?php endif; ?>>买家承担</option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label"></label>
-							<div class="col-md-9">
-								<button type="submit" class="btn btn-purple waves-effect waves-light">保存设置</button>
-							</div>
-						</div>
+						<button type="submit" class="btn btn-purple waves-effect waves-light"><i class="fa fa-search"></i> 搜索</button>
 					</form>
 				</div>
-				<!-- end col -->
-				<div class="col-lg-6">
-					<h4 class="header-title m-t-0 m-b-30">商户收款信息</h4>
-					<form class="form-horizontal" role="form" action="<?php echo url('collect'); ?>" method="post" id="gathering_info" enctype="multipart/form-data">
-						<div class="form-group">
-							<label class="col-md-3 control-label">收款方式</label>
-							<div class="col-md-9">
-								<select name="type" class="form-control"  <?php if(isset($_user['collect']['info']) && $_user['collect']['allow_update'] == 0): ?> disabled="disabled" <?php endif; ?> >
-								<?php if(in_array(1, (array)json_decode((string)sysconf('cash_type'), true))): ?>
-								<option value="1" <?php if($_user['collect']['type']==1): ?>selected<?php endif; ?>>支付宝收款</option>
-								<?php endif; if(in_array(2, (array)json_decode((string)sysconf('cash_type'), true))): ?>
-								<option value="2" <?php if($_user['collect']['type']==2): ?>selected<?php endif; ?>>微信收款</option>
-								<?php endif; if(in_array(3, (array)json_decode((string)sysconf('cash_type'), true))): ?>
-								<option value="3" <?php if($_user['collect']['type']==3): ?>selected<?php endif; ?>>银行卡收款</option>
+				<div class="col-sm-6">
+					<a href="<?php echo url('add'); ?>" class="pull-right btn btn-purple waves-effect waves-light">添加商品</a>
+					<a href="javascript:batch_del();" class="pull-right btn btn-danger" style="margin-right: 10px;">批量删除</a>
+				</div>
+			</div>
+			<!-- end row -->
+			<div class="row">
+				<table class="table table-striped m-0">
+					<thead>
+						<tr>
+							<th><input type="checkbox" id="select_all"></th>
+							<th>商品分类</th>
+							<th>排序</th>
+							<th>商品名称</th>
+							<th>价格</th>
+							<th>库存</th>
+							<th>卖出</th>
+							<th>上下架</th>
+							<th>创建时间</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach($goodsList as $v): ?>
+						<tr>
+							<td><input type="checkbox" name="good_id" value="<?php echo $v['id']; ?>"></td>
+							<td><?php echo (isset($v['category']['name']) && ($v['category']['name'] !== '')?$v['category']['name']:"未分类"); ?></td>
+							<td><?php echo $v['sort']; ?></td>
+							<th scope="row"><?php echo $v['name']; if($v['wholesale_discount']==1): ?>
+								<span class="label label-success">批</span>
+								<?php endif; if($v['coupon_type']==1): ?>
+								<span class="label label-pink">券</span>
+								<?php endif; if($v['take_card_type']!=0): ?>
+								<span class="label label-primary">取</span>
+								<?php endif; if($v['visit_type']==1): ?>
+								<span class="label label-danger">密</span>
 								<?php endif; ?>
-								</select>
-							</div>
-						</div>
-						<?php if($type = json_decode(sysconf('cash_type'), true)): ?>
-						<div class="collect_type type_alipay" <?php if((!$_user['collect'] && $_user['collect']['type']!='1' && $type[0] != 1) || ($_user['collect'] && $_user['collect']['type']!='1')): ?>style="display:none;"<?php endif; ?>>
-						<div class="form-group">
-							<label class="col-md-3 control-label">支付宝账号</label>
-							<div class="col-md-9">
-								<input name="alipay[account]" type="text" class="form-control"  <?php if(isset($_user['collect']['info']['account']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  value="<?php echo (isset($_user['collect']['info']['account']) && ($_user['collect']['info']['account'] !== '')?$_user['collect']['info']['account']:''); ?>">
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">收款人姓名</label>
-							<div class="col-md-9">
-								<input name="alipay[realname]" type="text" class="form-control" <?php if(isset($_user['collect']['info']['realname']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  value="<?php echo (isset($_user['collect']['info']['realname']) && ($_user['collect']['info']['realname'] !== '')?$_user['collect']['info']['realname']:''); ?>">
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">身份证号</label>
-							<div class="col-md-9">
-								<input name="alipay[idcard_number]" type="text" class="form-control idcard_number" <?php if(isset($_user['collect']['info']['idcard_number']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  onblur="if(this.value==''){this.value='<?php echo idcardnoMask($_user['collect']['info']['idcard_number']); ?>'}" onfocus="if(this.value=='<?php echo idcardnoMask($_user['collect']['info']['idcard_number']); ?>'){this.value=''}" value="<?php echo idcardnoMask($_user['collect']['info']['idcard_number']); ?>">
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">收款二维码</label>
-							<div class="col-md-9">
-								<?php if($_user['collect']['collect_img'] && $_user['collect']['allow_update'] == 0): ?>
-								<img src="<?php echo (isset($_user['collect']['collect_img']) && ($_user['collect']['collect_img'] !== '')?$_user['collect']['collect_img']:''); ?>" style="width: 80%;margin:0 auto;" alt="">
-								<?php else: ?>
-								<input type="file" name="ali_collect_img" class="dropify"/>
-								<?php endif; ?>
-							</div>
-						</div>
-				</div>
-				<div class="collect_type type_wxpay" <?php if((!$_user['collect'] && $_user['collect']['type']!='2' && $type[0] != 2) || ($_user['collect'] && $_user['collect']['type']!='2')): ?>style="display:none;"<?php endif; ?>>
-				<div class="form-group">
-					<label class="col-md-3 control-label">微信账号</label>
-					<div class="col-md-9">
-						<input name="wxpay[account]" type="text" class="form-control"  <?php if(isset($_user['collect']['info']['account']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  value="<?php echo (isset($_user['collect']['info']['account']) && ($_user['collect']['info']['account'] !== '')?$_user['collect']['info']['account']:''); ?>">
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-3 control-label">收款人姓名</label>
-					<div class="col-md-9">
-						<input name="wxpay[realname]" type="text" class="form-control"  <?php if(isset($_user['collect']['info']['realname']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  value="<?php echo (isset($_user['collect']['info']['realname']) && ($_user['collect']['info']['realname'] !== '')?$_user['collect']['info']['realname']:''); ?>">
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-3 control-label">身份证号</label>
-					<div class="col-md-9">
-						<input name="wxpay[idcard_number]" type="text" class="form-control idcard_number"  <?php if(isset($_user['collect']['info']['idcard_number']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  value="<?php echo (isset($_user['collect']['info']['idcard_number']) && ($_user['collect']['info']['idcard_number'] !== '')?$_user['collect']['info']['idcard_number']:''); ?>">
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-3 control-label">收款二维码</label>
-					<div class="col-md-9">
-						<?php if($_user['collect']['collect_img'] && $_user['collect']['allow_update'] == 0): ?>
-						<img src="<?php echo (isset($_user['collect']['collect_img']) && ($_user['collect']['collect_img'] !== '')?$_user['collect']['collect_img']:''); ?>" style="width: 80%;margin:0 auto;" alt="">
-						<?php else: ?>
-						<input type="file" name="collect_img" class="dropify"/>
-						<?php endif; ?>
-					</div>
-				</div>
+							</th>
+							<td><?php echo $v['price']; ?></td>
+							<td>
+								<?php echo $v->cards_stock_count; ?>张
+								<a href="/merchant/goods_card/index?goods_id=<?php echo $v['id']; ?>&status=1">查看</a>
+								<a class="dumpCard" href="javascript:;" data-id="<?php echo $v['id']; ?>" data-goodsname="<?php echo $v['name']; ?>">导出</a>
+								<a href="javascript:void(0);" onclick="emptied(this,<?php echo $v['id']; ?>)">清空</a>
+							<td>
+								<?php echo $v->cards_sold_count; ?>张
+								<a href="/merchant/goods_card/index?goods_id=<?php echo $v['id']; ?>&status=2">查看</a>
+								<a href="/merchant/goods/dumpCards?goods_id=<?php echo $v['id']; ?>&status=2" target="_blank">导出</a></td>
+							<td>
+								<input onchange="change_status(this,<?php echo $v['id']; ?>)" type="checkbox" data-plugin="switchery" data-color="#2bb309"
+								 data-size="small" data-switchery="true" style="display: none;" <?php if($v['status']==1): ?>checked<?php endif; ?>> </td> <td><?php echo date("Y-m-d
+								H:i:s",$v['create_at']); ?></td>
+							<td>
+								<a href="<?php echo url('link'); ?>?id=<?php echo $v['id']; ?>">链接</a>
+								<span>|</span>
+								<a href="<?php echo url('goods_card/add'); ?>?goods_id=<?php echo $v['id']; ?>">加卡</a>
+								<span>|</span>
+								<a href="<?php echo url('edit'); ?>?id=<?php echo $v['id']; ?>">编辑</a>
+								<span>|</span>
+								<a href="javascript:void(0);" onclick="del(this,<?php echo $v['id']; ?>)">删除</a>
+							</td>
+						</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
 			</div>
-			<div class="collect_type type_bank" <?php if((!$_user['collect'] && $_user['collect']['type']!='3' && $type[0] != 3) || ($_user['collect'] && $_user['collect']['type']!='3')): ?>style="display:none;"<?php endif; ?>>
-			<div class="form-group">
-				<label class="col-md-3 control-label">开户银行</label>
-				<div class="col-md-9">
-					<select name="bank[bank_name]" class="form-control"  <?php if(isset($_user['collect']['info']['bank_name']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?> >
-					<option value="中国工商银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='中国工商银行'): ?>selected<?php endif; ?>>中国工商银行</option>
-					<option value="中国建设银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='中国建设银行'): ?>selected<?php endif; ?>>中国建设银行</option>
-					<option value="中国农业银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='中国农业银行'): ?>selected<?php endif; ?>>中国农业银行</option>
-					<option value="中国邮政储蓄银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='中国邮政储蓄银行'): ?>selected<?php endif; ?>>中国邮政储蓄银行</option>
-					<option value="招商银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='招商银行'): ?>selected<?php endif; ?>>招商银行</option>
-					<option value="农村信用合作社" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='农村信用合作社'): ?>selected<?php endif; ?>>农村信用合作社</option>
-					<option value="兴业银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='兴业银行'): ?>selected<?php endif; ?>>兴业银行</option>
-					<option value="广东发展银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='广东发展银行'): ?>selected<?php endif; ?>>广东发展银行</option>
-					<option value="深圳发展银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='深圳发展银行'): ?>selected<?php endif; ?>>深圳发展银行</option>
-					<option value="民生银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='民生银行'): ?>selected<?php endif; ?>>民生银行</option>
-					<option value="交通银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='交通银行'): ?>selected<?php endif; ?>>交通银行</option>
-					<option value="中信银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='中信银行'): ?>selected<?php endif; ?>>中信银行</option>
-					<option value="光大银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='光大银行'): ?>selected<?php endif; ?>>光大银行</option>
-					<option value="中国银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='中国银行'): ?>selected<?php endif; ?>>中国银行</option>
-					</select>
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-md-3 control-label">开户地址</label>
-				<div class="col-md-9">
-					<input name="bank[bank_branch]" type="text" class="form-control" value="<?php echo (isset($_user['collect']['info']['bank_branch']) && ($_user['collect']['info']['bank_branch'] !== '')?$_user['collect']['info']['bank_branch']:''); ?>" <?php if(isset($_user['collect']['info']['bank_branch'])&& $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  placeholder="开户行请精确到市">
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-md-3 control-label">银行卡号</label>
-				<div class="col-md-9">
-					<input name="bank[bank_card]" type="text" class="form-control" <?php if(isset($_user['collect']['info']['bank_card']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  value="<?php echo (isset($_user['collect']['info']['bank_card']) && ($_user['collect']['info']['bank_card'] !== '')?$_user['collect']['info']['bank_card']:''); ?>" placeholder="请认真核对银行卡号">
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-md-3 control-label">收款人姓名</label>
-				<div class="col-md-9">
-					<input name="bank[realname]" type="text" class="form-control" <?php if(isset($_user['collect']['info']['realname']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?> value="<?php echo (isset($_user['collect']['info']['realname']) && ($_user['collect']['info']['realname'] !== '')?$_user['collect']['info']['realname']:''); ?>">
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-md-3 control-label">身份证号</label>
-				<div class="col-md-9">
-					<input name="bank[idcard_number]" type="text" class="form-control idcard_number" <?php if(isset($_user['collect']['info']['idcard_number'])&& $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?> value="<?php echo (isset($_user['collect']['info']['idcard_number']) && ($_user['collect']['info']['idcard_number'] !== '')?$_user['collect']['info']['idcard_number']:''); ?>">
-				</div>
-			</div>
+			<!-- end row -->
 		</div>
-		<?php endif; if(!$_user['collect']['info'] || $_user['collect']['allow_update'] == 1): ?>
-		<div class="form-group" style="display: flex; align-items: center; color: red;">
-			<label class="col-md-3 control-label">*</label>
-			<div class="col-md-9">
-				慎重填写，再三确认，填写后不可修改
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="col-md-3 control-label"></label>
-			<div class="col-md-9">
-				<button type="submit" class="btn btn-purple waves-effect waves-light">保存设置</button>
-			</div>
-		</div>
-		<?php else: ?>
-		<div class="form-group" style="display: flex; align-items: center; color: red;">
-			<label class="col-md-3 control-label">*</label>
-			<div class="col-md-9">
-				修改收款方式请联系客服
-			</div>
-		</div>
-		<?php endif; ?>
-		</form>
+		<?php echo $page; ?>
 	</div>
-	<!-- end col -->
 </div>
-<!-- end row -->
-</div>
-</div>
-<!-- end col -->
-</div>
+<div class="modal fade" id="exportCard" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">导出卡密</h4>
+			</div>
+			<div class="modal-body">
+				<form id="export_form" class="form-horizontal" method="POST" action="/merchant/goods/dumpCards" target="_blank">
+					<input type="hidden" id="goods_id" name="goods_id" value="">
+					<div class="form-group">
+						<div class="col-sm-2">
+							<label class="control-label">商品名称</label>
+						</div>
+						<div class="col-sm-6">
+							<p id="goodsname" style="padding-top: 5px;"></p>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2">
+							<label class="control-label">导出范围</label>
+						</div>
+						<div class="col-sm-6">
+							<label class="radio-inline">
+								<input type="radio" name="range" value="0" checked> 全部库存的卡密
+							</label>
+							<label class="radio-inline">
+								<input type="radio" name="range" value="1"> 导出指定的数量
+							</label>
+						</div>
+					</div>
+					<div class="form-group" id="exportNUm" style="display:none">
+						<div class="col-sm-2">
+							<label class="control-label">导出数量</label>
+						</div>
+						<div class="col-sm-6">
+							<input name="number" type="number" class="form-control" placeholder="请输入正整数">
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2">
+							<label class="control-label">是否删除</label>
+						</div>
+						<div class="col-sm-6">
+							<label class="radio-inline">
+								<input type="radio" name="del" value="0" checked> 仅导出不做删除
+							</label>
+							<label class="radio-inline">
+								<input type="radio" name="del" value="1"> 导出并删除卡密
+							</label>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2">
+							<label class="control-label">商品名称</label>
+						</div>
+						<div class="col-sm-6">
+							<label class="radio-inline">
+								<input type="radio" name="need_goods_name" value="1" checked> 导出商品名
+							</label>
+							<label class="radio-inline">
+								<input type="radio" name="need_goods_name" value="0"> 不需要商品名
+							</label>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2">
+							<label class="control-label">导出格式</label>
+						</div>
+						<div class="col-sm-6">
+							<label class="radio-inline">
+								<input type="radio" name="file_type" value="0" checked> EXCEL
+							</label>
+							<label class="radio-inline">
+								<input type="radio" name="file_type" value="1"> TXT
+							</label>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="submit" class="btn btn-primary" id="export">确定</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
                     </div> <!-- container -->
                 </div> <!-- content -->
@@ -848,94 +666,151 @@
         </script>
 
         
+
 <script>
-    $('[name="type"]').change(function(){
-        var selected=$(this).val()*1;
-        $('.collect_type').slideUp();
-        switch(selected){
-            case 1:  // 支付宝
-                $('.type_alipay').slideDown();
-                break;
-            case 2:  // 微信
-                $('.type_wxpay').slideDown();
-                break;
-            case 3:  // 银行
-                $('.type_bank').slideDown();
-                break;
-        }
-    });
-    $('[name="stock_display"]').change(function(){
-        var selected=$(this).val()*1;
-        console.log(selected);
-        if(selected==2){
-            $('.stock_display_2_tips').show();
-        }else{
-            $('.stock_display_2_tips').hide();
-        }
-    });
-    $('#gathering_info').submit(function(){
-        var status = true;
-        $('.collect_type').each(function(){
-            if($(this).is(':visible')){
-                //验证二维码
-                var collect_img_value = $(this).find('.dropify').val();
-                if($(this).find('.dropify').length > 0 && !collect_img_value){
-                    layer.alert('请选择收款二维码！');
-                    status = false;
-                }
-                var idcard_number = $(this).find('input.idcard_number').last().val()
-                var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
-                console.log(idcard_number);
-                if(!reg.test(idcard_number)){
-                    layer.alert('请输入正确的身份证号码');
-                    status = false;
-                }
+	$('#select_all').click(function () {
+		if ($(this).is(':checked')) {
+			$('tbody').find('input[type="checkbox"]').each(function () {
+				$(this).prop("checked", true)
+			})
+		} else {
+			$('tbody').find('input[type="checkbox"]').each(function () {
+				$(this).prop("checked", false)
+			})
+		}
+	})
 
-            }
-        })
-        return status;
-    })
-    $('.dropify').dropify({
-        messages: {
-            'default': '点击上传二维码',
-            'replace': '点击替换二维码',
-            'remove': '删除',
-            'error': '上传错误'
-        },
-        error: {
-            'fileSize': '文件太大超过（1M）'
-        }
-    });
+	function change_status(obj, id) {
+		var status = $(obj).prop('checked');
+		if (status) {
+			status = 1;
+		} else {
+			status = 0;
+		}
+		$.post('/merchant/goods/changeStatus', {
+			id: id,
+			status: status
+		}, function (res) {
+			if (res.code != 0) {
+				alert(res.msg);
+				$(obj).prop('checked', false)
+				return false;
+			}
+			if (status == 1) {
+				$(obj).prop('checked', true)
+			} else {
+				$(obj).prop('checked', false)
+			}
+		});
+	}
 
-    function getCode() {
-        layer.prompt({
-            title: '请输入验证码',
-            formType: 3
-        }, function (chkcode) {
-            $('#get_code').off('click');
-            $.post('/merchant/user/sendSmsCode', {
-                chkcode: chkcode,
-                token: "<?php echo $sms_token; ?>",
-                phone: "<?php echo $_user['mobile']; ?>",
-                t: new Date().getTime()
-            }, function (ret) {
-                //                        console.log(ret);
-                if (ret.code === 1) {
-                    layer.closeAll();
-                    layer.msg(ret.msg);
-                    token = ret.data.token;
-                    $('#get_code').html('<i class="times">80</i> 秒后重发');
-                    timeC(80, '#get_code');
-                } else {
-                    alert(ret.msg);
-                    $('#get_code').on('click', getCode);
-                }
-            }, 'json');
-        })
-        $('.layui-layer-prompt .layui-layer-content').prepend($(
-            '<img style="cursor:pointer;height: 60px;" id="chkcode_img" src="/chkcode" onclick="javascript:this.src=\'/chkcode\'+\'?time=\'+Math.random()">'
-        ))
-    }</script>
+	function del(obj, id) {
+		swal({
+				title: "确定删除吗？",
+				text: "删除的商品将进入回收站！",
+				type: "warning",
+				showCancelButton: true,
+				confirmButtonColor: "#DD6B55",
+				confirmButtonText: "确定删除！",
+				closeOnConfirm: false
+			},
+			function () {
+				$.post('/merchant/goods/del', {
+					id: id
+				}, function (res) {
+					if (res.code != 0) {
+						swal('删除失败', res.msg, "error");
+					} else {
+						swal('删除成功', '', "success");
+						setTimeout(function () {
+							location.reload();
+						}, 200);
+					}
+				});
+			});
+	}
+
+	function emptied(obj, id) {
+		swal({
+				title: "确定清空该商品所有未售虚拟卡吗？",
+				text: "删除的虚拟卡将进入回收站",
+				type: "warning",
+				showCancelButton: true,
+				confirmButtonColor: "#DD6B55",
+				confirmButtonText: "确定清空！",
+				closeOnConfirm: false
+			},
+			function () {
+				$.post('/merchant/goods/emptiedCards', {
+					id: id
+				}, function (res) {
+					if (res.code != 0) {
+						swal('清空失败', res.msg, "error");
+					} else {
+						swal('清空成功', '', "success");
+						setTimeout(function () {
+							location.reload();
+						}, 200);
+					}
+				});
+			});
+	}
+
+	function batch_del() {
+		var ids = new Array();
+		$('tbody').find('input[name="good_id"]').each(function () {
+			if ($(this).is(':checked')) {
+				ids.push($(this).val());
+			}
+		})
+		if (ids.length == 0) {
+			swal('选择要删除的数据', '', "error");
+			return false;
+		}
+		$.post('/merchant/goods/batch_del', {
+			ids: ids
+		}, function (res) {
+			if (res.code != 0) {
+				swal('删除失败', res.msg, "error");
+			} else {
+				swal('删除成功', '', "success");
+				setTimeout(function () {
+					location.reload();
+				}, 200);
+			}
+		});
+		console.log(ids);
+	}
+	$(document).ready(function () {
+		$("input[name='range']").change(function () {
+			var selectedvalue = $("input[name='range']:checked").val();
+			if (selectedvalue == 1) {
+				$('#exportNUm').show();
+			} else {
+				$('#exportNUm').hide();
+			}
+		});
+
+		$('.dumpCard').click(function () {
+			var id = $(this).data('id');
+			$('#goods_id').val(id);
+			var goodsname = $(this).data('goodsname');
+			$('#goodsname').html(goodsname);
+			$('#exportCard').modal('show')
+		});
+
+		$('#export').click(function () {
+			var range = $("input[name='range']");
+			var number = $("input[name='number']");
+			if (range == 1 && !number) {
+				swal('请输入导出数量', '', "error");
+				return false;
+			}
+			$('#export_form').submit();
+		});
+	});
+</script>
+
 
 
         <!-- App js -->

@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:80:"F:\MaLong\item\faka\application\templates\pc\merchant\default\user\settings.html";i:1543624690;s:71:"F:\MaLong\item\faka\application\templates\pc\merchant\default\base.html";i:1585486427;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:77:"F:\MaLong\item\faka\application\templates\pc\merchant\default\goods\edit.html";i:1585487439;s:71:"F:\MaLong\item\faka\application\templates\pc\merchant\default\base.html";i:1585486427;}*/ ?>
 <!DOCTYPE html>
 <html lang="zh">
     <head>
@@ -345,358 +345,345 @@
 	<div class="col-sm-12">
 		<div class="card-box">
 			<div class="row">
-				<div class="col-lg-6">
-					<h4 class="header-title m-t-0 m-b-30">商户基本信息</h4>
-					<form class="form-horizontal" role="form" action="" method="post">
-						<div class="form-group">
-							<label class="col-md-3 control-label">商户编号</label>
-							<div class="col-md-9">
-								<p class="form-control-static"><?php echo $_user['id']; ?></p>
-							</div>
+				<form class="form-horizontal" role="form" action="" method="post">
+					<input type="hidden" name="cate_id" value="<?php echo (isset($goods['id']) && ($goods['id'] !== '')?$goods['id']:''); ?>">
+					<div class="form-group">
+						<label class="col-md-2 control-label">商品分类</label>
+						<div class="col-md-4">
+							<select name="cate_id" class="form-control" required>
+								<?php foreach($categorys as $v): ?>
+								<option value="<?php echo $v['id']; ?>" <?php if(isset($goods) && $goods['cate_id']==$v['id']): ?>selected<?php endif; ?>><?php echo $v['name']; ?></option>
+								<?php endforeach; ?>
+							</select>
 						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">用户名</label>
-							<div class="col-md-9">
-								<p class="form-control-static"><?php echo $_user['username']; ?></p>
-							</div>
+						<div class="col-md-6">
+							<p class="form-control-static">请选择商品分类</p>
 						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">电子邮箱</label>
-							<div class="col-md-9">
-								<p class="form-control-static"><?php echo $_user['email']; ?></p>
-							</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-2 control-label">页面风格</label>
+						<div class="col-md-4">
+							<select name="theme" class="form-control" required>
+								<?php foreach(config('pay_themes') as $theme): ?>
+								<option value="<?php echo $theme['alias']; ?>" <?php if(isset($goods) && $goods['theme']==$theme['alias']): ?>selected<?php endif; ?>><?php echo $theme['name']; ?></option>
+								<?php endforeach; ?>
+							</select>
 						</div>
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">手机号码</label>
-                            <div class="col-md-9">
-                                <input name="mobile" type="text" class="form-control" value="<?php echo $_user['mobile']; ?>">
-                                <br>
-                                <button type="button" id="get_code" onclick="getCode()"> 获取验证码</button>
+						<div class="col-md-6">
+							<p class="form-control-static">请选择购买时的页面风格</p>
+						</div>
+					</div>
+                    <div class="form-group">
+						<label class="col-md-2 control-label">商品排序</label>
+						<div class="col-md-4">
+							<input name="sort" type="number" class="form-control" placeholder="商品排序" value="<?php echo (isset($goods['sort']) && ($goods['sort'] !== '')?$goods['sort']:0); ?>" min=0>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">	数字越大越靠前！</p>
+						</div>
+                    </div>
+					<div class="form-group">
+						<label class="col-md-2 control-label">商品名称</label>
+						<div class="col-md-4">
+							<input name="name" type="text" class="form-control" placeholder="商品名称" value="<?php echo (isset($goods['name']) && ($goods['name'] !== '')?$goods['name']:''); ?>">
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">好的名字有利于销售哦！</p>
+						</div>
+					</div>
+                    <div class="form-group">
+						<label class="col-md-2 control-label">商品价格</label>
+						<div class="col-md-4">
+							<input name="price" type="text" class="form-control" placeholder="商品价格" value="<?php echo (isset($goods['price']) && ($goods['price'] !== '')?$goods['price']:''); ?>">
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">商品对外出售的价格即零售价格！</p>
+						</div>
+                    </div>
+                    <div class="form-group">
+						<label class="col-md-2 control-label">批发优惠</label>
+						<div class="col-md-4">
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="wholesale_discount" id="wholesale_discount1" value="1" <?php if(isset($goods) && $goods['wholesale_discount']==1): ?>checked<?php endif; ?>>
+                                <label for="wholesale_discount1">
+                                    使用
+                                </label>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">短信验证码</label>
-                            <div class="col-md-9">
-                                <input name="mobileCode" type="text" class="form-control" value="">
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="wholesale_discount" id="wholesale_discount2" value="0" <?php if(isset($goods)): if($goods['wholesale_discount']==0): ?>checked<?php endif; else: ?>checked<?php endif; ?> >
+                                <label for="wholesale_discount2">
+                                    不使用
+                                </label>
                             </div>
-                        </div>
-                        <div class="form-group" style="color:red;">
-                            <label class="col-md-3 control-label">* 说明 *</label>
-                            <div class="col-md-9">
-                                修改手机号需验证旧手机号码，新增或不修改，此项留空，验证码错误时，手机号码不会修改
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">是否设置批发购买时使用批发价格！</p>
+						</div>
+                    </div>
+                    <div class="form-group block-wholesale_discount" <?php if(!isset($goods) || $goods['wholesale_discount']==0): ?>style="display:none"<?php endif; ?>>
+						<label class="col-md-2 control-label"></label>
+						<div class="col-md-4">
+							<div class="block-discount_list">
+								<?php if(isset($goods)): foreach($goods['wholesale_discount_list'] as $v): ?>
+								<div class="form-group discount_item">
+									<div class="col-md-3">
+										<input name="wholesale_discount_list[num][]" type="number" class="form-control" value="<?php echo $v['num']; ?>" min=0>
+									</div>
+									<div class="col-md-1">
+										<p class="form-control-static">张</p>
+									</div>
+									<div class="col-md-3">
+										<input name="wholesale_discount_list[price][]" type="text" class="form-control" value="<?php echo $v['price']; ?>">
+									</div>
+									<div class="col-md-1">
+										<p class="form-control-static">元</p>
+									</div>
+									<div class="col-md-4">
+										<button type="button" class="btn btn-danger waves-effect waves-light" onclick="del_discount_item(this)">删除</button>
+									</div>
+								</div>
+								<?php endforeach; endif; ?>
+							</div>
+							<button type="button" class="btn btn-primary waves-effect waves-light" onclick="add_discount_item()"><i class="zmdi zmdi-plus-circle"></i> 添加优惠</button>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">优惠价格为单价，并不是商品总价哦！</p>
+						</div>
+                    </div>
+                    <div class="form-group">
+						<label class="col-md-2 control-label">成本价格</label>
+						<div class="col-md-4">
+							<input name="cost_price" type="text" class="form-control" placeholder="单位（元）" value="<?php echo (isset($goods['cost_price']) && ($goods['cost_price'] !== '')?$goods['cost_price']:''); ?>">
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">商品进货价,可以不填,填写有利于商户系统的利润统计分析！</p>
+						</div>
+                    </div>
+					<div class="form-group">
+						<label class="col-md-2 control-label">短信费用</label>
+						<div class="col-md-4">
+							<div class="radio radio-primary radio-inline">
+								<input type="radio" name="sms_payer" id="sms_payer1" value="0" <?php if(isset($goods)): if($goods['sms_payer']==0): ?>checked<?php endif; else: ?>checked<?php endif; ?>>
+								<label for="sms_payer1">
+									买家承担
+								</label>
+							</div>
+							<div class="radio radio-primary radio-inline">
+								<input type="radio" name="sms_payer" id="sms_payer2" value="1" <?php if(isset($goods) && $goods['sms_payer']==1): ?>checked<?php endif; ?>>
+								<label for="sms_payer2">
+									商户承担
+								</label>
+							</div>
+						</div>
+					</div>
+                    <div class="form-group">
+						<label class="col-md-2 control-label">起购数量</label>
+						<div class="col-md-4">
+							<input name="limit_quantity" type="number" class="form-control" placeholder="起购数量" value="<?php echo (isset($goods['limit_quantity']) && ($goods['limit_quantity'] !== '')?$goods['limit_quantity']:1); ?>" min=1>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">每次购买 最少购买多少件！</p>
+						</div>
+                    </div>
+                    <div class="form-group">
+						<label class="col-md-2 control-label">库存预警</label>
+						<div class="col-md-4">
+							<input name="inventory_notify" type="number" class="form-control" placeholder="库存预警" value="<?php echo (isset($goods['inventory_notify']) && ($goods['inventory_notify'] !== '')?$goods['inventory_notify']:0); ?>" min=0>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">为0表示不报警,设置后请确保邮箱正确，否则无法接收邮件</p>
+						</div>
+                    </div>
+                    <div class="form-group">
+						<label class="col-md-2 control-label">通知方式</label>
+						<div class="col-md-4">
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="inventory_notify_type" id="inventory_notify_type1" value="1" <?php if(isset($goods)): if($goods['inventory_notify_type']==1): ?>checked<?php endif; else: ?>checked<?php endif; ?>>
+                                <label for="inventory_notify_type1">
+                                    站内信
+                                </label>
                             </div>
-                        </div>
-						<?php if(sysconf('login_auth') == 1) {?>
-						<div class="form-group">
-							<label class="col-md-3 control-label">安全登录</label>
-							<div class="col-md-9">
-								<select name="login_auth" class="form-control" required>
-									<option value="1" <?php if($_user['login_auth']==1): ?>selected<?php endif; ?>>是</option>
-									<option value="0" <?php if($_user['login_auth']==0): ?>selected<?php endif; ?>>否</option>
-								</select>
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="inventory_notify_type" id="inventory_notify_type2" value="2" <?php if(isset($goods) && $goods['inventory_notify_type']==2): ?>checked<?php endif; ?>>
+                                <label for="inventory_notify_type2">
+                                    邮件
+                                </label>
+                            </div>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static"></p>
+						</div>
+                    </div>
+                    <div class="form-group">
+						<label class="col-md-2 control-label">优惠券</label>
+						<div class="col-md-4">
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="coupon_type" id="coupon_type1" value="1" <?php if(isset($goods) && $goods['coupon_type']==1): ?>checked<?php endif; ?>>
+                                <label for="coupon_type1">
+                                    支持
+                                </label>
+                            </div>
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="coupon_type" id="coupon_type2" value="0" <?php if(isset($goods)): if($goods['coupon_type']==0): ?>checked<?php endif; else: ?>checked<?php endif; ?>>
+                                <label for="coupon_type2">
+                                    不支持
+                                </label>
+                            </div>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">是否支持优惠券</p>
+						</div>
+                    </div>
+                    <div class="form-group">
+						<label class="col-md-2 control-label">售出通知</label>
+						<div class="col-md-4">
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="sold_notify" id="sold_notify1" value="1" <?php if(isset($goods) && $goods['sold_notify']==1): ?>checked<?php endif; ?>>
+                                <label for="sold_notify1">
+                                    开启
+                                </label>
+                            </div>
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="sold_notify" id="sold_notify2" value="0" <?php if(isset($goods)): if($goods['sold_notify']==0): ?>checked<?php endif; else: ?>checked<?php endif; ?>>
+                                <label for="sold_notify2">
+                                    关闭
+                                </label>
+                            </div>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">开启后，成功售卡将会发送邮件通知</p>
+						</div>
+                    </div>
+                    <div class="form-group">
+						<label class="col-md-2 control-label">提卡密码</label>
+						<div class="col-md-4">
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="take_card_type" id="take_card_type1" value="1" <?php if(isset($goods) && $goods['take_card_type']==1): ?>checked<?php endif; ?>>
+                                <label for="take_card_type1">
+                                    必填
+                                </label>
+                            </div>
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="take_card_type" id="take_card_type2" value="2" <?php if(isset($goods) && $goods['take_card_type']==2): ?>checked<?php endif; ?>>
+                                <label for="take_card_type2">
+                                    选填
+                                </label>
+                            </div>
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="take_card_type" id="take_card_type3" value="0" <?php if(isset($goods)): if($goods['take_card_type']==0): ?>checked<?php endif; else: ?>checked<?php endif; ?>>
+                                <label for="take_card_type3">
+                                    关闭
+                                </label>
+                            </div>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">开启后，购买页面会提示买家填写取卡密码</p>
+						</div>
+                    </div>
+					<div class="form-group">
+						<label class="col-md-2 control-label">对接控制</label>
+						<div class="col-md-4">
+							<div class="radio radio-primary radio-inline">
+								<input type="radio" name="is_duijie" id="is_duijie1" value="1" <?php if(isset($goods) && $goods['is_duijie']==1): ?>checked<?php endif; ?>>
+								<label for="is_duijie1">
+									开启
+								</label>
+							</div>
+							<div class="radio radio-primary radio-inline">
+								<input type="radio" name="is_duijie" id="is_duijie2" value="0" <?php if(isset($goods)): if($goods['is_duijie']==0): ?>checked<?php endif; else: ?>checked<?php endif; ?>>
+								<label for="is_duijie2">
+									关闭
+								</label>
 							</div>
 						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">安全登录方式</label>
-							<div class="col-md-9">
-								<select name="login_auth_type" class="form-control" required>
-									<?php if(sysconf('login_auth_type') == 0) { ?>
-									<option value="1" <?php if($_user['login_auth_type']==1): ?>selected<?php endif; ?>>短信验证</option>
-									<option value="2" <?php if($_user['login_auth_type']==2): ?>selected<?php endif; ?>>邮件验证</option>
-									<option value="3" <?php if($_user['login_auth_type']==3): ?>selected<?php endif; ?>>谷歌密码验证</option>
-									<?php } if(sysconf('login_auth_type') == 1) { ?>
-									<option value="2" <?php if($_user['login_auth_type']==2): ?>selected<?php endif; ?>>邮件验证</option>
-									<option value="3" <?php if($_user['login_auth_type']==3): ?>selected<?php endif; ?>>谷歌密码验证</option>
-									<?php } if(sysconf('login_auth_type') == 2) { ?>
-									<option value="1" <?php if($_user['login_auth_type']==1): ?>selected<?php endif; ?>>短信验证</option>
-									<option value="3" <?php if($_user['login_auth_type']==3): ?>selected<?php endif; ?>>谷歌密码验证</option>
-									<?php } ?>
-								</select>
-							</div>
+						<div class="col-md-6">
+							<p class="form-control-static">留空为不开启，若开启后商品购买页面将提示输入设置的密码才能继续访问</p>
 						</div>
-						<?php } ?>
-						<div class="form-group">
-							<label class="col-md-3 control-label">商户QQ</label>
-							<div class="col-md-9">
-								<input name="qq" type="text" class="form-control" value="<?php echo $_user['qq']; ?>">
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">商户网站</label>
-							<div class="col-md-9">
-								<input name="website" type="text" class="form-control" value="<?php echo $_user['website']; ?>">
-								<p class="stock_display_2_tips">网址前面加http://或https://</p>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">子域名</label>
-							<div class="col-md-9">
-								<input name="subdomain" type="text" class="form-control" value="<?php echo $_user['subdomain']; ?>">
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">店铺名称</label>
-							<div class="col-md-9">
-								<input name="shop_name" type="text" class="form-control" value="<?php echo $_user['shop_name']; ?>">
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">店铺公告</label>
-							<div class="col-md-9">
-								<textarea name="shop_notice" placeholder="" class="form-control" rows="5" maxlength="200"><?php echo $_user['shop_notice']; ?></textarea>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">系统公告自动弹出</label>
-							<div class="col-md-9">
-								<select name="shop_notice_auto_pop" class="form-control" required>
-									<option value="1" <?php if($_user['shop_notice_auto_pop']==1): ?>selected<?php endif; ?>>是</option>
-									<option value="0" <?php if($_user['shop_notice_auto_pop']==0): ?>selected<?php endif; ?>>否</option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">商家公告自动弹出</label>
-							<div class="col-md-9">
-								<select name="user_notice_auto_pop" class="form-control" required>
-									<option value="1" <?php if($_user['user_notice_auto_pop']==1): ?>selected<?php endif; ?>>是 </option>
-									<option value="0" <?php if($_user['user_notice_auto_pop']==0): ?>selected<?php endif; ?>>否 </option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">购卡协议自动弹出</label>
-							<div class="col-md-9">
-								<select name="shop_gouka_protocol_pop" class="form-control" required>
-									<option value="1" <?php if($_user['shop_gouka_protocol_pop']==1): ?>selected<?php endif; ?>>是 </option>
-									<option value="0" <?php if($_user['shop_gouka_protocol_pop']==0): ?>selected<?php endif; ?>>否 </option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">支付页面风格</label>
-							<div class="col-md-9">
-								<select name="pay_theme" class="form-control" required>
-									<!-- <?php foreach(config('pay_themes') as $theme): ?> -->
-									<option value="<?php echo $theme['alias']; ?>" <?php if($_user['pay_theme']==$theme['alias']): ?>selected<?php endif; ?>><?php echo $theme['name']; ?></option>
-									<!-- <?php endforeach; ?> -->
-								</select>
-							</div>
-						</div>
-						<!-- <div class="form-group">
-							<label class="col-md-3 control-label">取卡页售后菜单</label>
-							<div class="col-md-9">
-								<select name="pay_theme" class="form-control" required>
-									<?php foreach(config('pay_themes') as $theme): ?>
-									<option value="<?php echo $theme['alias']; ?>" <?php if($_user['pay_theme']==$theme['alias']): ?>selected<?php endif; ?>><?php echo $theme['name']; ?></option>
-									<?php endforeach; ?>
-								</select>
-							</div>
-						</div> -->
-						<div class="form-group">
-							<label class="col-md-3 control-label">库存展示方式</label>
-							<div class="col-md-9">
-								<select name="stock_display" class="form-control" required>
-									<option value="1" <?php if($_user['stock_display']==1): ?>selected<?php endif; ?>>实际库存</option>
-									<option value="2" <?php if($_user['stock_display']==2): ?>selected<?php endif; ?>>范围库存</option>
-								</select>
-								<p class="stock_display_2_tips" <?php if($_user['stock_display']==1): ?>style="display:none"<?php endif; ?>>
-									1. 库存大于100，显示 库存非常多<br>
-									2. 库存小于100、大于30，显示 库存很多<br>
-									3. 库存小于30、大于10，显示 库存一般<br>
-									4. 库存小于10，显示 库存少量<br>
-								</p>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">提现方式</label>
-							<div class="col-md-9">
-								<select name="cash_type" class="form-control">
-									<option value="1" <?php if($_user['cash_type']==1): ?>selected<?php endif; ?>>系统默认</option>
-									<option value="2" <?php if($_user['cash_type']==2): ?>selected<?php endif; ?>>手工提现</option>
-									<option value="3" <?php if($_user['cash_type']==3): ?>selected<?php endif; ?>>自动提现</option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group" style="color:red;">
-							<label class="col-md-3 control-label">* 说明 *</label>
-							<div class="col-md-9">
-								手工提现：手动申请提现。自动提现：金额满 <?php echo sysconf('auto_cash_money'); ?> 元系统自动生成提款记录无需手工操作。
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">费率承担方</label>
-							<div class="col-md-9">
-								<select name="fee_payer" class="form-control">
-									<option value="0" <?php if($_user['fee_payer']==0): ?>selected<?php endif; ?>>跟随系统</option>
-									<option value="1" <?php if($_user['fee_payer']==1): ?>selected<?php endif; ?>>商家承担</option>
-									<option value="2" <?php if($_user['fee_payer']==2): ?>selected<?php endif; ?>>买家承担</option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label"></label>
-							<div class="col-md-9">
-								<button type="submit" class="btn btn-purple waves-effect waves-light">保存设置</button>
-							</div>
-						</div>
-					</form>
-				</div>
-				<!-- end col -->
-				<div class="col-lg-6">
-					<h4 class="header-title m-t-0 m-b-30">商户收款信息</h4>
-					<form class="form-horizontal" role="form" action="<?php echo url('collect'); ?>" method="post" id="gathering_info" enctype="multipart/form-data">
-						<div class="form-group">
-							<label class="col-md-3 control-label">收款方式</label>
-							<div class="col-md-9">
-								<select name="type" class="form-control"  <?php if(isset($_user['collect']['info']) && $_user['collect']['allow_update'] == 0): ?> disabled="disabled" <?php endif; ?> >
-								<?php if(in_array(1, (array)json_decode((string)sysconf('cash_type'), true))): ?>
-								<option value="1" <?php if($_user['collect']['type']==1): ?>selected<?php endif; ?>>支付宝收款</option>
-								<?php endif; if(in_array(2, (array)json_decode((string)sysconf('cash_type'), true))): ?>
-								<option value="2" <?php if($_user['collect']['type']==2): ?>selected<?php endif; ?>>微信收款</option>
-								<?php endif; if(in_array(3, (array)json_decode((string)sysconf('cash_type'), true))): ?>
-								<option value="3" <?php if($_user['collect']['type']==3): ?>selected<?php endif; ?>>银行卡收款</option>
-								<?php endif; ?>
-								</select>
-							</div>
-						</div>
-						<?php if($type = json_decode(sysconf('cash_type'), true)): ?>
-						<div class="collect_type type_alipay" <?php if((!$_user['collect'] && $_user['collect']['type']!='1' && $type[0] != 1) || ($_user['collect'] && $_user['collect']['type']!='1')): ?>style="display:none;"<?php endif; ?>>
-						<div class="form-group">
-							<label class="col-md-3 control-label">支付宝账号</label>
-							<div class="col-md-9">
-								<input name="alipay[account]" type="text" class="form-control"  <?php if(isset($_user['collect']['info']['account']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  value="<?php echo (isset($_user['collect']['info']['account']) && ($_user['collect']['info']['account'] !== '')?$_user['collect']['info']['account']:''); ?>">
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">收款人姓名</label>
-							<div class="col-md-9">
-								<input name="alipay[realname]" type="text" class="form-control" <?php if(isset($_user['collect']['info']['realname']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  value="<?php echo (isset($_user['collect']['info']['realname']) && ($_user['collect']['info']['realname'] !== '')?$_user['collect']['info']['realname']:''); ?>">
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">身份证号</label>
-							<div class="col-md-9">
-								<input name="alipay[idcard_number]" type="text" class="form-control idcard_number" <?php if(isset($_user['collect']['info']['idcard_number']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  onblur="if(this.value==''){this.value='<?php echo idcardnoMask($_user['collect']['info']['idcard_number']); ?>'}" onfocus="if(this.value=='<?php echo idcardnoMask($_user['collect']['info']['idcard_number']); ?>'){this.value=''}" value="<?php echo idcardnoMask($_user['collect']['info']['idcard_number']); ?>">
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-md-3 control-label">收款二维码</label>
-							<div class="col-md-9">
-								<?php if($_user['collect']['collect_img'] && $_user['collect']['allow_update'] == 0): ?>
-								<img src="<?php echo (isset($_user['collect']['collect_img']) && ($_user['collect']['collect_img'] !== '')?$_user['collect']['collect_img']:''); ?>" style="width: 80%;margin:0 auto;" alt="">
-								<?php else: ?>
-								<input type="file" name="ali_collect_img" class="dropify"/>
-								<?php endif; ?>
-							</div>
-						</div>
-				</div>
-				<div class="collect_type type_wxpay" <?php if((!$_user['collect'] && $_user['collect']['type']!='2' && $type[0] != 2) || ($_user['collect'] && $_user['collect']['type']!='2')): ?>style="display:none;"<?php endif; ?>>
-				<div class="form-group">
-					<label class="col-md-3 control-label">微信账号</label>
-					<div class="col-md-9">
-						<input name="wxpay[account]" type="text" class="form-control"  <?php if(isset($_user['collect']['info']['account']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  value="<?php echo (isset($_user['collect']['info']['account']) && ($_user['collect']['info']['account'] !== '')?$_user['collect']['info']['account']:''); ?>">
 					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-3 control-label">收款人姓名</label>
-					<div class="col-md-9">
-						<input name="wxpay[realname]" type="text" class="form-control"  <?php if(isset($_user['collect']['info']['realname']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  value="<?php echo (isset($_user['collect']['info']['realname']) && ($_user['collect']['info']['realname'] !== '')?$_user['collect']['info']['realname']:''); ?>">
+					<div class="form-group block-duijie_smilepic" <?php if(!isset($goods) || $goods['is_duijie']==0): ?>style="display:none"<?php endif; ?>>
+						<label class="col-md-2 control-label">最小加价</label>
+						<div class="col-md-4">
+							<input name="duijie_smilepic" type="text" class="form-control" placeholder="" value="<?php echo (isset($goods['duijie_smilepic']) && ($goods['duijie_smilepic'] !== '')?$goods['duijie_smilepic']:''); ?>">
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">设置后代理商最低加价价格！</p>
+						</div>
 					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-3 control-label">身份证号</label>
-					<div class="col-md-9">
-						<input name="wxpay[idcard_number]" type="text" class="form-control idcard_number"  <?php if(isset($_user['collect']['info']['idcard_number']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  value="<?php echo (isset($_user['collect']['info']['idcard_number']) && ($_user['collect']['info']['idcard_number'] !== '')?$_user['collect']['info']['idcard_number']:''); ?>">
+                    <div class="form-group">
+						<label class="col-md-2 control-label">访问密码</label>
+						<div class="col-md-4">
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="visit_type" id="visit_type1" value="1" <?php if(isset($goods) && $goods['visit_type']==1): ?>checked<?php endif; ?>>
+                                <label for="visit_type1">
+                                    开启
+                                </label>
+                            </div>
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="visit_type" id="visit_type2" value="0" <?php if(isset($goods)): if($goods['visit_type']==0): ?>checked<?php endif; else: ?>checked<?php endif; ?>>
+                                <label for="visit_type2">
+                                    关闭
+                                </label>
+                            </div>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">留空为不开启，若开启后商品购买页面将提示输入设置的密码才能继续访问</p>
+						</div>
+                    </div>
+                    <div class="form-group block-visit_password" <?php if(!isset($goods) || $goods['visit_type']==0): ?>style="display:none"<?php endif; ?>>
+						<label class="col-md-2 control-label">设置密码</label>
+						<div class="col-md-4">
+							<input name="visit_password" type="text" class="form-control" placeholder="" value="<?php echo (isset($goods['visit_password']) && ($goods['visit_password'] !== '')?$goods['visit_password']:''); ?>">
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">设置密码后，请牢记该密码！</p>
+						</div>
+                    </div>
+					<div class="form-group">
+						<label class="col-md-2 control-label">客户信息</label>
+						<div class="col-md-4">
+							<select name="contact_limit" class="form-control" required>
+								<option value="default" <?php if(isset($goods) && $goods['contact_limit']==='default'): ?>selected<?php endif; ?>>默认</option>
+								<option value="any" <?php if(isset($goods) && $goods['contact_limit']==='any'): ?>selected<?php endif; ?>>任意字符</option>
+								<option value="qq" <?php if(isset($goods) && $goods['contact_limit']==='qq'): ?>selected<?php endif; ?>>QQ号码</option>
+								<option value="email" <?php if(isset($goods) && $goods['contact_limit']==='email'): ?>selected<?php endif; ?>>邮箱账号</option>
+								<option value="mobile" <?php if(isset($goods) && $goods['contact_limit']==='mobile'): ?>selected<?php endif; ?>>手机号码</option>
+							</select>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">客户下单时输入的联系方式或充值账号格式限制</p>
+						</div>
 					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-3 control-label">收款二维码</label>
-					<div class="col-md-9">
-						<?php if($_user['collect']['collect_img'] && $_user['collect']['allow_update'] == 0): ?>
-						<img src="<?php echo (isset($_user['collect']['collect_img']) && ($_user['collect']['collect_img'] !== '')?$_user['collect']['collect_img']:''); ?>" style="width: 80%;margin:0 auto;" alt="">
-						<?php else: ?>
-						<input type="file" name="collect_img" class="dropify"/>
-						<?php endif; ?>
-					</div>
-				</div>
-			</div>
-			<div class="collect_type type_bank" <?php if((!$_user['collect'] && $_user['collect']['type']!='3' && $type[0] != 3) || ($_user['collect'] && $_user['collect']['type']!='3')): ?>style="display:none;"<?php endif; ?>>
-			<div class="form-group">
-				<label class="col-md-3 control-label">开户银行</label>
-				<div class="col-md-9">
-					<select name="bank[bank_name]" class="form-control"  <?php if(isset($_user['collect']['info']['bank_name']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?> >
-					<option value="中国工商银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='中国工商银行'): ?>selected<?php endif; ?>>中国工商银行</option>
-					<option value="中国建设银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='中国建设银行'): ?>selected<?php endif; ?>>中国建设银行</option>
-					<option value="中国农业银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='中国农业银行'): ?>selected<?php endif; ?>>中国农业银行</option>
-					<option value="中国邮政储蓄银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='中国邮政储蓄银行'): ?>selected<?php endif; ?>>中国邮政储蓄银行</option>
-					<option value="招商银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='招商银行'): ?>selected<?php endif; ?>>招商银行</option>
-					<option value="农村信用合作社" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='农村信用合作社'): ?>selected<?php endif; ?>>农村信用合作社</option>
-					<option value="兴业银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='兴业银行'): ?>selected<?php endif; ?>>兴业银行</option>
-					<option value="广东发展银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='广东发展银行'): ?>selected<?php endif; ?>>广东发展银行</option>
-					<option value="深圳发展银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='深圳发展银行'): ?>selected<?php endif; ?>>深圳发展银行</option>
-					<option value="民生银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='民生银行'): ?>selected<?php endif; ?>>民生银行</option>
-					<option value="交通银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='交通银行'): ?>selected<?php endif; ?>>交通银行</option>
-					<option value="中信银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='中信银行'): ?>selected<?php endif; ?>>中信银行</option>
-					<option value="光大银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='光大银行'): ?>selected<?php endif; ?>>光大银行</option>
-					<option value="中国银行" <?php if($_user['collect']['type']==3 && $_user['collect']['info']['bank_name']=='中国银行'): ?>selected<?php endif; ?>>中国银行</option>
-					</select>
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-md-3 control-label">开户地址</label>
-				<div class="col-md-9">
-					<input name="bank[bank_branch]" type="text" class="form-control" value="<?php echo (isset($_user['collect']['info']['bank_branch']) && ($_user['collect']['info']['bank_branch'] !== '')?$_user['collect']['info']['bank_branch']:''); ?>" <?php if(isset($_user['collect']['info']['bank_branch'])&& $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  placeholder="开户行请精确到市">
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-md-3 control-label">银行卡号</label>
-				<div class="col-md-9">
-					<input name="bank[bank_card]" type="text" class="form-control" <?php if(isset($_user['collect']['info']['bank_card']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?>  value="<?php echo (isset($_user['collect']['info']['bank_card']) && ($_user['collect']['info']['bank_card'] !== '')?$_user['collect']['info']['bank_card']:''); ?>" placeholder="请认真核对银行卡号">
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-md-3 control-label">收款人姓名</label>
-				<div class="col-md-9">
-					<input name="bank[realname]" type="text" class="form-control" <?php if(isset($_user['collect']['info']['realname']) && $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?> value="<?php echo (isset($_user['collect']['info']['realname']) && ($_user['collect']['info']['realname'] !== '')?$_user['collect']['info']['realname']:''); ?>">
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-md-3 control-label">身份证号</label>
-				<div class="col-md-9">
-					<input name="bank[idcard_number]" type="text" class="form-control idcard_number" <?php if(isset($_user['collect']['info']['idcard_number'])&& $_user['collect']['allow_update'] == 0): ?> readonly="readonly" <?php endif; ?> value="<?php echo (isset($_user['collect']['info']['idcard_number']) && ($_user['collect']['info']['idcard_number'] !== '')?$_user['collect']['info']['idcard_number']:''); ?>">
-				</div>
+                    <div class="form-group">
+						<label class="col-md-2 control-label">商品说明</label>
+						<div class="col-md-4">
+							<textarea name="content" placeholder="建议填写该商品的使用方法，文字不超过200字" class="form-control" rows="5" maxlength="200"><?php echo (isset($goods['content']) && ($goods['content'] !== '')?$goods['content']:''); ?></textarea>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">商品说明将显示在商品购买页面</p>
+						</div>
+                    </div>
+                    <div class="form-group">
+						<label class="col-md-2 control-label">使用说明</label>
+						<div class="col-md-4">
+							<textarea name="remark" placeholder="建议填写该商品的使用方法，文字不超过200字" class="form-control" rows="5" maxlength="200"><?php echo (isset($goods['remark']) && ($goods['remark'] !== '')?$goods['remark']:''); ?></textarea>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">使用说明将显示在订单查询结果中，一般设置售后QQ群，或者下载地址类</p>
+						</div>
+                    </div>
+                    <div class="form-group">
+						<label class="col-md-2 control-label"></label>
+						<div class="col-md-4">
+							<button type="submit" class="btn btn-purple waves-effect waves-light">确认提交</button>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static"></p>
+						</div>
+                    </div>
+                </form>
 			</div>
 		</div>
-		<?php endif; if(!$_user['collect']['info'] || $_user['collect']['allow_update'] == 1): ?>
-		<div class="form-group" style="display: flex; align-items: center; color: red;">
-			<label class="col-md-3 control-label">*</label>
-			<div class="col-md-9">
-				慎重填写，再三确认，填写后不可修改
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="col-md-3 control-label"></label>
-			<div class="col-md-9">
-				<button type="submit" class="btn btn-purple waves-effect waves-light">保存设置</button>
-			</div>
-		</div>
-		<?php else: ?>
-		<div class="form-group" style="display: flex; align-items: center; color: red;">
-			<label class="col-md-3 control-label">*</label>
-			<div class="col-md-9">
-				修改收款方式请联系客服
-			</div>
-		</div>
-		<?php endif; ?>
-		</form>
 	</div>
-	<!-- end col -->
-</div>
-<!-- end row -->
-</div>
-</div>
-<!-- end col -->
 </div>
 
                     </div> <!-- container -->
@@ -848,94 +835,60 @@
         </script>
 
         
+
 <script>
-    $('[name="type"]').change(function(){
-        var selected=$(this).val()*1;
-        $('.collect_type').slideUp();
-        switch(selected){
-            case 1:  // 支付宝
-                $('.type_alipay').slideDown();
-                break;
-            case 2:  // 微信
-                $('.type_wxpay').slideDown();
-                break;
-            case 3:  // 银行
-                $('.type_bank').slideDown();
-                break;
-        }
-    });
-    $('[name="stock_display"]').change(function(){
-        var selected=$(this).val()*1;
-        console.log(selected);
-        if(selected==2){
-            $('.stock_display_2_tips').show();
-        }else{
-            $('.stock_display_2_tips').hide();
-        }
-    });
-    $('#gathering_info').submit(function(){
-        var status = true;
-        $('.collect_type').each(function(){
-            if($(this).is(':visible')){
-                //验证二维码
-                var collect_img_value = $(this).find('.dropify').val();
-                if($(this).find('.dropify').length > 0 && !collect_img_value){
-                    layer.alert('请选择收款二维码！');
-                    status = false;
-                }
-                var idcard_number = $(this).find('input.idcard_number').last().val()
-                var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
-                console.log(idcard_number);
-                if(!reg.test(idcard_number)){
-                    layer.alert('请输入正确的身份证号码');
-                    status = false;
-                }
+$('[name="is_duijie"]').change(function(){
+	var status=$(this).val();
+	if(status==1){
+		$('.block-duijie_smilepic').slideDown();
+	}else{
+		$('.block-duijie_smilepic').slideUp();
+	}
+});
+$('[name="visit_type"]').change(function(){
+	var status=$(this).val();
+	if(status==1){
+		$('.block-visit_password').slideDown();
+	}else{
+		$('.block-visit_password').slideUp();
+	}
+});
+$('[name="wholesale_discount"]').change(function(){
+	var status=$(this).val();
+	if(status==1){
+		$('.block-wholesale_discount').slideDown();
+	}else{
+		$('.block-wholesale_discount').slideUp();
+	}
+});
+function del_discount_item(obj){
+	$(obj).parents('.discount_item').remove();
+}
+function add_discount_item(){
+	var html='<div class="form-group discount_item"><div class="col-md-3"><input name="wholesale_discount_list[num][]" type="number" class="form-control" value="" min=0></div><div class="col-md-1"><p class="form-control-static">张 </p></div><div class="col-md-3"><input name="wholesale_discount_list[price][]" type="text" class="form-control" value=""></div><div class="col-md-1"><p class="form-control-static">元 </p></div><div class="col-md-4"><button type="button" class="btn btn-danger waves-effect waves-light" onclick="del_discount_item(this)">删除</button></div></div>';
+	$('.block-discount_list').append($(html));
+}
+//检查参数
+$('.form-horizontal').submit(function(){
+	var good_name = $(this).find("input[name='name']").val();
+	if(!good_name){
+		layer.alert('商品名称不能为空!');
+		return false;
+	}
+	var good_price = $(this).find("input[name='price']").val();
+	if(!good_price){
+		layer.alert('商品价格不能为空!');
+		return false;
+	}
+	/* if(good_price < 1 || good_price > 1000){
+		layer.alert('商品价格必须为1-1000');
+		return false;
+	} */
 
-            }
-        })
-        return status;
-    })
-    $('.dropify').dropify({
-        messages: {
-            'default': '点击上传二维码',
-            'replace': '点击替换二维码',
-            'remove': '删除',
-            'error': '上传错误'
-        },
-        error: {
-            'fileSize': '文件太大超过（1M）'
-        }
-    });
+	return true;
+})
+</script>
 
-    function getCode() {
-        layer.prompt({
-            title: '请输入验证码',
-            formType: 3
-        }, function (chkcode) {
-            $('#get_code').off('click');
-            $.post('/merchant/user/sendSmsCode', {
-                chkcode: chkcode,
-                token: "<?php echo $sms_token; ?>",
-                phone: "<?php echo $_user['mobile']; ?>",
-                t: new Date().getTime()
-            }, function (ret) {
-                //                        console.log(ret);
-                if (ret.code === 1) {
-                    layer.closeAll();
-                    layer.msg(ret.msg);
-                    token = ret.data.token;
-                    $('#get_code').html('<i class="times">80</i> 秒后重发');
-                    timeC(80, '#get_code');
-                } else {
-                    alert(ret.msg);
-                    $('#get_code').on('click', getCode);
-                }
-            }, 'json');
-        })
-        $('.layui-layer-prompt .layui-layer-content').prepend($(
-            '<img style="cursor:pointer;height: 60px;" id="chkcode_img" src="/chkcode" onclick="javascript:this.src=\'/chkcode\'+\'?time=\'+Math.random()">'
-        ))
-    }</script>
 
 
         <!-- App js -->

@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:76:"F:\MaLong\item\faka\application\templates\pc\merchant\default\user\link.html";i:1539744088;s:71:"F:\MaLong\item\faka\application\templates\pc\merchant\default\base.html";i:1539744041;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:76:"F:\MaLong\item\faka\application\templates\pc\merchant\default\user\link.html";i:1539744088;s:71:"F:\MaLong\item\faka\application\templates\pc\merchant\default\base.html";i:1585486427;}*/ ?>
 <!DOCTYPE html>
 <html lang="zh">
     <head>
@@ -192,6 +192,9 @@
                                     </li>
                                 	<li class="waves-effect <?php if($_controller=='Goods' && $_action=='index'): ?>active<?php endif; ?>">
                                         <a href="/merchant/goods/index">商品列表</a>
+                                    </li>
+                                    <li class="waves-effect <?php if($_controller=='Goods' && $_action=='duijie'): ?>active<?php endif; ?>">
+                                        <a href="/merchant/goods/duijie">代理对接</a>
                                     </li>
                                     <li class="waves-effect <?php if($_controller=='Goods' && $_action=='trash'): ?>active<?php endif; ?>">
                                         <a href="/merchant/goods/trash">回收站</a>
