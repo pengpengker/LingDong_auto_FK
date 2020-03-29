@@ -1,0 +1,24 @@
+---------------------------------------------------------------
+[ 2020-03-29T16:33:23+08:00 ] 127.0.0.1 POST /register/email
+[ error ] [2]preg_match(): Compilation failed: invalid range in character class at offset 5[F:\MaLong\item\faka\application\common.php:908]
+---------------------------------------------------------------
+[ 2020-03-29T16:47:34+08:00 ] 127.0.0.1 POST /register/email
+[ error ] [2]preg_match(): Compilation failed: invalid range in character class at offset 5[F:\MaLong\item\faka\application\common.php:908]
+---------------------------------------------------------------
+[ 2020-03-29T16:52:19+08:00 ] 127.0.0.1 POST /register/email
+[ error ] [2]preg_match(): Compilation failed: invalid range in character class at offset 5[F:\MaLong\item\faka\application\common.php:908]
+---------------------------------------------------------------
+[ 2020-03-29T16:56:02+08:00 ] 127.0.0.1 POST /register/email
+[ error ] [2]preg_match(): Compilation failed: invalid range in character class at offset 5[F:\MaLong\item\faka\application\common.php:908]
+---------------------------------------------------------------
+[ 2020-03-29T16:57:27+08:00 ] 127.0.0.1 POST /register/email
+[ error ] [2]preg_match(): Compilation failed: invalid range in character class at offset 5[F:\MaLong\item\faka\application\common.php:908]
+---------------------------------------------------------------
+[ 2020-03-29T17:03:25+08:00 ] 127.0.0.1 POST /register/email
+[ error ] [2]preg_match(): Compilation failed: invalid range in character class at offset 5[F:\MaLong\item\faka\application\common.php:908]
+---------------------------------------------------------------
+[ 2020-03-29T17:05:45+08:00 ] 127.0.0.1 POST /register/email
+[ error ] [8192]The each() function is deprecated. This message will be suppressed on further calls[F:\MaLong\item\faka\extend\Util\Mailer\SMTP.class.php:388]
+---------------------------------------------------------------
+[ 2020-03-29T17:09:53+08:00 ] 127.0.0.1 POST /register/email
+[ error ] [8192]The each() function is deprecated. This message will be suppressed on further calls[F:\MaLong\item\faka\extend\Util\Mailer\SMTP.class.php:388]

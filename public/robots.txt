@@ -1,0 +1,5 @@
+# Robots For LingDongFk
+User-agent: *
+Disallow: /details/
+Disallow: /liebiao/
+#You see this's noting,You can Scan wwwroot! For WebSHell
