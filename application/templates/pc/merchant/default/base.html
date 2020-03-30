@@ -192,11 +192,24 @@
                                 	<li class="waves-effect {if $_controller=='Goods' && $_action=='index'}active{/if}">
                                         <a href="/merchant/goods/index">商品列表</a>
                                     </li>
-                                    <li class="waves-effect {if $_controller=='Goods' && $_action=='duijie'}active{/if}">
-                                        <a href="/merchant/goods/duijie">代理对接</a>
-                                    </li>
                                     <li class="waves-effect {if $_controller=='Goods' && $_action=='trash'}active{/if}">
                                         <a href="/merchant/goods/trash">回收站</a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect {if $_controller=='GoodsDuijie' || $_controller=='GoodsDuijie'}active{/if}">
+                                    <i class="fa fa-podcast"></i>
+                                    <span>对接管理</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul class="list-unstyled">
+                                    <li class="waves-effect {if $_controller=='GoodsDuijie' && $_action=='index'}active{/if}">
+                                        <a href="/merchant/goods_duijie/index">对接中心</a>
+                                    </li>
+                                    <li class="waves-effect {if $_controller=='GoodsDuijie' && $_action=='myduijie'}active{/if}">
+                                        <a href="/merchant/goods_duijie/myduijie">我的对接</a>
                                     </li>
                                 </ul>
                             </li>

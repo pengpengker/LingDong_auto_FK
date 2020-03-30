@@ -149,6 +149,7 @@ class Goods extends Base
 
     /**
      * 恢复商品
+     * 对接功能此处修改恢复下级对接的用户商品
      */
     public function restore()
     {
@@ -488,11 +489,5 @@ class Goods extends Base
         $this->assign('goods', $goods);
         $this->assign('short_link', $goods->shortLink);
         return $this->fetch();
-    }
-    
-    //商品对接功能
-    public function duijie()
-    {
-        $this->error('工程师正在赶工中，近期上线');
     }
 }
