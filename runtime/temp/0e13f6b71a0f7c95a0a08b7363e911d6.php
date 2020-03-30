@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:3:{s:78:"F:\MaLong\item\faka\application\templates\pc\index\default\\user\register.html";i:1585473136;s:78:"F:\MaLong\item\faka\application\templates\pc\index\default\default_header.html";i:1585471324;s:78:"F:\MaLong\item\faka\application\templates\pc\index\default\default_footer.html";i:1539744034;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:3:{s:78:"F:\MaLong\item\faka\application\templates\pc\index\default\\user\register.html";i:1585542391;s:78:"F:\MaLong\item\faka\application\templates\pc\index\default\default_header.html";i:1585471324;s:78:"F:\MaLong\item\faka\application\templates\pc\index\default\default_footer.html";i:1539744034;}*/ ?>
 <!DOCTYPE html>
 <html lang="cn">
 
@@ -256,29 +256,34 @@
                     return false;
                 }
                 $('#click_checkcode_email').off('click');
-                $.ajax({
-                    type:"POST",
-                    url:'/register/email',
-                    data:{email: email,t: new Date().getTime()},
-                    dataType: "json",
-                    success:function(ret){
-                        if (ret.code === 1) {
-                            layer.closeAll();
-                            layer.msg(ret.msg);
-                            $('#click_checkcode_email').html('<i class="times">80</i> 秒后重发');
-                            timeC(80, "#click_checkcode_email");
-                        } else {
-                            layer.alert(ret.msg);
+                try{
+                    $.ajax({
+                        type:"POST",
+                        url:'/register/email',
+                        data:{email: email,t: new Date().getTime()},
+                        dataType: "json",
+                        success:function(ret){
+                            if (ret.code === 1) {
+                                layer.closeAll();
+                                layer.msg(ret.msg);
+                                $('#click_checkcode_email').html('<i class="times">80</i> 秒后重发');
+                                timeC(80, "#click_checkcode_email");
+                            } else {
+                                layer.alert(ret.msg);
+                                $('#click_checkcode_email').on('click', getEmailCode);
+                            }
+                        },
+                        error:function(xhr,errorText,errorType){
+                            layer.msg('服务器繁忙，稍后再试');
                             $('#click_checkcode_email').on('click', getEmailCode);
+                        },
+                        complete:function(){
+                            layer.close(loadin);
                         }
-                    },
-                    error:function(xhr,errorText,errorType){
-                        layer.msg('服务器繁忙，稍后再试');
-                    },
-                    complete:function(){
-                        layer.close(loadin);
-                    }
-                });
+                    });
+                }catch (e) {
+                    $('#click_checkcode_email').on('click', getEmailCode);
+                }
             }
 
             function timeC(t, obj) {

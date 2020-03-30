@@ -164,7 +164,7 @@
                     <!--<label class="col-sm-2 control-label">被投诉次数限制</label>-->
                     <!--<div class='col-sm-8'>-->
                     <!--<select name="complaint_limit_num" class="layui-input" required>-->
-                    <!--<?php $__FOR_START_1610813951__=1;$__FOR_END_1610813951__=100;for($i=$__FOR_START_1610813951__;$i < $__FOR_END_1610813951__;$i+=1){ ?>-->
+                    <!--<?php $__FOR_START_1138451__=1;$__FOR_END_1138451__=100;for($i=$__FOR_START_1138451__;$i < $__FOR_END_1138451__;$i+=1){ ?>-->
                     <!--<option value="<?php echo $i; ?>" <?php if(sysconf('complaint_limit_num')==$i): ?>selected<?php endif; ?>><?php echo $i; ?></option>-->
                     <!--<?php } ?>-->
                     <!--</select>-->

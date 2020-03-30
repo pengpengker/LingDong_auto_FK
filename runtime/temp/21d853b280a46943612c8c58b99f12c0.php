@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:3:{s:76:"F:\MaLong\item\faka\application\templates\pc\index\default\\index\index.html";i:1561817207;s:78:"F:\MaLong\item\faka\application\templates\pc\index\default\default_header.html";i:1585471324;s:78:"F:\MaLong\item\faka\application\templates\pc\index\default\default_footer.html";i:1539744034;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:3:{s:76:"F:\MaLong\item\faka\application\templates\pc\index\default\\index\index.html";i:1585551741;s:78:"F:\MaLong\item\faka\application\templates\pc\index\default\default_header.html";i:1585471324;s:78:"F:\MaLong\item\faka\application\templates\pc\index\default\default_footer.html";i:1539744034;}*/ ?>
 <!DOCTYPE html>
 <html lang="cn">
 <head>
@@ -99,10 +99,10 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-6 hero_text wow fadeInLeft">
-                <h2>全新的售卡体验 </h2>
-                <h2>New Experience</h2>
-                <p>致力于解决虚拟商品的快捷寄售服务，为商户及其买家提供便捷、绿色、安全、快速的销售和购买体验 </p>
-                <a href="/merchant" class="btn pro_btn">立即加入</a>
+                <h2>极致售卡体验</h2>
+                <h2>Super Faka</h2>
+                <p>快捷，绿色，高响应，高可用，定制型专业发卡平台 </p>
+                <a href="/merchant" class="btn pro_btn">立即体验</a>
             </div>
             <div class="col-sm-6 wow fadeInRight">
                 <img class="header_mac_img" src="/static/app/default/image/banner/mac-book.png" alt="mac">

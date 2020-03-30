@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:80:"F:\MaLong\item\faka\application\templates\pc\merchant\default\user\settings.html";i:1543624690;s:71:"F:\MaLong\item\faka\application\templates\pc\merchant\default\base.html";i:1585486427;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:80:"F:\MaLong\item\faka\application\templates\pc\merchant\default\user\settings.html";i:1543624690;s:71:"F:\MaLong\item\faka\application\templates\pc\merchant\default\base.html";i:1585553287;}*/ ?>
 <!DOCTYPE html>
 <html lang="zh">
     <head>
@@ -193,11 +193,24 @@
                                 	<li class="waves-effect <?php if($_controller=='Goods' && $_action=='index'): ?>active<?php endif; ?>">
                                         <a href="/merchant/goods/index">商品列表</a>
                                     </li>
-                                    <li class="waves-effect <?php if($_controller=='Goods' && $_action=='duijie'): ?>active<?php endif; ?>">
-                                        <a href="/merchant/goods/duijie">代理对接</a>
-                                    </li>
                                     <li class="waves-effect <?php if($_controller=='Goods' && $_action=='trash'): ?>active<?php endif; ?>">
                                         <a href="/merchant/goods/trash">回收站</a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect <?php if($_controller=='GoodsDuijie' || $_controller=='GoodsDuijie'): ?>active<?php endif; ?>">
+                                    <i class="fa fa-shopping-bag"></i>
+                                    <span>对接管理</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul class="list-unstyled">
+                                    <li class="waves-effect <?php if($_controller=='GoodsDuijie' && $_action=='index'): ?>active<?php endif; ?>">
+                                        <a href="/merchant/goods_duijie/index">对接中心</a>
+                                    </li>
+                                    <li class="waves-effect <?php if($_controller=='GoodsDuijie' && $_action=='myduijie'): ?>active<?php endif; ?>">
+                                        <a href="/merchant/goods_duijie/myduijie">我的对接</a>
                                     </li>
                                 </ul>
                             </li>
