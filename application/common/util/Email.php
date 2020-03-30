@@ -39,6 +39,7 @@ class Email
             $this->error='请输入正确的邮箱！';
             return false;
         }
+
         // 检测是否存在验证码（5分钟）
         $expire_time        =$_SERVER['REQUEST_TIME']-$this->expire_in;
         $where['email']    =$email;
@@ -64,11 +65,17 @@ class Email
             }
         }
         // 生成验证码
+        $site_name = sysconf('site_name');
+        $site_info_address = sysconf('site_info_address');
         $code = (string)(mt_rand(100000, 999999));
-        $tpl  = "您的验证码为：{$code}，该验证码5分钟内有效，请勿泄露他人。";
-
+        //$tpl  = "您的验证码为：{$code}，该验证码5分钟内有效，请勿泄露他人。";
+        $tpl = file_get_contents('./static/app/default/system/email.tpl');
+        $tpl = str_ireplace("{@email}",$email,$tpl);
+        $tpl = str_ireplace("{@wwwtitle}",$site_name,$tpl);
+        $tpl = str_ireplace("{@address}",$site_info_address,$tpl);
+        $tpl = str_ireplace("{@code}",$code,$tpl);
         //发送邮件验证码
-        $title = '卡密自动销售（发卡）系统注册验证码';
+        $title = $site_name.'卡密自动销售（发卡）系统注册验证码';
         if(!sendMail($email, $title, $tpl)){
             $this->error='验证码发送失败！';
             return false;

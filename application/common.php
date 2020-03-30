@@ -131,7 +131,6 @@ function sysconf($name, $value = null) {
     }
     if (empty($config)) {
         $config = Db::name('SystemConfig')->column('name,value');
-        //var_dump($config); die;
     }
     return isset($config[$name]) ? $config[$name] : '';
 }
@@ -370,7 +369,7 @@ function sendMail($to, $title, $content, $filePath = '', $throwExceptions = fals
     //3.修改命名空间
     //4.注意在PHPMailer中最后一个继承
     $mail = new Util\Mailer\PHPMailer($throwExceptions);
-    $mail->SMTPDebug  = 1;
+    $mail->SMTPDebug  = 0;
     $mail->CharSet = "utf-8"; //设置采用utf8中文编码
     $mail->IsSMTP(); //设置采用SMTP方式发送邮件
 
