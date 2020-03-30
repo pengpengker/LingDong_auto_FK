@@ -9,21 +9,24 @@ namespace app\common\util\dwz;
 use app\common\util\DWZ;
 use service\HttpService;
 
-class Sina extends DWZ
+class Im extends DWZ
 {
-    const API_URL    = 'https://api.d5.nz/api/dwz/tcn.php';
+    const API_URL    = 'https://915.im/api.ashx';
+    const APP_KEY    = 'FC447277711EB70CB94E0DBAAF4E8BAA';
+    const APP_Userid = '3101';
+    const APP_Format = 'txt';
+
     public function create($url)
     {
         $res=HttpService::get(SELF::API_URL,[
+            'format'   =>SELF::APP_Format,
+            'userId'   =>SELF::APP_Userid,
+            'key'      =>SELF::APP_KEY,
             'url'      =>$url,
         ]);
         if($res===null || $res===false){
             return false;
         }
-        $json=json_decode($res);
-        if(!$json || $json->code!== "200" || !$json->url){
-            return false;
-        }
-        return $json->url;
+        return $res;
     }
 }

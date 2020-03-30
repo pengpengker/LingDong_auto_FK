@@ -15,11 +15,13 @@ class Baidu extends DWZ
 
     public function create($url)
     {
+        halt(SELF::API_URL);
         $res=HttpService::post(SELF::API_URL,[
             'url'         =>$url,
             'alias'       =>'',
             'access_type' =>'web'
         ]);
+        halt($res);
         $json=json_decode($res);
         if(!$json || $json->status==-1){
             return false;

@@ -770,13 +770,10 @@ function get_short_domain($url, $type = '') {
     }
     $dwz = \app\common\util\DWZ::load($type);
     switch ($type) {
-        case 'Baidu':
+        case 'Im':
             $shortDomain = $dwz->create($url);
             break;
         case 'Sina':
-            $shortDomain = $dwz->create($url);
-            break;
-        case 'U6':
             $shortDomain = $dwz->create($url);
             break;
         default:
