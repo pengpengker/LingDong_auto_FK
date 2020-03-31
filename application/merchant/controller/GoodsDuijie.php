@@ -165,8 +165,8 @@ class GoodsDuijie extends Base
                 $this->error('商品价格不能超过' . sysconf('goods_max_price') . '元');
             }
             //检查加价是否正常
-            if(input('price/s', 0) <= 0){
-                $this->error('代理商品必须加价');
+            if(input('price/s', 0) <= 0 || input('price/s', 0) < $sjgoods['duijie_smilepic']){
+                $this->error('代理商品加价价格不正确');
             }
             $res = $this->validate($data, 'Goods');
             if ($res !== true) {

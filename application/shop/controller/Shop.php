@@ -99,11 +99,14 @@ class Shop extends Base
         $duijie_class_id = GoodsModel::where('user_id',$shop['id'])->where('duijie_id','neq',0)->select();
         //循环代理商品的分类
         foreach ($duijie_class_id as $k => $v){
-            $catenum++;
-            //查询分类信息
-            $cache = GoodsCategory::where('id',$duijie_class_id[$k]['cate_id'])->find();
-            if($cache){
-                $categorys[$catenum] = $cache;
+            //判断当前是否已有这个分类
+            if($this->class_rep_is($categorys,$duijie_class_id[$k]['cate_id']) === false) {
+                $catenum++;
+                //查询分类信息
+                $cache = GoodsCategory::where('id', $duijie_class_id[$k]['cate_id'])->find();
+                if ($cache) {
+                    $categorys[$catenum] = $cache;
+                }
             }
         }
         $this->assign('categorys', $categorys);
@@ -124,6 +127,19 @@ class Shop extends Base
 
         // 加载模板
         return $this->fetch('/index');
+    }
+
+    /*class_id重复检测*/
+    public function class_rep_is($categorys,$id)
+    {
+        $boo = false;
+        foreach ($categorys as $k => $v){
+            if($categorys[$k]['id'] === $id){
+                $boo = true;
+                break;
+            }
+        }
+        return $boo;
     }
 
     /**
@@ -242,9 +258,7 @@ class Shop extends Base
     {
         $cate_id = input('cateid/d', 0);
         $str = '';
-        //获取user_id
-        halt($this->request->param());
-        $goodsList = GoodsModel::where(['cate_id' => $cate_id, 'status' => 1])->order('sort DESC')->select();
+        $goodsList = GoodsModel::where(['cate_id' => $cate_id, 'status' => 1,'user_id' => $this->request->param('userid')])->order('sort DESC')->select();
         foreach ($goodsList as $v) {
             $str .= "<option value=\"{$v->id}\">{$v->name}</option>";
         }
@@ -258,34 +272,82 @@ class Shop extends Base
         if (!$goods) {
             return '不存在该商品！';
         }
-        $cardsCount = $goods->cards_stock_count;
-        $stockStr = '库存' . $cardsCount . '张';
-        // 如果库存显示类型为范围库存
-        if ($goods->user->stock_display == 2) {
-            if ($cardsCount >= 100) {
-                $stockStr = '库存非常多';
-            } elseif ($cardsCount >= 30) {
-                $stockStr = '库存很多';
-            } elseif ($cardsCount >= 10) {
-                $stockStr = '库存一般';
-            } elseif ($cardsCount > 0) {
-                $stockStr = '库存少量';
-            } else {
-                $stockStr = '库存不足';
+        //拼装数据
+        $data = [];
+        //库存查询
+        if(empty($goods->duijie_id)){
+            //自己商品
+            //库存
+            $cardsCount = $goods->cards_stock_count;
+            //金额
+            $price = $goods->price;
+            $stockStr = '库存' . $cardsCount . '张';
+            $data = [
+                // 'gonggao'         =>'测试',
+                'goodinvent' => '<span style="color:green">' . $stockStr . '</span><input type="hidden" name="kucun" value="' . $cardsCount . '">',
+                'is_coupon' => $goods->coupon_type,
+                'is_discount' => $goods->wholesale_discount,
+                'is_pwdforbuy' => $goods->visit_type,
+                'is_pwdforsearch' => $goods->take_card_type,
+                'limit_quantity' => $goods->limit_quantity,
+                'price' => $price,
+                'remark' => $goods->content,
+                'contact_limit' => $goods->contact_limit,
+            ];
+
+            // 如果库存显示类型为范围库存
+            if ($goods->user->stock_display == 2) {
+                if ($cardsCount >= 100) {
+                    $stockStr = '库存非常多';
+                } elseif ($cardsCount >= 30) {
+                    $stockStr = '库存很多';
+                } elseif ($cardsCount >= 10) {
+                    $stockStr = '库存一般';
+                } elseif ($cardsCount > 0) {
+                    $stockStr = '库存少量';
+                } else {
+                    $stockStr = '库存不足';
+                }
+            }
+        }else{
+            //对接商品
+            //库存
+            $sjgoods = GoodsModel::get(['id' => $goods->duijie_id, 'status' => 1]);
+            if(!$sjgoods){
+                return '不存在该商品！';
+            }
+            $cardsCount = $sjgoods->cards_stock_count;
+            //金额
+            $price = round($sjgoods->price,3) + round($goods->duijia_secmoney,3);
+            $stockStr = '库存' . $cardsCount . '张';
+            $data = [
+                // 'gonggao'         =>'测试',
+                'goodinvent' => '<span style="color:green">' . $stockStr . '</span><input type="hidden" name="kucun" value="' . $cardsCount . '">',
+                'is_coupon' => $sjgoods->coupon_type,
+                'is_discount' => $sjgoods->wholesale_discount,
+                'is_pwdforbuy' => $sjgoods->visit_type,
+                'is_pwdforsearch' => $sjgoods->take_card_type,
+                'limit_quantity' => $sjgoods->limit_quantity,
+                'price' => $price,
+                'remark' => $sjgoods->content,
+                'contact_limit' => $sjgoods->contact_limit,
+            ];
+
+            // 如果库存显示类型为范围库存
+            if ($sjgoods->user->stock_display == 2) {
+                if ($cardsCount >= 100) {
+                    $stockStr = '库存非常多';
+                } elseif ($cardsCount >= 30) {
+                    $stockStr = '库存很多';
+                } elseif ($cardsCount >= 10) {
+                    $stockStr = '库存一般';
+                } elseif ($cardsCount > 0) {
+                    $stockStr = '库存少量';
+                } else {
+                    $stockStr = '库存不足';
+                }
             }
         }
-        $data = [
-            // 'gonggao'         =>'测试',
-            'goodinvent' => '<span style="color:green">' . $stockStr . '</span><input type="hidden" name="kucun" value="' . $cardsCount . '">',
-            'is_coupon' => $goods->coupon_type,
-            'is_discount' => $goods->wholesale_discount,
-            'is_pwdforbuy' => $goods->visit_type,
-            'is_pwdforsearch' => $goods->take_card_type,
-            'limit_quantity' => $goods->limit_quantity,
-            'price' => $goods->price,
-            'remark' => $goods->content,
-            'contact_limit' => $goods->contact_limit,
-        ];
         return json($data);
     }
 

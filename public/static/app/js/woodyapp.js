@@ -1,4 +1,6 @@
 $(function () {
+    console.log(userid);
+
     resize();
     $(window).resize(resize);
 
@@ -275,7 +277,7 @@ function selectcateid() {
     $("#goodid").hide();
     var option = '<option value="">请选择商品</option>';
     if (cateid > 0) {
-        $.post("/ajax/getgoodlist", {cateid: cateid}, function (data) {
+        $.post("/ajax/getgoodlist", {cateid: cateid,userid:userid}, function (data) {
             if (data == "ok") {
                 alert("此分类下没有商品！");
             } else {

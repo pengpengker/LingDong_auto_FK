@@ -18,20 +18,6 @@
     <script src="__RES__/app/js/jquery.min.js"></script>
     <script src="__RES__/app/js/nyro.js"></script>
     <!--    点击购买遮罩弹窗结束-->
-    <!--    核心文件开始-->
-    <script src="__RES__/app/js/woodyapp.js?_v={:date('YmdHi')}"></script>
-    <!--    核心文件结束-->
-    <!--    支付方式样式文件开始-->
-    <script src="__RES__/app/js/layer.js"></script>
-    <!--    支付方式样式文件结束-->
-    <style>
-        .spsm>span>span{
-            color: #648ff7 !important;
-        }
-    </style>
-    {block name="CSS"}
-    {/block}
-
     <script>
         var user_popup_message = '';
         var is_display = '0';
@@ -45,15 +31,28 @@
         var limit_quantity_tip = '无法修改购买数量，是因为本商品限制了购买数量。';
 
         /* {if !isset($goods)} */
- 
+
         function closeNyro(){
             $('[name="goodid"]').val('');
             $('[name="goodid"]').change();
         }
 
         /* {/if} */
-        
+
     </script>
+    <!--    核心文件开始-->
+    <script src="__RES__/app/js/woodyapp.js?_v={:date('YmdHi')}"></script>
+    <!--    核心文件结束-->
+    <!--    支付方式样式文件开始-->
+    <script src="__RES__/app/js/layer.js"></script>
+    <!--    支付方式样式文件结束-->
+    <style>
+        .spsm>span>span{
+            color: #648ff7 !important;
+        }
+    </style>
+    {block name="CSS"}
+    {/block}
 
 </head>
 
