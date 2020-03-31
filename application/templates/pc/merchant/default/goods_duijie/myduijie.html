@@ -7,7 +7,7 @@
             <h3 class="panel-title">对接控制</h3>
         </div>
         <div class="panel-body">
-            <form class="form-inline" role="form" action="" method="post">
+            <form class="form-inline form-duijiekz" role="form" action="" method="post">
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon" id="basic-addon3">上级对接码</span>
@@ -30,8 +30,14 @@
                     <form class="form-inline" role="form" action="" method="get">
                         <div class="form-group">
                             <select name="cate_id" class="form-control">
-                                <option value="" {if $Think.get.cate_id=='' }selected{/if}>全部分类 </option> {foreach $categorys as $v} <option
-                                    value="{$v.id}" {if $Think.get.cate_id==$v.id}selected{/if}>{$v.name} </option> {/foreach} </select> </div>
+                                <option value="" {if $Think.get.cate_id=='' }selected{/if}>全部分类 </option>
+                                {present name="categorys"}
+                                    {foreach $categorys as $v}
+                                    <option value="{$v.id}" {if $Think.get.cate_id==$v.id}selected{/if}>{$v.name} </option>
+                                    {/foreach}
+                                {/present}
+                            </select>
+                        </div>
                         <div class="form-group">
                             <input name="name" type="text" class="form-control" placeholder="商品名" value="{$Think.get.name|default=''}">
                         </div>
@@ -47,45 +53,29 @@
                 <table class="table table-striped m-0">
                     <thead>
                     <tr>
+                        <th>商品分类</th>
                         <th>商品名称</th>
-                        <th>供货商QQ</th>
                         <th>对接名称</th>
                         <th>对接价格</th>
                         <th>加价价格</th>
                         <th>最终销售价格</th>
                         <th>库存</th>
-                        <th>状态</th>
                         <th>商品管理</th>
+                        <th>商品创建时间</th>
                     </tr>
                     </thead>
                     <tbody>
                     {foreach $goodsList as $v}
                     <tr>
                         <td>{$v.category.name|default="未分类"}</td>
-                        <td>{$v.sort}</td>
-                        <th scope="row">{$v.name}
-                            {if $v.wholesale_discount==1}
-                            <span class="label label-success">批</span>
-                            {/if}
-                            {if $v.coupon_type==1}
-                            <span class="label label-pink">券</span>
-                            {/if}
-                            {if $v.take_card_type!=0}
-                            <span class="label label-primary">取</span>
-                            {/if}
-                            {if $v.visit_type==1}
-                            <span class="label label-danger">密</span>
-                            {/if}
-                        </th>
+                        <th scope="row">{$v.name}</th>
+                        <th scope="row">{$v.duijie_name}</th>
                         <td>{$v.price}</td>
+                        <td>{$v.duijia_secmoney}</td>
+                        <td>{$v.price+$v.duijia_secmoney}</td>
+                        <td><?php echo $v->cards_stock_count; ?>张</td>
                         <td>
-                            <?php echo $v->cards_stock_count; ?>张
-                        </td>
-                        <td>
-                            <?php echo $v->cards_sold_count; ?>张
-                        </td>
-                        <td>
-                            {if $v.status==1}<span class="label label-danger">上架</span>{else /} <span class="label label-danger">下架</span>{/if}
+                            {if $v.duijie_status!=1}<a href="{:Url('start_duijie_shop',['shop_id'=>$v.id])}"><span class="label label-danger">开始对接</span></a>{else /} <a href="{:Url('stop_duijie_shop',['shop_id'=>$v.id])}"><span class="label label-info">停止对接</span></a>{/if}
                         </td>
                         <td>
                             {$v.create_at|date="Y-m-d H:i:s",###}

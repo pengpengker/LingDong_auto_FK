@@ -53,6 +53,9 @@ class Goods extends Base
         if ($goods->is_freeze == 1) {
             $this->result('', 1, '该商品已被冻结，如果要上架，请修改相关商品信息再上架', 'json');
         }
+        if ($goods->duijie_id != null) {
+            $this->result('', 1, '该商品为对接商品，不能修改', 'json');
+        }
         $status = input('status/d', 0);
         $status = $status ? 1 : 0;
         $statusStr = $status == 1 ? '上架' : '下架';
@@ -77,9 +80,15 @@ class Goods extends Base
         if ($goods->cards_stock_count > 0) {
             return J(1, '该商品下存在虚拟卡，暂不能删除！');
         }
+        if ($goods->duijie_id != null) {
+            return J(1, '该商品为对接商品，无法删除！');
+        }
         $res = $goods->delete();
         if ($res !== false) {
             MerchantLogService::write('删除商品', '删除ID为' . $goods_id . '的商品');
+            //删除该商品则清理下级对接用户的该商品id
+            //清空下级对接
+            GoodsModel::where('duijie_id',$goods_id)->delete();
             return J(0, '删除成功！');
         } else {
             return J(1, '删除失败！');
@@ -294,6 +303,7 @@ class Goods extends Base
     {
         $where = [];
         $where['user_id'] = $this->user->id;
+        $where['duijie_id'] = null;
         $action = $this->request->action();
         switch ($action) {
             case 'index':
@@ -431,11 +441,18 @@ class Goods extends Base
             'take_card_type' => input('take_card_type/d', 0),
             'visit_type' => input('visit_type/d', 0),
             'visit_password' => input('visit_password/s', ''),
+            'is_duijie' => input('is_duijie/d', 0),
+            'duijie_smilepic' => input('duijie_smilepic/s', ''),
             'contact_limit' => input('contact_limit/s', ''),
             'content' => input('content/s', ''),
             'remark' => input('remark/s', ''),
             'sms_payer' => input('sms_payer/d', 0),
         ];
+        //判断是否是禁止对接
+        if(input('is_duijie/d', 0) === 0){
+            //清空下级对接
+            GoodsModel::where('duijie_id',$goods_id)->delete();
+        }
         if ($goods->is_freeze == 1) {
             $data['is_freeze'] = 0;
         }

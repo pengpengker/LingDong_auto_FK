@@ -3,6 +3,7 @@
 namespace app\shop\controller;
 
 use app\common\model\Goods as GoodsModel;
+use app\common\model\GoodsCategory;
 use app\common\model\GoodsCoupon as CouponModel;
 use app\common\model\Link;
 use app\common\model\User as UserModel;
@@ -89,9 +90,22 @@ class Shop extends Base
 
         $this->assign('shop', $shop);
         $this->assign('qrcode', $shop->link);
-
         // 商品分类
+        //自己的商品分类
         $categorys = $shop->categorys()->where('status', 1)->order('sort DESC')->select();
+        $catenum = count($categorys);
+        //代理上级的商品分类
+        //取出商户的全部代理商品
+        $duijie_class_id = GoodsModel::where('user_id',$shop['id'])->where('duijie_id','neq',0)->select();
+        //循环代理商品的分类
+        foreach ($duijie_class_id as $k => $v){
+            $catenum++;
+            //查询分类信息
+            $cache = GoodsCategory::where('id',$duijie_class_id[$k]['cate_id'])->find();
+            if($cache){
+                $categorys[$catenum] = $cache;
+            }
+        }
         $this->assign('categorys', $categorys);
 
         // 获取支付渠道
@@ -228,6 +242,8 @@ class Shop extends Base
     {
         $cate_id = input('cateid/d', 0);
         $str = '';
+        //获取user_id
+        halt($this->request->param());
         $goodsList = GoodsModel::where(['cate_id' => $cate_id, 'status' => 1])->order('sort DESC')->select();
         foreach ($goodsList as $v) {
             $str .= "<option value=\"{$v->id}\">{$v->name}</option>";
