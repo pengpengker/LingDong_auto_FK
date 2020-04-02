@@ -18,12 +18,12 @@ class GoodsDuijie extends Base
         $query = [
             'cate_id' => input('cate_id/s', ''),
             'name' => input('name/s', ''),
+            'user_id' => $this->user->id,
         ];
         $where = $this->genereate_where($query);
         $goodsList = GoodsModel::where($where)->order('sort desc,id desc')->paginate(30, false, [
             'query' => $query,
         ]);
-
         // 分页
         $page = $goodsList->render();
         $this->assign('page', $page);
@@ -34,7 +34,7 @@ class GoodsDuijie extends Base
         $this->assign('categorys', $categorys);
         return $this->fetch();
     }
-    
+
     // 商品对接信息渲染
     public function myduijie()
     {
@@ -53,6 +53,7 @@ class GoodsDuijie extends Base
                 $query = [
                     'cate_id' => input('cate_id/s', ''),
                     'name' => input('name/s', ''),
+                    'user_id' => '0.5',
                 ];
             }
             $where = $this->genereate_where($query);
@@ -165,8 +166,8 @@ class GoodsDuijie extends Base
                 $this->error('商品价格不能超过' . sysconf('goods_max_price') . '元');
             }
             //检查加价是否正常
-            if(input('price/s', 0) <= 0 || input('price/s', 0) < $sjgoods['duijie_smilepic']){
-                $this->error('代理商品加价价格不正确');
+            if(input('price/s', 0) <= 0){
+                $this->error('代理商品必须加价');
             }
             $res = $this->validate($data, 'Goods');
             if ($res !== true) {
@@ -190,7 +191,7 @@ class GoodsDuijie extends Base
             return view();
         }
     }
-    
+
     //取消对接商品
     public function stop_duijie_shop()
     {
@@ -201,7 +202,7 @@ class GoodsDuijie extends Base
             $this->error('取消对接失败','myduijie');
         }
     }
-    
+
     //验证对接数据
     public function virfly_duijie_data($shop_id)
     {
@@ -235,15 +236,13 @@ class GoodsDuijie extends Base
     protected function genereate_where($params)
     {
         $where = [];
-        if(empty($params['user_id'])){
-            $where['user_id'] = $this->user->id;
-        }else{
-            $where['user_id'] = $params['user_id'];
+        if(!empty($params['user_id'])){
+            $where['user_id'] = ['=', $params['user_id']];
         }
         $action = $this->request->action();
         switch ($action) {
             case 'index':
-                $where['is_duijie'] = '1';
+                break;
             case 'myduijie':
                 if ($params['cate_id'] !== '') {
                     $where['cate_id'] = ['=', $params['cate_id']];
@@ -251,9 +250,10 @@ class GoodsDuijie extends Base
                 if ($params['name'] !== '') {
                     $where['name'] = ['like', '%' . $params['name'] . '%'];
                 }
-                $where['is_duijie'] = '1';
+                $where['status'] = ['=', 1];
                 break;
         }
+        $where['is_duijie'] = ['=', 1];;
         return $where;
     }
 }
