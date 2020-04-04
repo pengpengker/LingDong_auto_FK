@@ -173,22 +173,6 @@ class Index extends Base {
                                     ->order('top desc,id desc')->limit(20)->select();
         }
 
-        //全局弹出公告 - 只显示一次
-        $qjgg = sysconf('sh_qjgg');
-        if(empty($qjgg)){
-            $this->assign('qjgg_script','');
-            $this->assign('qjgg_node','');
-        }else{
-            if(Session::get('qjgg_session')){
-                $this->assign('qjgg_script','');
-                $this->assign('qjgg_node','');
-            }else{
-                $this->assign('qjgg_script',"$('#qjgg').modal('show');");
-                $this->assign('qjgg_node',$qjgg);
-                Session::set('qjgg_session','1');
-            }
-        }
-
         //今日成交统计
         $dealStat['cardnum']  = OrderModel::where([
             'user_id'    => $this->user->id,
