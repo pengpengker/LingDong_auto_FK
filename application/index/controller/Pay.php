@@ -311,6 +311,8 @@ class Pay extends Base {
         }
         //订单商户id
         $data['user_id'] = $user->id;
+        // 单号
+        $data['trade_no']  = generate_trade_no('T', $data['user_id']);
         // 商品ID
         $data['goods_id'] = $goods->id;
         // 商品名
@@ -614,7 +616,7 @@ class Pay extends Base {
                 $datas['settlement_type'] = sysconf('settlement_type');
             }
         }
-        halt($data);
+        halt($datas);
         // 支付下单
         $PayAPI = PayAPI::load($channel, $account);
         $res    = $PayAPI->order($data['trade_no'], '投诉QQ：' . sysconf('site_info_qq') . ' 订单：' . $data['trade_no'], round($pirce, 2));
