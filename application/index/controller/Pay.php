@@ -637,6 +637,7 @@ class Pay extends Base {
 
         // 创建订单
         $order = OrderModel::create($data);
+        $order->total_price = $pirce;
         if (!$order) {
             return '订单创建失败，请重试！ -1';
         }
