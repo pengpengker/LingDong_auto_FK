@@ -62,14 +62,17 @@ class GoodsDuijie extends Base
             ]);
             //查询本人已对接的商品
             $duijie_list = GoodsModel::where('user_id',$this->user->id)->where('duijie_id','neq',0)->select();
+
             //循环判断$goodsList里的商品是否被上架
             foreach ($goodsList as $k => $v) {
                 $goodsList[$k]['duijie_status'] = 0;
+                $goodsList[$k]['duijie_name'] = '';
+                $goodsList[$k]['duijia_secmoney'] = 0;
                 foreach ($duijie_list as $ks => $vs) {
                     if($vs['duijie_id'] === $v['id']){
                         $goodsList[$k]['duijie_status'] = 1;
-                        $goodsList[$k]['duijie_name'] = $vs['duijie_name'];
-                        $goodsList[$k]['duijia_secmoney'] = $vs['duijia_secmoney'];
+                        $goodsList[$k]['duijie_name'] = $vs['name'];
+                        $goodsList[$k]['duijia_secmoney'] = $vs['price'];
                     }
                 }
             }
@@ -120,8 +123,8 @@ class GoodsDuijie extends Base
                 'cate_id' => $sjgoods['cate_id'],
                 'theme' => $sjgoods['theme'],
                 'sort' => input('sort/d', 0),
-                'name' => $sjgoods['name'],
-                'price' => $sjgoods['price'],
+                'name' => input('name/s', ''),
+                'price' => input('price/s', 0),
                 'cost_price' => $sjgoods['cost_price'],
                 'wholesale_discount' => $sjgoods['wholesale_discount'],
                 'wholesale_discount_list' => $sjgoods['wholesale_discount_list'],
@@ -142,8 +145,6 @@ class GoodsDuijie extends Base
                 'status' => 1,
                 'create_at' => $sjgoods['create_at'],
                 'duijie_id' => $sjgoods['id'],
-                'duijie_name' => input('name/s', ''),
-                'duijia_secmoney' => input('price/s', 0),
             ];
             // 字词检查
             $res = check_wordfilter($data['name']);
@@ -169,6 +170,9 @@ class GoodsDuijie extends Base
             if(input('price/s', 0) <= 0){
                 $this->error('代理商品必须加价');
             }
+            if(input('price/s', 0) < $sjgoods['price']){
+                $this->error('加价价格必须高于'.$sjgoods['price']);
+            }
             $res = $this->validate($data, 'Goods');
             if ($res !== true) {
                 $this->error($res);
@@ -177,7 +181,7 @@ class GoodsDuijie extends Base
             if ($res !== false) {
                 //创建成功，马上创建短链接
                 GoodsModel::makeLink($data['user_id'], $res->id);
-                MerchantLogService::write('添加代理商品成功', '添加代理商品成功，本商品ID:' . $res->id . ',名称:' . $res->duijie_name . ',加价价格:' . $res->duijia_secmoney . ',成本价:' . $res->price);
+                MerchantLogService::write('添加代理商品成功', '添加代理商品成功，本商品ID:' . $res->id . ',名称:' . $res->name . ',加价价格:' . $res->price . ',成本价:' . $sjgoods['price']);
                 $this->success('代理商品成功','myduijie');
             } else {
                 $this->error('添加失败！');

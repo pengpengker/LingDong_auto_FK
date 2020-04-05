@@ -318,7 +318,7 @@ class Shop extends Base
             }
             $cardsCount = $sjgoods->cards_stock_count;
             //金额
-            $price = round($sjgoods->price,3) + round($goods->duijia_secmoney,3);
+            $price = round($sjgoods->price,3) + round($goods->price,3);
             $stockStr = '库存' . $cardsCount . '张';
             $data = [
                 // 'gonggao'         =>'测试',
