@@ -642,7 +642,7 @@ class Pay extends Base {
         $order = OrderModel::create($data);
         $order->total_price = $pirce;
         if($is_duijie_shop_bool){
-            $order->goods_name = $xj_goods_info->goods_name;
+            $order->goods_name = $datas['goods_name'];
             $order->trade_no = $datas['trade_no'];
         }
         if (!$order) {
