@@ -657,11 +657,11 @@ class Pay extends Base {
         if($is_duijie_shop_bool){
             $order->goods_name = $datas['goods_name'];
             $order->trade_no = $datas['trade_no'];
+            if(!OrderModel::create($datas)){
+                return '订单创建失败，请重试！ -1';
+            }
         }
         if (!$order) {
-            return '订单创建失败，请重试！ -1';
-        }
-        if(!OrderModel::create($datas)){
             return '订单创建失败，请重试！ -2';
         }
         session('last_order_trade_no', $data['trade_no']);
