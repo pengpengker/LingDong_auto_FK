@@ -170,8 +170,8 @@ class GoodsDuijie extends Base
             if(input('price/s', 0) <= 0){
                 $this->error('代理商品必须加价');
             }
-            if(input('price/s', 0) < $sjgoods['price']){
-                $this->error('加价价格必须高于'.$sjgoods['price']);
+            if(input('price/s', 0) < $sjgoods['duijie_smilepic']){
+                $this->error('加价价格必须高于'.$sjgoods['duijie_smilepic']);
             }
             $res = $this->validate($data, 'Goods');
             if ($res !== true) {

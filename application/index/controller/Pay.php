@@ -276,31 +276,41 @@ class Pay extends Base {
         $this->assign('token', $token);
 
         ////////////////// 基础项 //////////////////
-
-        // 联系方式
-        $data['contact'] = input('contact/s', '');
-        if (empty($data['contact'])) {
-            return '请填写联系方式！';
-        }
-
+        //商品总结--支付传入
+        $pirce = 0;
         // 商家
         $user = UserModel::get(['id' => input('userid/d', 0), 'status' => 1]);
         if (!$user) {
             return '不存在该商家！';
         }
-        $data['user_id'] = $user->id;
-        // 单号
-        $data['trade_no']  = generate_trade_no('T', $data['user_id']);
-        $data['create_at'] = $_SERVER['REQUEST_TIME'];
-        $data['create_ip'] = $this->request->ip();
-
         ////////////////// 业务项 //////////////////
         $goods = GoodsModel::get(['id' => input('goodid/d', 0), 'user_id' => $user->id, 'status' => 1]);
         if (!$goods) {
             return '不存在该商品！';
         }
-        //从这里开始判断是否是对接的商品
-        //自己的商品
+        if(!empty($goods->duijie_id)){
+            //定义对接下级的商品和用户信息
+            $xj_goods_info = $goods;
+            $xj_users_info = $user;
+            $goods = GoodsModel::get(['id' => $goods->duijie_id, 'status' => 1]);
+            if (!$goods) {
+                return '对接商品不存在或下架';
+            }
+            if($xj_goods_info->price < $goods->duijie_smilepic){
+                $xj_goods_info->price = $goods->duijie_smilepic;
+            }
+            $user = UserModel::get(['id' => $goods->user_id, 'status' => 1]);
+            if (!$user) {
+                return '对接不存在该商家！';
+            }
+        }
+        // 联系方式
+        $data['contact'] = input('contact/s', '');
+        if (empty($data['contact'])) {
+            return '请填写联系方式！';
+        }
+        //订单商户id
+        $data['user_id'] = $user->id;
         // 商品ID
         $data['goods_id'] = $goods->id;
         // 商品名
@@ -388,7 +398,8 @@ class Pay extends Base {
         $data['total_price'] = $data['total_product_price'] + $data['sms_price'];
         // 总成本价
         $data['total_cost_price'] = round($data['goods_cost_price'] * $data['quantity'], 2);
-
+        //  订单金额定义
+        $pirce = $data['total_price'];
         // echo '<pre>';
         // var_export($data);
 
@@ -481,9 +492,132 @@ class Pay extends Base {
             $data['settlement_type'] = sysconf('settlement_type');
         }
 
+        //对接商户订单创建
+        if(!empty($xj_goods_info->duijie_id)){
+            $datas['contact'] = $data['contact'];
+            $datas['user_id'] = $xj_users_info->id;
+            // 单号
+            $datas['trade_no']  = $data['trade_no'];
+            $datas['create_at'] = $data['create_at'];
+            $datas['create_ip'] = $data['create_ip'];
+            // 商品ID
+            $datas['goods_id'] = $xj_goods_info->id;
+            // 商品名
+            $datas['goods_name'] = $xj_goods_info->name;
+            // 商品单价 总价格-上级价格
+            $datas['goods_price'] = $xj_goods_info->price;
+            // 成本价
+            $datas['goods_cost_price'] = $xj_goods_info->cost_price;
+            //商品数量
+            $datas['quantity'] = $data['quantity'];
+            // 售出通知
+            $datas['sold_notify'] = (int)$goods->sold_notify;
+            // 提卡密码
+            $datas['take_card_type'] = (int)$goods->take_card_type;
+            // 邮件通知
+            $datas['email_notify'] = $data['email_notify'];
+            $datas['email']        = $data['email'];
+            // 短信
+            $data['sms_notify'] = input('is_rev_sms/d', 0);
+            // 短信付费方
+            $data['sms_payer'] = $goods->sms_payer; // 0买家承担 1商户承担
+            // 短信费
+            $datas['sms_price'] = $data['sms_price'];
+            //清空上级短信费
+            $data['sms_price'] = 0;
+
+            ////////////////// 计算总价 //////////////////
+            // 商品总价（单价*数量）
+            $datas['total_product_price'] = round($datas['goods_price'] * $datas['quantity'], 2);
+            // 总价（商品总价+短信费）
+            $datas['total_price'] = $datas['total_product_price'] + $datas['sms_price'];
+            // 总成本价
+            $datas['total_cost_price'] = round($datas['goods_cost_price'] * $datas['quantity'], 2);
+
+            ////////////////// 支付下单项 //////////////////
+            // 支付渠道
+            $channel = ChannelModel::get(['id' => input('pid/d', 0), 'status' => 1]);
+            if (!$channel) {
+                return '该支付产品没有可用的支付渠道！';
+            }
+            //检查是否设置了分组费率
+            $rate_group_user = Db::name('rate_group_user')->where('user_id', $xj_users_info->id)->find();
+            if(!empty($rate_group_user)) {
+                $rate_group_rule = Db::name('rate_group_rule')
+                    ->where(['group_id' => $rate_group_user['group_id'], 'channel_id' => $channel->id, 'status' => 1])
+                    ->find();
+                if(empty($rate_group_rule)) {
+                    $this->assign('error', '该商户未启用此支付渠道！');
+                    return $this->fetch();
+                }
+            }
+            // 渠道账户
+            $accounts = $channel->accounts()->where(['channel_id' => $channel->id, 'status' => 1])->select();
+            if (empty($accounts)) {
+                $this->assign('error', '不存在支付渠道：' . $channel->title . '的账号！');
+                return $this->fetch();
+            }
+            $account = $accounts[0];
+            if (count($accounts) > 1) {
+                $account = $accounts[intval(floor(rand(0, count($accounts) - 1)))];
+            }
+            if (!$account) {
+                $this->assign('error', '不存在支付渠道：' . $channel->title . '的账号！');
+                return $this->fetch();
+            }
+            //银行支付
+            if (input('bankid') != '') {
+                $channel->bankid = input('bankid');
+            }
+            $datas['paytype']            = $channel->paytype;
+            $datas['channel_id']         = $channel->id;
+            $datas['channel_account_id'] = $account->id;
+            if (round($datas['total_price'], 2) < $smsPrice && $datas['sms_payer'] == 1 && $datas['sms_notify'] == 1) {
+                // 开启了短信通知，商家承担费用
+                $this->assign('error', '订单金额不足以扣除短信费');
+                return $this->fetch();
+            }
+            ////////////////// 费率结算项 //////////////////
+            // 手续费
+            $datas['rate'] = get_user_rate($xj_users_info->id, $channel->id);
+            $datas['fee']  = round($datas['rate'] * $datas['total_product_price'], 3);
+            if ($datas['fee'] < sysconf('transaction_min_fee')) {
+                $datas['fee'] = sysconf('transaction_min_fee');
+            }
+            $fee_payer = Db::name('user')->where('id', $datas['user_id'])->value('fee_payer');
+            if (0 == $fee_payer) {
+                // 获取系统配置
+                $fee_payer = sysconf('fee_payer');
+            }
+            $datas['fee_payer'] = $fee_payer;
+            //买家承担费率
+            if ($fee_payer == 2) {
+                $datas['total_price'] = bcadd($datas['total_price'], $datas['fee'], 4);
+            }
+            // 代理手续费
+            $datas['agent_rate'] = 0;
+            $datas['agent_fee']  = 0;
+            $datas['status']     = 0;
+            // 创建订单前的检查
+            // 检查商户余额是否足够抵扣短信费
+            if (($datas['sms_payer'] == 1) && ($datas['total_product_price'] < $datas['sms_price'])) {
+                if ($user->money < $datas['sms_price']) {
+                    return '商户余额不足以支付短信费用，请联系商家';
+                }
+            }
+            ////////////////// 费率结算项 //////////////////
+
+            // 获取当前商家的结算周期
+            $datas['settlement_type'] = $xj_users_info->settlement_type;
+            // 未指定结算周期，跟随系统的结算周期，默认是 T1
+            if ($datas['settlement_type'] == -1) {
+                $datas['settlement_type'] = sysconf('settlement_type');
+            }
+        }
+        halt($data);
         // 支付下单
         $PayAPI = PayAPI::load($channel, $account);
-        $res    = $PayAPI->order($data['trade_no'], '投诉QQ：' . sysconf('site_info_qq') . ' 订单：' . $data['trade_no'], round($data['total_price'], 2));
+        $res    = $PayAPI->order($data['trade_no'], '投诉QQ：' . sysconf('site_info_qq') . ' 订单：' . $data['trade_no'], round($pirce, 2));
         if ($res === false) {
             $this->assign('error', $PayAPI->getError());
             return $this->fetch();
