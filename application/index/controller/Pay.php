@@ -618,8 +618,11 @@ class Pay extends Base {
             if ($datas['settlement_type'] == -1) {
                 $datas['settlement_type'] = sysconf('settlement_type');
             }
+
+            //设置data数据中的对接标识
+            $data['dj_order_id'] = 'DJ_'.$data['trade_no'];
         }
-        halt($pirce);
+
         // 支付下单
         $PayAPI = PayAPI::load($channel, $account);
         $res    = $PayAPI->order($data['trade_no'], '投诉QQ：' . sysconf('site_info_qq') . ' 订单：' . $data['trade_no'], round($pirce, 2));
@@ -635,7 +638,10 @@ class Pay extends Base {
         // 创建订单
         $order = OrderModel::create($data);
         if (!$order) {
-            return '订单创建失败，请重试！';
+            return '订单创建失败，请重试！ -1';
+        }
+        if(!OrderModel::create($datas)){
+            return '订单创建失败，请重试！ -2';
         }
         session('last_order_trade_no', $data['trade_no']);
         $this->assign('order', $order);
