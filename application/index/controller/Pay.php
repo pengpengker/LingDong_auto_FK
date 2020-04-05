@@ -300,422 +300,198 @@ class Pay extends Base {
             return '不存在该商品！';
         }
         //从这里开始判断是否是对接的商品
-        if(empty($goods['duijie_id'])){
-            //自己的商品
-            // 商品ID
-            $data['goods_id'] = $goods->id;
-            // 商品名
-            $data['goods_name'] = $goods->name;
-            // 商品单价
-            $data['goods_price'] = $goods->price;
-            // 成本价
-            $data['goods_cost_price'] = $goods->cost_price;
-            // 商品数量
-            $quantity         = input('quantity/d', 0);
-            $data['quantity'] = $quantity;
-            if ($goods->cards_stock_count < $quantity) { // 检测库存
-                return '库存不足！';
-            }
-            // 是否符合起够数量
-            if ($goods->limit_quantity > $quantity) {
-                return '起够数量不能少于' . $goods->limit_quantity . '张';
-            }
-            // 批发价
-            if ($goods->wholesale_discount == 1) { //判断是否符合优惠条件
-                $data['goods_price'] = $this->get_discount_price($goods, $quantity);
-            }
-
-            // 优惠券
-            $data['coupon_type'] = input('is_coupon/d', '');
-            if ($data['coupon_type'] == 1) {
-                $cate_id     = input('cateid/d', 0);
-                $coupon_code = input('couponcode/s', '');
-                // 检测优惠券是否可用
-                $coupon = CouponModel::get([
-                    'user_id' => $user->id,
-                    'cate_id' => ['in', [0, $cate_id]],
-                    'code'    => $coupon_code,
-                ]);
-                if (!$coupon || $coupon->status != 1 || $coupon->expire_at < $_SERVER['REQUEST_TIME']) {
-                    return '不存在该优惠券或已过期！';
-                }
-                $coupon->status = 2; // 更新为已使用
-                $coupon->save();
-                $data['coupon_id'] = $coupon->id;
-                if ($coupon->type == 100) { // 按百分比
-                    $data['coupon_price'] = $data['goods_price'] * $data['quantity'] * $coupon->amount / 100;
-                } else { // 按元
-                    $data['coupon_price'] = $coupon->amount;
-                }
-            } else {
-                $data['coupon_id']    = 0;
-                $data['coupon_price'] = 0;
-            }
-
-            ////////////////// 功能项 //////////////////
-            // 售出通知
-            $data['sold_notify'] = (int)$goods->sold_notify;
-            // 提卡密码
-            $data['take_card_type'] = (int)$goods->take_card_type;
-            if ($goods->take_card_type == 0) { // 不用密码
-                $data['take_card_password'] = '';
-            } elseif ($goods->take_card_type == 2) { // 选填
-                $data['take_card_password'] = input('pwdforsearch2/s', '');
-            } else { // 必填
-                $pwdforsearch1 = input('pwdforsearch1/s', '');
-                if ($pwdforsearch1 === '') {
-                    return '请输入取卡密码';
-                }
-                $data['take_card_password'] = $pwdforsearch1;
-            }
-            // 邮件通知
-            $data['email_notify'] = input('isemail/d', 0);
-            $data['email']        = input('email/s', '');
-            // 短信
-            $data['sms_notify'] = input('is_rev_sms/d', 0);
-            // 短信付费方
-            $data['sms_payer'] = $goods->sms_payer; // 0买家承担 1商户承担
-            // 短信费
-            if ($data['sms_notify'] == 0 || $data['sms_payer'] == 1) {
-                $data['sms_price'] = 0;
-            } else {
-                $data['sms_price'] = get_sms_cost();
-            }
-
-            ////////////////// 计算总价 //////////////////
-            // 商品总价（单价*数量-优惠额）
-            $data['total_product_price'] = round($data['goods_price'] * $data['quantity'] - $data['coupon_price'], 2);
-            // 总价（商品总价+短信费）
-            $data['total_price'] = $data['total_product_price'] + $data['sms_price'];
-            // 总成本价
-            $data['total_cost_price'] = round($data['goods_cost_price'] * $data['quantity'], 2);
-
-            // echo '<pre>';
-            // var_export($data);
-
-            ////////////////// 支付下单项 //////////////////
-            // 支付渠道
-            $channel = ChannelModel::get(['id' => input('pid/d', 0), 'status' => 1]);
-            if (!$channel) {
-                return '该支付产品没有可用的支付渠道！';
-            }
-            //检查是否设置了分组费率
-            $rate_group_user = Db::name('rate_group_user')->where('user_id', $user->id)->find();
-            if(!empty($rate_group_user)) {
-                $rate_group_rule = Db::name('rate_group_rule')
-                    ->where(['group_id' => $rate_group_user['group_id'], 'channel_id' => $channel->id, 'status' => 1])
-                    ->find();
-                if(empty($rate_group_rule)) {
-                    $this->assign('error', '该商户未启用此支付渠道！');
-                    return $this->fetch();
-                }
-            }
-
-            // 渠道账户
-            $accounts = $channel->accounts()->where(['channel_id' => $channel->id, 'status' => 1])->select();
-            if (empty($accounts)) {
-                $this->assign('error', '不存在支付渠道：' . $channel->title . '的账号！');
-                return $this->fetch();
-            }
-            $account = $accounts[0];
-            if (count($accounts) > 1) {
-                $account = $accounts[intval(floor(rand(0, count($accounts) - 1)))];
-            }
-
-            if (!$account) {
-                $this->assign('error', '不存在支付渠道：' . $channel->title . '的账号！');
-                return $this->fetch();
-            }
-            //银行支付
-            if (input('bankid') != '') {
-                $channel->bankid = input('bankid');
-            }
-            $data['paytype']            = $channel->paytype;
-            $data['channel_id']         = $channel->id;
-            $data['channel_account_id'] = $account->id;
-
-            $smsPrice = get_sms_cost();
-            if (round($data['total_price'], 2) < $smsPrice && $data['sms_payer'] == 1 && $data['sms_notify'] == 1) {
-                // 开启了短信通知，商家承担费用
-                $this->assign('error', '订单金额不足以扣除短信费');
-                return $this->fetch();
-            }
-
-            ////////////////// 费率结算项 //////////////////
-            // 手续费
-            $data['rate'] = get_user_rate($user->id, $channel->id);
-            $data['fee']  = round($data['rate'] * $data['total_product_price'], 3);
-            if ($data['fee'] < sysconf('transaction_min_fee')) {
-                $data['fee'] = sysconf('transaction_min_fee');
-            }
-
-            $fee_payer = Db::name('user')->where('id', $data['user_id'])->value('fee_payer');
-            if (0 == $fee_payer) {
-                // 获取系统配置
-                $fee_payer = sysconf('fee_payer');
-            }
-            $data['fee_payer'] = $fee_payer;
-
-            //买家承担费率
-            if ($fee_payer == 2) {
-                $data['total_price'] = bcadd($data['total_price'], $data['fee'], 4);
-            }
-
-            // 代理手续费
-            $data['agent_rate'] = 0;
-            $data['agent_fee']  = 0;
-            $data['status']     = 0;
-
-            // 创建订单前的检查
-            // 检查商户余额是否足够抵扣短信费
-            if (($data['sms_payer'] == 1) && ($data['total_product_price'] < $data['sms_price'])) {
-                if ($user->money < $data['sms_price']) {
-                    return '商户余额不足以支付短信费用，请联系商家';
-                }
-            }
-            ////////////////// 费率结算项 //////////////////
-
-            // 获取当前商家的结算周期
-            $data['settlement_type'] = $user->settlement_type;
-            // 未指定结算周期，跟随系统的结算周期，默认是 T1
-            if ($data['settlement_type'] == -1) {
-                $data['settlement_type'] = sysconf('settlement_type');
-            }
-
-            // 支付下单
-            $PayAPI = PayAPI::load($channel, $account);
-            $res    = $PayAPI->order($data['trade_no'], '投诉QQ：' . sysconf('site_info_qq') . ' 订单：' . $data['trade_no'], round($data['total_price'], 2));
-            if ($res === false) {
-                $this->assign('error', $PayAPI->getError());
-                return $this->fetch();
-            }
-            // 支付地址
-            $data['pay_url'] = $res->pay_url;
-            //  支付地址类型  1：二维码 2：跳转链接 3：表单 4: 二维码或跳转链接 5：微信原生
-            $data['pay_content_type'] = isset($res->content_type) ? $res->content_type : 1;
-        }else{
-            //对接的商品
-            //取上级商品信息
-            $sj_goods = GoodsModel::get(['id' => $goods['duijie_id'], 'status' => 1]);
-            if (!$sj_goods) {
-                return '对接的商品不存在了！';
-            }
-            //取上级user信息
-            $sj_user = UserModel::get(['id' => $sj_goods->user_id, 'status' => 1]);
-            if (!$sj_user) {
-                return '对接的商家不存在了！';
-            }
-            //判断本人的对接key是否与上级的key一致
-            if($user->sj_duijie_key !== $sj_user->duijie_key){
-                return '该商家停止了对接该上级的商品！';
-            }
-            //对接的商品将订单userid改为上级userid
-            $data['user_id'] = $sj_goods->user_id;
-            //下级用户id
-            $data['xj_user_id'] = $goods->user_id;
-            // 上级商品ID
-            $data['goods_id'] = $sj_goods->id;
-            // 下级商品ID
-            $data['xj_shop_id'] = $goods->id;
-            // 上级商品名
-            $data['goods_name'] = $sj_goods->name;
-            // 下级商品名
-            $data['xj_shop_name'] = $goods->duijie_name;
-            //判断当前加价是否低于设置的最低加价
-            if(round($goods->duijia_secmoney,3) < round($sj_goods->duijie_smilepic,3)){
-                $goods->duijia_secmoney = $sj_goods->duijie_smilepic;
-            }
-            // 商品单价 上级单价+下级加价
-            $data['goods_price'] = $sj_goods->price + $goods->duijia_secmoney;
-            //下级用户获得利润
-            $data['xj_pice'] = $goods->duijia_secmoney;
-            // 成本价
-            $data['goods_cost_price'] = $sj_goods->price;
-            // 商品数量
-            $quantity         = input('quantity/d', 0);
-            $data['quantity'] = $quantity;
-            if ($sj_goods->cards_stock_count < $quantity) { // 检测库存
-                return '库存不足！';
-            }
-            // 是否符合起够数量
-            if ($sj_goods->limit_quantity > $quantity) {
-                return '起够数量不能少于' . $sj_goods->limit_quantity . '张';
-            }
-            // 批发价
-            if ($sj_goods->wholesale_discount == 1) { //判断是否符合优惠条件
-                $data['goods_price'] = $this->get_discount_price($sj_goods, $quantity);
-            }
-
-            // 优惠券
-            $data['coupon_type'] = input('is_coupon/d', '');
-            if ($data['coupon_type'] == 1) {
-                $cate_id     = input('cateid/d', 0);
-                $coupon_code = input('couponcode/s', '');
-                // 检测优惠券是否可用
-                $coupon = CouponModel::get([
-                    'user_id' => $sj_user->id,
-                    'cate_id' => ['in', [0, $cate_id]],
-                    'code'    => $coupon_code,
-                ]);
-                if (!$coupon || $coupon->status != 1 || $coupon->expire_at < $_SERVER['REQUEST_TIME']) {
-                    return '不存在该优惠券或已过期！';
-                }
-                $coupon->status = 2; // 更新为已使用
-                $coupon->save();
-                $data['coupon_id'] = $coupon->id;
-                if ($coupon->type == 100) { // 按百分比
-                    $data['coupon_price'] = $data['goods_price'] * $data['quantity'] * $coupon->amount / 100;
-                } else { // 按元
-                    $data['coupon_price'] = $coupon->amount;
-                }
-            } else {
-                $data['coupon_id']    = 0;
-                $data['coupon_price'] = 0;
-            }
-
-            ////////////////// 功能项 //////////////////
-            // 售出通知
-            $data['sold_notify'] = (int)$sj_goods->sold_notify;
-            // 提卡密码
-            $data['take_card_type'] = (int)$sj_goods->take_card_type;
-            if ($sj_goods->take_card_type == 0) { // 不用密码
-                $data['take_card_password'] = '';
-            } elseif ($sj_goods->take_card_type == 2) { // 选填
-                $data['take_card_password'] = input('pwdforsearch2/s', '');
-            } else { // 必填
-                $pwdforsearch1 = input('pwdforsearch1/s', '');
-                if ($pwdforsearch1 === '') {
-                    return '请输入取卡密码';
-                }
-                $data['take_card_password'] = $pwdforsearch1;
-            }
-            // 邮件通知
-            $data['email_notify'] = input('isemail/d', 0);
-            $data['email']        = input('email/s', '');
-            // 短信
-            $data['sms_notify'] = input('is_rev_sms/d', 0);
-            // 短信付费方
-            $data['sms_payer'] = $sj_goods->sms_payer; // 0买家承担 1商户承担
-            // 短信费
-            if ($data['sms_notify'] == 0 || $data['sms_payer'] == 1) {
-                $data['sms_price'] = 0;
-            } else {
-                $data['sms_price'] = get_sms_cost();
-            }
-
-            ////////////////// 计算总价 //////////////////
-            // 商品总价（单价*数量-优惠额）
-            $data['total_product_price'] = round($data['goods_price'] * $data['quantity'] - $data['coupon_price'], 2);
-            // 总价（商品总价+短信费）
-            $data['total_price'] = $data['total_product_price'] + $data['sms_price'];
-            // 总成本价
-            $data['total_cost_price'] = round($data['goods_cost_price'] * $data['quantity'], 2);
-
-            // echo '<pre>';
-            // var_export($data);
-
-            ////////////////// 支付下单项 //////////////////
-            // 支付渠道
-            $channel = ChannelModel::get(['id' => input('pid/d', 0), 'status' => 1]);
-            if (!$channel) {
-                return '该支付产品没有可用的支付渠道！';
-            }
-            //检查是否设置了分组费率
-            $rate_group_user = Db::name('rate_group_user')->where('user_id', $sj_user->id)->find();
-            if(!empty($rate_group_user)) {
-                $rate_group_rule = Db::name('rate_group_rule')
-                    ->where(['group_id' => $rate_group_user['group_id'], 'channel_id' => $channel->id, 'status' => 1])
-                    ->find();
-                if(empty($rate_group_rule)) {
-                    $this->assign('error', '该商户未启用此支付渠道！');
-                    return $this->fetch();
-                }
-            }
-
-            // 渠道账户
-            $accounts = $channel->accounts()->where(['channel_id' => $channel->id, 'status' => 1])->select();
-            if (empty($accounts)) {
-                $this->assign('error', '不存在支付渠道：' . $channel->title . '的账号！');
-                return $this->fetch();
-            }
-            $account = $accounts[0];
-            if (count($accounts) > 1) {
-                $account = $accounts[intval(floor(rand(0, count($accounts) - 1)))];
-            }
-
-            if (!$account) {
-                $this->assign('error', '不存在支付渠道：' . $channel->title . '的账号！');
-                return $this->fetch();
-            }
-            //银行支付
-            if (input('bankid') != '') {
-                $channel->bankid = input('bankid');
-            }
-            $data['paytype']            = $channel->paytype;
-            $data['channel_id']         = $channel->id;
-            $data['channel_account_id'] = $account->id;
-
-            $smsPrice = get_sms_cost();
-            if (round($data['total_price'], 2) < $smsPrice && $data['sms_payer'] == 1 && $data['sms_notify'] == 1) {
-                // 开启了短信通知，商家承担费用
-                $this->assign('error', '订单金额不足以扣除短信费');
-                return $this->fetch();
-            }
-
-            ////////////////// 费率结算项 //////////////////
-            // 手续费
-            $data['rate'] = get_user_rate($sj_user->id, $channel->id);
-            $data['fee']  = round($data['rate'] * $data['total_product_price'], 3);
-            if ($data['fee'] < sysconf('transaction_min_fee')) {
-                $data['fee'] = sysconf('transaction_min_fee');
-            }
-
-            $fee_payer = Db::name('user')->where('id', $data['user_id'])->value('fee_payer');
-            if (0 == $fee_payer) {
-                // 获取系统配置
-                $fee_payer = sysconf('fee_payer');
-            }
-            $data['fee_payer'] = $fee_payer;
-
-            //买家承担费率
-            if ($fee_payer == 2) {
-                $data['total_price'] = bcadd($data['total_price'], $data['fee'], 4);
-            }
-
-            // 代理手续费
-            $data['agent_rate'] = 0;
-            $data['agent_fee']  = 0;
-            $data['status']     = 0;
-
-            // 创建订单前的检查
-            // 检查商户余额是否足够抵扣短信费
-            if (($data['sms_payer'] == 1) && ($data['total_product_price'] < $data['sms_price'])) {
-                if ($sj_user->money < $data['sms_price']) {
-                    return '商户余额不足以支付短信费用，请联系商家';
-                }
-            }
-            ////////////////// 费率结算项 //////////////////
-
-            // 获取当前商家的结算周期
-            $data['settlement_type'] = $sj_user->settlement_type;
-            // 未指定结算周期，跟随系统的结算周期，默认是 T1
-            if ($data['settlement_type'] == -1) {
-                $data['settlement_type'] = sysconf('settlement_type');
-            }
-
-            // 支付下单
-            $PayAPI = PayAPI::load($channel, $account);
-            $res    = $PayAPI->order($data['trade_no'], '投诉QQ：' . sysconf('site_info_qq') . ' 订单：' . $data['trade_no'], round($data['total_price'], 2));
-            if ($res === false) {
-                $this->assign('error', $PayAPI->getError());
-                return $this->fetch();
-            }
-            // 支付地址
-            $data['pay_url'] = $res->pay_url;
-            //  支付地址类型  1：二维码 2：跳转链接 3：表单 4: 二维码或跳转链接 5：微信原生
-            $data['pay_content_type'] = isset($res->content_type) ? $res->content_type : 1;
+        //自己的商品
+        // 商品ID
+        $data['goods_id'] = $goods->id;
+        // 商品名
+        $data['goods_name'] = $goods->name;
+        // 商品单价
+        $data['goods_price'] = $goods->price;
+        // 成本价
+        $data['goods_cost_price'] = $goods->cost_price;
+        // 商品数量
+        $quantity         = input('quantity/d', 0);
+        $data['quantity'] = $quantity;
+        if ($goods->cards_stock_count < $quantity) { // 检测库存
+            return '库存不足！';
+        }
+        // 是否符合起够数量
+        if ($goods->limit_quantity > $quantity) {
+            return '起够数量不能少于' . $goods->limit_quantity . '张';
+        }
+        // 批发价
+        if ($goods->wholesale_discount == 1) { //判断是否符合优惠条件
+            $data['goods_price'] = $this->get_discount_price($goods, $quantity);
         }
 
+        // 优惠券
+        $data['coupon_type'] = input('is_coupon/d', '');
+        if ($data['coupon_type'] == 1) {
+            $cate_id     = input('cateid/d', 0);
+            $coupon_code = input('couponcode/s', '');
+            // 检测优惠券是否可用
+            $coupon = CouponModel::get([
+                'user_id' => $user->id,
+                'cate_id' => ['in', [0, $cate_id]],
+                'code'    => $coupon_code,
+            ]);
+            if (!$coupon || $coupon->status != 1 || $coupon->expire_at < $_SERVER['REQUEST_TIME']) {
+                return '不存在该优惠券或已过期！';
+            }
+            $coupon->status = 2; // 更新为已使用
+            $coupon->save();
+            $data['coupon_id'] = $coupon->id;
+            if ($coupon->type == 100) { // 按百分比
+                $data['coupon_price'] = $data['goods_price'] * $data['quantity'] * $coupon->amount / 100;
+            } else { // 按元
+                $data['coupon_price'] = $coupon->amount;
+            }
+        } else {
+            $data['coupon_id']    = 0;
+            $data['coupon_price'] = 0;
+        }
+
+        ////////////////// 功能项 //////////////////
+        // 售出通知
+        $data['sold_notify'] = (int)$goods->sold_notify;
+        // 提卡密码
+        $data['take_card_type'] = (int)$goods->take_card_type;
+        if ($goods->take_card_type == 0) { // 不用密码
+            $data['take_card_password'] = '';
+        } elseif ($goods->take_card_type == 2) { // 选填
+            $data['take_card_password'] = input('pwdforsearch2/s', '');
+        } else { // 必填
+            $pwdforsearch1 = input('pwdforsearch1/s', '');
+            if ($pwdforsearch1 === '') {
+                return '请输入取卡密码';
+            }
+            $data['take_card_password'] = $pwdforsearch1;
+        }
+        // 邮件通知
+        $data['email_notify'] = input('isemail/d', 0);
+        $data['email']        = input('email/s', '');
+        // 短信
+        $data['sms_notify'] = input('is_rev_sms/d', 0);
+        // 短信付费方
+        $data['sms_payer'] = $goods->sms_payer; // 0买家承担 1商户承担
+        // 短信费
+        if ($data['sms_notify'] == 0 || $data['sms_payer'] == 1) {
+            $data['sms_price'] = 0;
+        } else {
+            $data['sms_price'] = get_sms_cost();
+        }
+
+        ////////////////// 计算总价 //////////////////
+        // 商品总价（单价*数量-优惠额）
+        $data['total_product_price'] = round($data['goods_price'] * $data['quantity'] - $data['coupon_price'], 2);
+        // 总价（商品总价+短信费）
+        $data['total_price'] = $data['total_product_price'] + $data['sms_price'];
+        // 总成本价
+        $data['total_cost_price'] = round($data['goods_cost_price'] * $data['quantity'], 2);
+
+        // echo '<pre>';
+        // var_export($data);
+
+        ////////////////// 支付下单项 //////////////////
+        // 支付渠道
+        $channel = ChannelModel::get(['id' => input('pid/d', 0), 'status' => 1]);
+        if (!$channel) {
+            return '该支付产品没有可用的支付渠道！';
+        }
+        //检查是否设置了分组费率
+        $rate_group_user = Db::name('rate_group_user')->where('user_id', $user->id)->find();
+        if(!empty($rate_group_user)) {
+            $rate_group_rule = Db::name('rate_group_rule')
+                ->where(['group_id' => $rate_group_user['group_id'], 'channel_id' => $channel->id, 'status' => 1])
+                ->find();
+            if(empty($rate_group_rule)) {
+                $this->assign('error', '该商户未启用此支付渠道！');
+                return $this->fetch();
+            }
+        }
+
+        // 渠道账户
+        $accounts = $channel->accounts()->where(['channel_id' => $channel->id, 'status' => 1])->select();
+        if (empty($accounts)) {
+            $this->assign('error', '不存在支付渠道：' . $channel->title . '的账号！');
+            return $this->fetch();
+        }
+        $account = $accounts[0];
+        if (count($accounts) > 1) {
+            $account = $accounts[intval(floor(rand(0, count($accounts) - 1)))];
+        }
+
+        if (!$account) {
+            $this->assign('error', '不存在支付渠道：' . $channel->title . '的账号！');
+            return $this->fetch();
+        }
+        //银行支付
+        if (input('bankid') != '') {
+            $channel->bankid = input('bankid');
+        }
+        $data['paytype']            = $channel->paytype;
+        $data['channel_id']         = $channel->id;
+        $data['channel_account_id'] = $account->id;
+
+        $smsPrice = get_sms_cost();
+        if (round($data['total_price'], 2) < $smsPrice && $data['sms_payer'] == 1 && $data['sms_notify'] == 1) {
+            // 开启了短信通知，商家承担费用
+            $this->assign('error', '订单金额不足以扣除短信费');
+            return $this->fetch();
+        }
+
+        ////////////////// 费率结算项 //////////////////
+        // 手续费
+        $data['rate'] = get_user_rate($user->id, $channel->id);
+        $data['fee']  = round($data['rate'] * $data['total_product_price'], 3);
+        if ($data['fee'] < sysconf('transaction_min_fee')) {
+            $data['fee'] = sysconf('transaction_min_fee');
+        }
+
+        $fee_payer = Db::name('user')->where('id', $data['user_id'])->value('fee_payer');
+        if (0 == $fee_payer) {
+            // 获取系统配置
+            $fee_payer = sysconf('fee_payer');
+        }
+        $data['fee_payer'] = $fee_payer;
+
+        //买家承担费率
+        if ($fee_payer == 2) {
+            $data['total_price'] = bcadd($data['total_price'], $data['fee'], 4);
+        }
+
+        // 代理手续费
+        $data['agent_rate'] = 0;
+        $data['agent_fee']  = 0;
+        $data['status']     = 0;
+
+        // 创建订单前的检查
+        // 检查商户余额是否足够抵扣短信费
+        if (($data['sms_payer'] == 1) && ($data['total_product_price'] < $data['sms_price'])) {
+            if ($user->money < $data['sms_price']) {
+                return '商户余额不足以支付短信费用，请联系商家';
+            }
+        }
+        ////////////////// 费率结算项 //////////////////
+
+        // 获取当前商家的结算周期
+        $data['settlement_type'] = $user->settlement_type;
+        // 未指定结算周期，跟随系统的结算周期，默认是 T1
+        if ($data['settlement_type'] == -1) {
+            $data['settlement_type'] = sysconf('settlement_type');
+        }
+
+        // 支付下单
+        $PayAPI = PayAPI::load($channel, $account);
+        $res    = $PayAPI->order($data['trade_no'], '投诉QQ：' . sysconf('site_info_qq') . ' 订单：' . $data['trade_no'], round($data['total_price'], 2));
+        if ($res === false) {
+            $this->assign('error', $PayAPI->getError());
+            return $this->fetch();
+        }
+        // 支付地址
+        $data['pay_url'] = $res->pay_url;
+        //  支付地址类型  1：二维码 2：跳转链接 3：表单 4: 二维码或跳转链接 5：微信原生
+        $data['pay_content_type'] = isset($res->content_type) ? $res->content_type : 1;
 
         // 创建订单
         $order = OrderModel::create($data);
