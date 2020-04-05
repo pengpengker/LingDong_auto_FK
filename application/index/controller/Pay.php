@@ -276,6 +276,8 @@ class Pay extends Base {
         $this->assign('token', $token);
 
         ////////////////// 基础项 //////////////////
+        //是否对接
+        $is_duijie_shop_bool = false;
         //商品总结--支付传入
         $pirce = 0;
         // 商家
@@ -289,6 +291,7 @@ class Pay extends Base {
             return '不存在该商品！';
         }
         if(!empty($goods->duijie_id)){
+            $is_duijie_shop_bool = true;
             //定义对接下级的商品和用户信息
             $xj_goods_info = $goods;
             $xj_users_info = $user;
@@ -497,7 +500,7 @@ class Pay extends Base {
         }
 
         //对接商户订单创建
-        if(!empty($xj_goods_info->duijie_id)){
+        if($is_duijie_shop_bool){
             $datas['contact'] = $data['contact'];
             $datas['user_id'] = $xj_users_info->id;
             // 单号
@@ -620,7 +623,7 @@ class Pay extends Base {
             }
 
             //设置data数据中的对接标识
-            $data['dj_order_id'] = 'DJ_'.$data['trade_no'];
+            $data['dj_order_id'] = 'D'.$data['trade_no'];
         }
 
         // 支付下单
@@ -638,6 +641,10 @@ class Pay extends Base {
         // 创建订单
         $order = OrderModel::create($data);
         $order->total_price = $pirce;
+        if($is_duijie_shop_bool){
+            $order->goods_name = $xj_goods_info->goods_name;
+            $order->trade_no = $datas['trade_no'];
+        }
         if (!$order) {
             return '订单创建失败，请重试！ -1';
         }
