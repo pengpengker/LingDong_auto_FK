@@ -625,21 +625,26 @@ class Pay extends Base {
             //设置data数据中的对接标识
             $data['dj_order_id'] = 'D'.$data['trade_no'];
         }
-
-        // 支付下单
-        $PayAPI = PayAPI::load($channel, $account);
-        $res    = $PayAPI->order($datas['trade_no'], '投诉QQ：' . sysconf('site_info_qq') . ' 订单：' . $datas['trade_no'], round($pirce, 2));
-        if ($res === false) {
-            $this->assign('error', $PayAPI->getError());
-            return $this->fetch();
-        }
-
         if($is_duijie_shop_bool){
+            // 支付下单
+            $PayAPI = PayAPI::load($channel, $account);
+            $res    = $PayAPI->order($datas['trade_no'], '投诉QQ：' . sysconf('site_info_qq') . ' 订单：' . $datas['trade_no'], round($pirce, 2));
+            if ($res === false) {
+                $this->assign('error', $PayAPI->getError());
+                return $this->fetch();
+            }
             // 支付地址
             $datas['pay_url'] = $res->pay_url;
             //  支付地址类型  1：二维码 2：跳转链接 3：表单 4: 二维码或跳转链接 5：微信原生
             $datas['pay_content_type'] = isset($res->content_type) ? $res->content_type : 1;
         }else{
+            // 支付下单
+            $PayAPI = PayAPI::load($channel, $account);
+            $res    = $PayAPI->order($data['trade_no'], '投诉QQ：' . sysconf('site_info_qq') . ' 订单：' . $data['trade_no'], round($pirce, 2));
+            if ($res === false) {
+                $this->assign('error', $PayAPI->getError());
+                return $this->fetch();
+            }
             // 支付地址
             $data['pay_url'] = $res->pay_url;
             //  支付地址类型  1：二维码 2：跳转链接 3：表单 4: 二维码或跳转链接 5：微信原生
