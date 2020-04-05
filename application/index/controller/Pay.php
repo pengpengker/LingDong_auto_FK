@@ -313,6 +313,8 @@ class Pay extends Base {
         $data['user_id'] = $user->id;
         // 单号
         $data['trade_no']  = generate_trade_no('T', $data['user_id']);
+        $data['create_at'] = $_SERVER['REQUEST_TIME'];
+        $data['create_ip'] = $this->request->ip();
         // 商品ID
         $data['goods_id'] = $goods->id;
         // 商品名
