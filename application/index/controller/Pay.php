@@ -504,7 +504,7 @@ class Pay extends Base {
             $datas['contact'] = $data['contact'];
             $datas['user_id'] = $xj_users_info->id;
             // 单号
-            $datas['trade_no']  = 'DJ_'.$data['trade_no'];
+            $datas['trade_no']  = 'D'.$data['trade_no'];
             $datas['create_at'] = $data['create_at'];
             $datas['create_ip'] = $data['create_ip'];
             // 商品ID
