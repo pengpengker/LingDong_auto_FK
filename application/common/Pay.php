@@ -154,6 +154,7 @@ class Pay {
 
             Db::commit();
 
+            //售出通知
             $notify = new Sell();
             $notify->notify($order, $freezeMoney);
         } catch (\Exception $e) {
