@@ -12,11 +12,11 @@ return [
     // 服务器地址
     'hostname'        => '127.0.0.1',
     // 数据库名
-    'database'        => 'faka.com',
+    'database'        => 'qs_yongchuntd_co',
     // 数据库用户名
-    'username'        => 'faka123',
+    'username'        => 'qs_yongchuntd_co',
     // 数据库密码
-    'password'        => 'faka123',
+    'password'        => 'BMzXB4cbf5B4Bahf',
     // 数据库连接端口
     'hostport'        => '',
     // 数据库连接参数
