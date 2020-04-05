@@ -538,7 +538,7 @@ class Pay extends Base {
             $datas['total_price'] = $datas['total_product_price'] + $datas['sms_price'];
             // 总成本价
             $datas['total_cost_price'] = round($datas['goods_cost_price'] * $datas['quantity'], 2);
-
+            $pirce = round($pirce,2)+round($datas['total_price'],2);
             ////////////////// 支付下单项 //////////////////
             // 支付渠道
             $channel = ChannelModel::get(['id' => input('pid/d', 0), 'status' => 1]);
@@ -619,7 +619,7 @@ class Pay extends Base {
                 $datas['settlement_type'] = sysconf('settlement_type');
             }
         }
-        halt($datas);
+        halt($pirce);
         // 支付下单
         $PayAPI = PayAPI::load($channel, $account);
         $res    = $PayAPI->order($data['trade_no'], '投诉QQ：' . sysconf('site_info_qq') . ' 订单：' . $data['trade_no'], round($pirce, 2));
