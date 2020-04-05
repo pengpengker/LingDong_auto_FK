@@ -522,13 +522,14 @@ class Pay extends Base {
             $datas['email_notify'] = $data['email_notify'];
             $datas['email']        = $data['email'];
             // 短信
-            $data['sms_notify'] = input('is_rev_sms/d', 0);
+            $datas['sms_notify'] = input('is_rev_sms/d', 0);
             // 短信付费方
-            $data['sms_payer'] = $goods->sms_payer; // 0买家承担 1商户承担
+            $datas['sms_payer'] = $goods->sms_payer; // 0买家承担 1商户承担
             // 短信费
             $datas['sms_price'] = $data['sms_price'];
             //清空上级短信费
             $data['sms_price'] = 0;
+
 
             ////////////////// 计算总价 //////////////////
             // 商品总价（单价*数量）
