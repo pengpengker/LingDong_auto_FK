@@ -170,6 +170,7 @@ class Pay {
         if(!empty($order->dj_order_id)){
             $sj_order = Order::get(['trade_no' => $order->dj_order_id]);
             if($sj_order){
+                $sj_order->transaction_id = $order->transaction_id;
                 $this->completeOrder($sj_order);
             }
         }

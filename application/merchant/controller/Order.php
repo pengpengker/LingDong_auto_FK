@@ -270,12 +270,12 @@ class Order extends Base
         }
         $order=OrderModel::get(['user_id'=>$this->user->id,'id'=>$id]);
         if(!$order){
-            $this->error('不存在该订单！');
+            $this->error('不存在该订单！ -1');
         }
         if(!empty($order->dj_order_id)){
             $order=OrderModel::get(['id'=>$order->dj_order_id]);
             if(!$order){
-                $this->error('不存在该订单！');
+                $this->error('不存在该订单！ -2');
             }
         }
         $card = OrderCardMoel::where(['order_id'=>$id])->select();
