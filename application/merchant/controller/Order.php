@@ -277,6 +277,7 @@ class Order extends Base
             if(!$order){
                 $this->error('不存在该订单！ -2');
             }
+            $id = $order->id;
         }
         $card = OrderCardMoel::where(['order_id'=>$id])->select();
         if(empty($card)) {
