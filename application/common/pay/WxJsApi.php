@@ -32,11 +32,12 @@ class WxJsApi extends Pay{
     public function order($outTradeNo,$subject,$totalAmount)
     {
         if (strpos(@$_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false) {
-            halt('Jsapi');
+            $pay_type = 'JSAPI';
+            halt(GetOpenid());
         }else{
-            halt('WechatScan');
-
+            $pay_type = 'MWEB';
         }
+
         $params = [
             'body' => $subject,
             'out_trade_no' => $outTradeNo,
