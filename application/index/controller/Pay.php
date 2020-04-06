@@ -504,7 +504,7 @@ class Pay extends Base {
             $datas['contact'] = $data['contact'];
             $datas['user_id'] = $xj_users_info->id;
             // 单号
-            $datas['trade_no']  = 'D'.$data['trade_no'];
+            $datas['trade_no']  = generate_trade_no('T', $datas['user_id']);
             $datas['create_at'] = $data['create_at'];
             $datas['create_ip'] = $data['create_ip'];
             // 商品ID
@@ -623,7 +623,7 @@ class Pay extends Base {
             }
 
             //设置data数据中的对接标识
-            $data['dj_order_id'] = 'D'.$data['trade_no'];
+            $datas['dj_order_id'] = $data['trade_no'];
         }
         if($is_duijie_shop_bool){
             // 支付下单
@@ -664,7 +664,11 @@ class Pay extends Base {
         if (!$order) {
             return '订单创建失败，请重试！ -2';
         }
-        session('last_order_trade_no', $data['trade_no']);
+        if($is_duijie_shop_bool){
+            session('last_order_trade_no', $datas['trade_no']);
+        }else{
+            session('last_order_trade_no', $data['trade_no']);
+        }
         $this->assign('order', $order);
         $this->assign('channel', $channel);
         $this->assign('isMobile', $this->request->isMobile());

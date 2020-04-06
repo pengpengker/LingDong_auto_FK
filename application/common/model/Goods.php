@@ -165,6 +165,25 @@ class Goods extends Model
             ]);
         }
 
+        //订单为对接商品，获取卡密获取上级卡密
+        if(!empty($order->dj_order_id)){
+            $order = Order::get(['trade_no' => $order->dj_order_id]);
+            if (!$order) {
+                return json([
+                    'msg' => '订单不存在!',
+                    'quantity' => 0,
+                    'status' => 0,
+                ]);
+            }
+            if ($order->status == 0) {
+                return json([
+                    'msg' => '订单未付款，请重新支付，或联系客服处理！',
+                    'quantity' => 0,
+                    'status' => 0,
+                ]);
+            }
+        }
+
         // 获取商品
         $goods = $order->goods;
 

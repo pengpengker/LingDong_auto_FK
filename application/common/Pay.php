@@ -5,6 +5,7 @@
 
 namespace app\common;
 
+use app\common\model\Order;
 use app\common\util\notify\Sell;
 use think\Db;
 use think\Exception;
@@ -164,6 +165,15 @@ class Pay {
             record_file_log('complete_error', $e->getTraceAsString());
             die('error');
         }
+
+        //判断是否为对接商品
+        if(!empty($order->dj_order_id)){
+            $sj_order = Order::get(['trade_no' => $order->dj_order_id]);
+            if($sj_order){
+                $this->completeOrder($sj_order);
+            }
+        }
+
 
         // 自动检测开启自动提现
         //自动提现功能改版，每天触发一次
