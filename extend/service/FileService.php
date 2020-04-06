@@ -171,6 +171,7 @@ class FileService
                 $auth = new Auth(sysconf('storage_qiniu_access_key'), sysconf('storage_qiniu_secret_key'));
                 $bucketMgr = new BucketManager($auth);
                 list($ret, $err) = $bucketMgr->stat(sysconf('storage_qiniu_bucket'), $filename);
+                halt($ret);
                 return $err === null;
             case 'oss':
                 $ossClient = new OssClient(sysconf('storage_oss_keyid'), sysconf('storage_oss_secret'), self::getBaseUriOss(), true);
