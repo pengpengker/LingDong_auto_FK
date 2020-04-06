@@ -1197,6 +1197,7 @@ function upload($name = 'file') {
         // 文件上传处理
         if (($info = $file->move('static' . DS . 'upload' . DS . $md5[0], $md5[1], true))) {
             $site_url = FileService::getFileUrl($filename, 'local');
+            halt($site_url);
             if ($site_url) {
                 return ['site_url' => $site_url, 'code' => 'SUCCESS', 'msg' => '文件上传成功'];
             } else {
