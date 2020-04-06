@@ -31,7 +31,12 @@ class WxJsApi extends Pay{
      */
     public function order($outTradeNo,$subject,$totalAmount)
     {
-        halt($this->account);
+        if (strpos(@$_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false) {
+            halt('Jsapi');
+        }else{
+            halt('WechatScan');
+
+        }
         $params = [
             'body' => $subject,
             'out_trade_no' => $outTradeNo,
