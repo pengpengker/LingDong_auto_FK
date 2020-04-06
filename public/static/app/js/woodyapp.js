@@ -192,7 +192,10 @@ $(function () {
         "/shop/shop/popNotice",
         {userid: userid},
         function (res) {
-            var notice = $("#notice").val();
+            var notice = $("#notice").text();
+            if(notice === null){
+                notice = '';
+            }
             if (res.code == 200 && notice != "") {
                 layer.open({
                     title: "商家公告",
