@@ -164,15 +164,13 @@ class FileService
      */
     public static function hasFile($filename, $storage = null)
     {
-        halt(empty($storage) ? sysconf('storage_type') : $storage);
         switch (empty($storage) ? sysconf('storage_type') : $storage) {
             case 'local':
-                return file_exists(ROOT_PATH . 'static/upload/' . $filename);
+                return file_exists(ROOT_PATH . '/public/static/upload/' . $filename);
             case 'qiniu':
                 $auth = new Auth(sysconf('storage_qiniu_access_key'), sysconf('storage_qiniu_secret_key'));
                 $bucketMgr = new BucketManager($auth);
                 list($ret, $err) = $bucketMgr->stat(sysconf('storage_qiniu_bucket'), $filename);
-                halt($ret);
                 return $err === null;
             case 'oss':
                 $ossClient = new OssClient(sysconf('storage_oss_keyid'), sysconf('storage_oss_secret'), self::getBaseUriOss(), true);

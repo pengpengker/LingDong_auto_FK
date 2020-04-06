@@ -181,7 +181,7 @@
         <button id="submit" type="button" style="width: 100%;">去支付</button>
     </div>
 </div>
-<div id="notice_tpl" style="display:none;">
+<div id="notice" style="display:none;">
     <pre>{$shop.shop_notice}</pre>
 </div>
 
@@ -267,7 +267,7 @@
             swal({
                 title: "商户公告",
                 html: true,
-                text: $('#notice_tpl').html(),
+                text: $('#notice').html(),
                 confirmButtonText: "已阅",
                 customClass: 'notice'
             });
