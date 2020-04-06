@@ -7,7 +7,6 @@ namespace app\common\pay;
 
 use think\Db;
 use think\Request;
-use app\common\Pay;
 
 class WxJsApi extends Pay{
     protected $code='';
