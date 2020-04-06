@@ -48,12 +48,14 @@ class FileService
     public static function getFileUrl($filename, $storage = null)
     {
         if (self::hasFile($filename, $storage) === false) {
+            halt('文件已存在');
             return false;
         }
         switch (empty($storage) ? sysconf('storage_type') : $storage) {
             case 'local':
                 return self::getBaseUriLocal() . $filename;
             case 'qiniu':
+                halt('进入qiniu');
                 return self::getBaseUriQiniu() . $filename;
             case 'oss':
                 return self::getBaseUriOss() . $filename;
