@@ -182,6 +182,12 @@ class Order extends Base
         if(!$order){
             $this->error('不存在该订单！');
         }
+        if(!empty($order->dj_order_id)){
+            $order=OrderModel::get(['trade_no'=>$order->dj_order_id]);
+            if(!$order){
+                $this->error('不存在该订单！ -2');
+            }
+        }
         $content   =[];
         $cards     =$order->cards;
         $count     =count($cards);

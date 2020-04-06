@@ -5,6 +5,7 @@
  */
 namespace app\common\pay;
 
+use app\common\model\Order;
 use think\Db;
 use think\Request;
 use app\common\Pay;
@@ -87,9 +88,21 @@ class AlipayWap extends Pay{
                 die('验签错误！');
             }
             // 金额异常检测
-            if($order->total_price<$params['total_amount']){
-                record_file_log('alipaywap_notify_error','金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$params['total_amount']}");
-                die('金额异常！');
+            if(empty($order->dj_order_id)){
+                if($order->total_price>$params['total_amount']){
+                    record_file_log('alipay_page_error','金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$params['total_amount']}");
+                    die('金额异常！');
+                }
+            }else{
+                $sj_order = Order::get(['trade_no' => $order->dj_order_id]);
+                if($sj_order){
+                    if(round($order->total_price,3)+round($sj_order->total_price,3)>round($params['total_amount'],3)){
+                        record_file_log('alipay_page_error','对接支付总金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$params['total_amount']}");
+                        die('对接支付总金额异常！');
+                    }
+                }else{
+                    die('上级订单不存在');
+                }
             }
             // TODO 这里去完成你的订单状态修改操作
             // 流水号
