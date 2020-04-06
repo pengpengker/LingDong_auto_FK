@@ -33,6 +33,10 @@ class WxJsApi extends Pay{
     {
         if (strpos(@$_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false) {
             $pay_type = 'JSAPI';
+            \think\Loader::import('wxpay.lib.WxPayApi');
+            \think\Loader::import('wxpay.JsApiPay');
+            $tools = new JsApiPay();
+            $openId = $tools->GetOpenid();
             halt(GetOpenid());
         }else{
             $pay_type = 'MWEB';
