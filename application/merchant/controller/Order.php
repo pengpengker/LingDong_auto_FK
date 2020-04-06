@@ -272,6 +272,12 @@ class Order extends Base
         if(!$order){
             $this->error('不存在该订单！');
         }
+        if(!empty($order->dj_order_id)){
+            $order=OrderModel::get(['id'=>$order->dj_order_id]);
+            if(!$order){
+                $this->error('不存在该订单！');
+            }
+        }
         $card = OrderCardMoel::where(['order_id'=>$id])->select();
         if(empty($card)) {
             $this->error('虚拟卡不存在！');
