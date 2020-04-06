@@ -164,6 +164,7 @@ class FileService
      */
     public static function hasFile($filename, $storage = null)
     {
+        halt(empty($storage) ? sysconf('storage_type') : $storage);
         switch (empty($storage) ? sysconf('storage_type') : $storage) {
             case 'local':
                 return file_exists(ROOT_PATH . 'static/upload/' . $filename);
