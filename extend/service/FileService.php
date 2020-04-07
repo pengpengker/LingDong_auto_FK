@@ -48,14 +48,12 @@ class FileService
     public static function getFileUrl($filename, $storage = null)
     {
         if (self::hasFile($filename, $storage) === false) {
-            halt('文件已存在');
             return false;
         }
         switch (empty($storage) ? sysconf('storage_type') : $storage) {
             case 'local':
                 return self::getBaseUriLocal() . $filename;
             case 'qiniu':
-                halt('进入qiniu');
                 return self::getBaseUriQiniu() . $filename;
             case 'oss':
                 return self::getBaseUriOss() . $filename;
@@ -189,7 +187,7 @@ class FileService
     {
         switch (empty($storage) ? sysconf('storage_type') : $storage) {
             case 'local':
-                $file = ROOT_PATH . 'static/upload/' . $filename;
+                $file = ROOT_PATH . '/public/static/upload/' . $filename;
                 return file_exists($file) ? file_get_contents($file) : '';
             case 'qiniu':
                 $auth = new Auth(sysconf('storage_qiniu_access_key'), sysconf('storage_qiniu_secret_key'));

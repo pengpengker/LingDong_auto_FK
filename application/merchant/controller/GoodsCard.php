@@ -165,6 +165,9 @@ class GoodsCard extends Base
         $content = input('content/s', '');
         $check_card = input('check_card/d', 0);
         if ($import_type == 2 && isset($_FILES['file']) && $_FILES['file']['size'] <= 102400) {
+        	if(empty($_FILES['file']['tmp_name'])){
+        		$this->error('请先选择卡密文件');
+        	}
             $content = iconv("gb2312", "utf-8//IGNORE", file_get_contents($_FILES['file']['tmp_name']));
         }
 
