@@ -329,7 +329,7 @@ class Shop extends Base
                 'is_pwdforsearch' => $sjgoods->take_card_type,
                 'limit_quantity' => $sjgoods->limit_quantity,
                 'price' => $price,
-                'remark' => $sjgoods->content,
+                'remark' => $goods->content,
                 'contact_limit' => $sjgoods->contact_limit,
             ];
 
