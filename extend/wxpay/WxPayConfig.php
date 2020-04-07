@@ -93,7 +93,7 @@ class WxPayConfig extends WxPayConfigInterface
 	}
 	public function GetAppSecret()
 	{
-		return APPSECRET;
+		return wx_APPSECRET;
 	}
 
 

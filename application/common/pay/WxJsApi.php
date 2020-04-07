@@ -33,43 +33,62 @@ class WxJsApi extends Pay{
      */
     public function order($outTradeNo,$subject,$totalAmount)
     {
+        Loader::import('wxpay.WxPayJsApiPay');
+        Loader::import('wxpay.WxPayApi.php');
+        Loader::import('wxpay.WxPayConfig.php');
+        Loader::import('wxpay.WxPayJsApiPay');
+        $this->defineWxConfig($this->account->params);
+		$config = new \WxPayConfig();
+    	$result = '';
+    	$content_type = 3;
         if (strpos(@$_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false) {
             $pay_type = 'JSAPI';
-            $openid = Session::get('openid');
-            Loader::import('wxpay.WxPayJsApiPay');
-            Loader::import('wxpay.WxPayApi.php');
-            Loader::import('wxpay.WxPayConfig.php');
-            Loader::import('wxpay.WxPayJsApiPay');
             $tools = new \JsApiPay();
             if(empty(Session::get('openid'))){
 	            $data = $tools->GetOpenid();
 	            $openid = $data['openid'];
 	            Session::set('openid',$openid);
+            }else{
+            	$openid = Session::get('openid');
             }
             $input = new \WxPayUnifiedOrder();
 			$input->SetBody($subject);
-			$input->SetAttach($this->createNoncestr());
+			$input->SetAttach($outTradeNo);
 			$input->SetOut_trade_no($outTradeNo);
 			$input->SetTotal_fee($totalAmount * 100);
 			$input->SetTime_start(date("YmdHis"));
 			$input->SetTime_expire(date("YmdHis", time() + 600));
 			$input->SetGoods_tag($subject);
 			$input->SetNotify_url(Request::instance()->domain().'/pay/notify/WxJsApi');
-			$input->SetTrade_type("JSAPI");
+			$input->SetTrade_type($pay_type);
 			$input->SetOpenid($openid);
-			$this->defineWxConfig($this->account->params);
-			$config = new \WxPayConfig();
 			$order = \WxPayApi::unifiedOrder($config, $input);
 			$jsApiParameters = $tools->GetJsApiParameters($order);
 			$editAddress = $tools->GetEditAddressParameters();
 			$result = $jsApiParameters;
+			$content_type = 5;
         }else{
-            $pay_type = 'MWEB';
+            $pay_type = 'NATIVE';
+            $input = new \WxPayUnifiedOrder();
+	        $input->SetBody($subject);
+	        $input->SetAttach($outTradeNo);
+	        $input->SetOut_trade_no($outTradeNo);
+	        $input->SetTotal_fee($totalAmount * 100);
+	        $input->SetTime_start(date('YmdHis'));
+	        $input->SetTime_expire(date('YmdHis', time() + 600));
+	        $input->SetGoods_tag('pay');
+	        $input->SetTrade_type($pay_type);
+	        $input->SetProduct_id($outTradeNo);
+	        $input->SetSpbill_create_ip($this->get_client_ip());
+	        $input->SetNotify_url(Request::instance()->domain().'/pay/notify/WxJsApi');
+	        $order = \WxPayApi::unifiedOrder($config, $input);
+	        $content_type = 1;
+	        $result = $order['code_url'];
         }
         $this->code    =0;
         $obj           =new \stdClass();
         $obj->pay_url  =$result;
-        $obj->content_type = 5;
+        $obj->content_type = $content_type;
         return $obj;
     }
 
@@ -84,34 +103,47 @@ class WxJsApi extends Pay{
      * 支付异步通知处理
      */
     public function notify_callback($params,$order) {
+    	//微信验证
         if($params['out_trade_no']) {
-            $buff = "";
-            foreach ($params as $k => $v) {
-                if ($k != "sign" && $v != "" && !is_array($v)) {
-                    $buff .= $k . "=" . $v . "&";
-                }
-            }
-            $buff = trim($buff, "&");
-            $string = $buff . "&key=" . $this->account->params->signkey;
-            $string = md5($string);
-            $sign = strtoupper($string);
-            if ($sign != $params["sign"]) {
-                record_file_log('wxpay_notify_error','验签错误！'."\r\n".$order->trade_no);
-                die('验签错误！');
-            }
-            // 金额异常检测
-            $money=$params['total_fee']/100;
-            if($order->total_price>$money){
-                record_file_log('alipay_notify_error','金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$money}");
-                die('金额异常！');
-            }
-            // TODO 这里去完成你的订单状态修改操作
-            // 流水号
-            $order->transaction_id =$params['transaction_id'];
-            $this->completeOrder($order);
-            record_file_log('wxpay_notify_success',$order->trade_no);
-            echo 'success';
-            return true;
+        	if ($params['return_code'] == "SUCCESS" && $params['result_code'] == "SUCCESS") {
+        		//把签名去掉
+	            $xmlSign = $params['sign'];
+	            unset($params['sign']);
+	            $sign = $this->MakeSign($params,$this->account->params->KEY);
+	            if ($sign !== $xmlSign){
+	            	record_file_log('wxpay_notify_error','验签错误！'."\r\n".$order->trade_no);
+	            	record_file_log('wxpay_notify_error','KEY:'.$this->account->params->KEY."\r\n".'sign:'.$sign."\r\n".$order->trade_no);
+                	die('验签错误！');
+	            }
+	            // 金额异常检测
+	            $money=$params['total_fee']/100;
+	            if(empty($order->dj_order_id)){
+		            if($order->total_price>$money){
+		                record_file_log('alipay_page_error','金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$money}");
+		                die('金额异常！');
+			        }
+		        }else{
+		            $sj_order = Order::get(['trade_no' => $order->dj_order_id]);
+		            if($sj_order){
+		                if(round($order->total_price,3)+round($sj_order->total_price,3)>round($money,3)){
+		                    record_file_log('alipay_page_error','对接支付总金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$money}");
+		                    die('对接支付总金额异常！');
+		                }
+		            }else{
+		                die('上级订单不存在');
+		            }
+		        }
+	            // TODO 这里去完成你的订单状态修改操作
+	            // 流水号
+	            $order->transaction_id =$params['transaction_id'];
+	            $this->completeOrder($order);
+	            record_file_log('wxpay_notify_success',$order->trade_no);
+	            echo '<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
+	            return true;
+        	}else{
+	            record_file_log('wxpay_notify_error','支付状态失败！'."\r\n".$params['out_trade_no']);
+                die('支付状态失败！');
+        	}
         }
     }
 
@@ -212,5 +244,29 @@ class WxJsApi extends Pay{
         if (!defined('wx_APPSECRET')) {
             define('wx_APPSECRET', $pargrm->APPSECRET);
         }
+    }
+    function MakeSign($params,$key){
+        //签名步骤一：按字典序排序数组参数
+        ksort($params);
+        $string = $this->ToUrlParams($params);  //参数进行拼接key=value&k=v
+        //签名步骤二：在string后加入KEY
+        $string = $string . "&key=".$key;
+        //签名步骤三：MD5加密
+        $string = hash_hmac("sha256",$string ,$key);
+        //签名步骤四：所有字符转为大写
+        $result = strtoupper($string);
+        return $result;
+    }
+ 
+    function ToUrlParams( $params ){
+        $string = '';
+        if( !empty($params) ){
+            $array = array();
+            foreach( $params as $key => $value ){
+                $array[] = $key.'='.$value;
+            }
+            $string = implode("&",$array);
+        }
+        return $string;
     }
 }

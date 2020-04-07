@@ -11,6 +11,7 @@ use app\common\model\User as UserModel;
 use app\common\Pay as PayAPI;
 use think\Db;
 use think\Request;
+use think\Exception;
 
 class Pay extends Base {
     public function __construct() {
@@ -785,6 +786,11 @@ class Pay extends Base {
                 parse_str(file_get_contents('php://input'), $params);
                 break;
             case 'WxpayH5':
+            case 'WxJsApi':
+            	$xml = file_get_contents('php://input');
+                libxml_disable_entity_loader(true);
+                $params = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
+                break;
             case 'QqNative':
             case 'SwiftAliScan':
             case 'SwiftAliWap':
@@ -974,6 +980,7 @@ class Pay extends Base {
             case 'WxpayH5':
                 $trade_no = isset($params['out_trade_no']) ? $params['out_trade_no'] : '';
                 break;
+            case 'WxJsApi':
             case 'QqNative':
                 $trade_no = isset($params['out_trade_no']) ? $params['out_trade_no'] : '';
                 break;
@@ -1123,6 +1130,7 @@ class Pay extends Base {
             case 'CodePayAliScan':
             case 'CodePayQqScan':
             case 'WxpayH5':
+            case 'WxJsApi':
             case 'QgjfAlipayScan':
             case 'QgjfAlipayWap':
             case 'QgjfQqNative':
@@ -1307,18 +1315,21 @@ class Pay extends Base {
             record_file_log('pay_error', $trade_no . '不存在该支付渠道！');
             die('不存在该支付渠道！');
         }
-
         // 渠道账户
         $account = $order->channelAccount;
         if (!$account) {
             record_file_log('pay_error', $trade_no . '不存在支付渠道：' . $channel->title . '的账号！');
             die('不存在支付渠道：' . $channel->title . '的账号！');
         }
-        // 回调通知
-        $PayAPI = PayAPI::load($channel, $account);
-        if ($PayAPI->notify_callback($params, $order)) {
-            //支付完成，扣除库存
-            Goods::sendOut($trade_no);
+        try{
+        	 // 回调通知
+	        $PayAPI = PayAPI::load($channel, $account);
+	        if ($PayAPI->notify_callback($params, $order)) {
+	            //支付完成，扣除库存
+	            Goods::sendOut($trade_no);
+	        }
+        }catch(Exception $e){
+        	record_file_log('pay_error', $trade_no . '传入支付控制器异常！'.$e);
         }
     }
 

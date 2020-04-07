@@ -143,7 +143,7 @@ class AlipayQr extends Pay{
             }
             // TODO 这里去完成你的订单状态修改操作
             // 流水号
-            $order->transaction_id =$params['trade_no'];
+            $order->transaction_id =$params['transaction_id'];
             $this->completeOrder($order);
             record_file_log('alipay_notify_success',$order->trade_no);
             echo 'success';
