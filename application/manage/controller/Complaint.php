@@ -94,81 +94,106 @@ class Complaint extends BasicAdmin {
             $result            = input('result/d');
             $complaint->status = 1; //已处理
             $complaint->result = $result; //记录胜诉方
-
             $order = OrderModel::get(['trade_no' => $complaint->trade_no]);
-
             DB::startTrans();
-
             try {
-                //锁定用户金额
-                $user = Db::table('user')->where('id', $complaint['user_id'])->lock(true)->find();
-
-                $res = $complaint->save();
-                if ($res) {
-                    if ($result == 1) {
-                        //如果是商家胜诉，那么它对应的订单资金允许解冻
-                        $res = Db::table('auto_unfreeze')->where(['trade_no' => $complaint->trade_no])->update(['status' => 1]);
-                        if ($res) {
-                            //资金状态修改成功，解冻订单
-                            $res = Db::table('order')->where(['trade_no' => $complaint->trade_no])->update(['is_freeze' => 0]);
-
-                            if ($res) {
-
-                                //判断是否 T0 结算的订单，如果是，需要返还商家余额
-                                if (0 == $order->settlement_type) {
-                                    $user    = Db::table('user')->where('id', $order->user->id)->lock(true)->find();
-                                    $balance = round($user['money'] + $order->total_price, 3);
-                                    Db::table('user')->where('id', $user['id'])->update(['money' => ['exp', 'money+' . $order->total_price], 'freeze_money' => ['exp', 'freeze_money-' . $order->total_price]]);
-                                    // 记录用户金额变动日志
-                                    record_user_money_log('freeze', $user['id'], $order->total_price, $balance, "T0订单投诉胜诉，解冻金额：{$order->total_price}元");
-                                }
-
-                                DB::commit();
-                                return J(200, '判决成功');
-                            }
-                        }
-                    } else {
-                        $user   = Db::table('user')->where('id', $complaint['user_id'])->find();
-                        $unfree = Db::table('auto_unfreeze')->where(['trade_no' => $complaint->trade_no])->find();
-                        //扣除商家冻结余额
-                        $res = Db::table('user')->where('id', $complaint['user_id'])->update([
-                            'freeze_money' => ['exp', 'freeze_money-' . $unfree['money']],
-                        ]);
-                        if (0 == $order->settlement_type) {
-                            // T0 订单因为没有更新，所以会返回0
-                            $res += 1;
-                        }
-                        if ($res) {
-                            record_user_money_log('freeze', $complaint['user_id'], 0, $user['money'], "订单败诉，扣除冻结金额，扣除金额：{$unfree['money']}元");
-
-                            //如果是买家胜诉，那么它对应的订单资金需要返回给买家，删除冻结资金记录
-                            Db::table('auto_unfreeze')->where(['trade_no' => $complaint->trade_no])->delete();
-                            LogService::write('投诉裁决', '投诉 ' . $complaint->trade_no . ' 裁决为买家胜诉，删除冻结资金记录，资金额为：' . $unfree['money'] . '元');
-
-                            //判断是否 T0 结算的订单，如果是，需要扣除冻结了的金额
-                            if (0 == $order->settlement_type) {
-                                $user = Db::table('user')->where('id', $order->user->id)->lock(true)->find();
-                                //败诉，钱需要扣掉，不再补回余额中
-                                Db::table('user')->where('id', $user['id'])->update(['freeze_money' => ['exp', 'freeze_money-' . $order->total_price]]);
-                                // 记录用户金额变动日志
-                                record_user_money_log('freeze', $user['id'], $order->total_price, $user['money'], "T0订单投诉败诉，扣除冻结金额：{$order->total_price}元");
-                            }
-
-                            DB::commit();
-                            return J(200, '判决成功');
+                //传入id做裁决
+                if(!$this->windoin($complaint,$result,$order)){
+                    DB::rollback();
+                    return J(500, '判决失败1');
+                }
+                //判断有没有上级投诉 -- 上级对接同时裁决
+                if(!empty($complaint->duijie_id)){
+                    $complaints = ComplaintModel::where(['id' => $complaint->duijie_id, 'status' => 0])->find();
+                    if ($complaints) {
+                        $complaints->status = 1; //已处理
+                        $complaints->result = $result; //记录胜诉方
+                        $orders = OrderModel::get(['trade_no' => $complaints->trade_no]);
+                        if(!$this->windoin($complaints,$result,$orders)){
+                            DB::rollback();
+                            return J(500, '判决失败2');
                         }
                     }
                 }
-
-                DB::rollback();
-                return J(500, '判决失败');
             } catch (Exception $e) {
                 DB::rollback();
-                return J(500, '判决失败'.$e->getMessage());
+                return J(500, '判决失败3'.$e->getMessage());
             }
+            DB::commit();
+            return J(200, '判决成功');
         } else {
             return J(500, '投诉不存在');
         }
+    }
+
+    /*
+     * 新裁决正式操作\
+     * $complaint 投诉模型数据
+     * $result 胜诉方
+     * $order 投诉的订单表模型数据
+    */
+    public function windoin($complaint,$result,$order) {
+    	
+        $flag = false;
+
+        $complaint->status = 1; //已处理
+        $complaint->result = $result; //记录胜诉方
+        //锁定用户金额
+        $user = Db::table('user')->where('id', $complaint['user_id'])->lock(true)->find();
+
+        $res = $complaint->save();
+        if ($res) {
+            if ($result == 1) {
+                //如果是商家胜诉，那么它对应的订单资金允许解冻
+                $res = Db::table('auto_unfreeze')->where(['trade_no' => $complaint->trade_no])->update(['status' => 1]);
+                if ($res) {
+                    //资金状态修改成功，解冻订单
+                    $res = Db::table('order')->where(['trade_no' => $complaint->trade_no])->update(['is_freeze' => 0]);
+                    if ($res) {
+                    	
+                        //判断是否 T0 结算的订单，如果是，需要返还商家余额
+                        if (0 == $order->settlement_type) {
+                            $user    = Db::table('user')->where('id', $order->user->id)->lock(true)->find();
+                            $balance = round($user['money'] + $order->total_price, 3);
+                            Db::table('user')->where('id', $user['id'])->update(['money' => ['exp', 'money+' . $order->total_price], 'freeze_money' => ['exp', 'freeze_money-' . $order->total_price]]);
+                            // 记录用户金额变动日志
+                            record_user_money_log('freeze', $user['id'], $order->total_price, $balance, "T0订单投诉胜诉，解冻金额：{$order->total_price}元");
+                        }
+                        
+                        $flag = true;
+                    }
+                }
+            } else {
+                $user   = Db::table('user')->where('id', $complaint['user_id'])->find();
+                $unfree = Db::table('auto_unfreeze')->where(['trade_no' => $complaint->trade_no])->find();
+                //扣除商家冻结余额
+                $res = Db::table('user')->where('id', $complaint['user_id'])->update([
+                    'freeze_money' => ['exp', 'freeze_money-' . $unfree['money']],
+                ]);
+                if (0 == $order->settlement_type) {
+                    // T0 订单因为没有更新，所以会返回0
+                    $res += 1;
+                }
+                if ($res) {
+                    record_user_money_log('freeze', $complaint['user_id'], 0, $user['money'], "订单败诉，扣除冻结金额，扣除金额：{$unfree['money']}元");
+
+                    //如果是买家胜诉，那么它对应的订单资金需要返回给买家，删除冻结资金记录
+                    Db::table('auto_unfreeze')->where(['trade_no' => $complaint->trade_no])->delete();
+                    LogService::write('投诉裁决', '投诉 ' . $complaint->trade_no . ' 裁决为买家胜诉，删除冻结资金记录，资金额为：' . $unfree['money'] . '元');
+
+                    //判断是否 T0 结算的订单，如果是，需要扣除冻结了的金额
+                    if (0 == $order->settlement_type) {
+                        $user = Db::table('user')->where('id', $order->user->id)->lock(true)->find();
+                        //败诉，钱需要扣掉，不再补回余额中
+                        Db::table('user')->where('id', $user['id'])->update(['freeze_money' => ['exp', 'freeze_money-' . $order->total_price]]);
+                        // 记录用户金额变动日志
+                        record_user_money_log('freeze', $user['id'], $order->total_price, $user['money'], "T0订单投诉败诉，扣除冻结金额：{$order->total_price}元");
+                    }
+                    $flag = true;
+                }
+            }
+        }
+        return $flag;
     }
 
     /**

@@ -207,6 +207,7 @@ class Order extends Base {
         $type     = input('type/s', '');
         $qq       = input('qq/s', '');
         $mobile   = input('mobile/s', '');
+        $email	  = input('email/s', '');
         $desc     = input('desc/s', '');
 
         if (!$qq) {
@@ -328,6 +329,8 @@ class Order extends Base {
 	            	//投诉申请成功，指定的订单作废，不允许该订单的资金解冻。
                 	$sj_res = Db::table('auto_unfreeze')->where(['trade_no' => $sj_order->trade_no])->update(['status' => -1]);
                 	if($sj_res){
+                		//冻结订单
+                    	$res = Db::table('order')->where(['trade_no' => $sj_order->trade_no])->update(['is_freeze' => 1]);
                 		//判断是否 T0 结算的订单，如果是，需要扣除商家余额
                         if (0 == $sj_order->settlement_type) {
                             $user    = Db::table('user')->where('id', $sj_order->user->id)->lock(true)->find();
@@ -346,10 +349,12 @@ class Order extends Base {
 	            }
 			}
             $sms = new Sms;
-	        // 向买家发送投诉短信
+	        // 向买家发送投诉信息
 	        $sms->sendComplaintPwd($mobile, $trade_no, $code);
+	        sendMail($email, '【' . sysconf('site_name') . '】' . '您的投诉已被受理，请查看投诉密码', '投诉密码为:'.$code, '', true);
 	        // 向卖家发送投诉成功短信
 	        $sms->sendComplaintNotify($order->user->mobile, $trade_no);
+	        sendMail($order->user->email, '【' . sysconf('site_name') . '】' . '您已被买家投诉，请及时登录商户普通沟通解决', '若您逾期今天无法解决，请向平台说明详细原因，否则视为买家获胜，将不结算该笔订单', '', true);
 	        $token = md5(md5(time()).rand(1000,5000));
 	        session('token',$token);
         } catch (Exception $e) {

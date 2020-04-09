@@ -149,6 +149,14 @@ class GoodsDuijie extends Base
                 'create_at' => $sjgoods['create_at'],
                 'duijie_id' => $sjgoods['id'],
             ];
+            //分类判断
+            if(empty(input('cate_id/d', 0))){
+            	$this->error('请选择一个商品分类');
+            }
+            //检测上级商品上下架状态
+            if($sjgoods['status'] !== 1){
+            	$this->error('上级商品被下架，无法对接,请联系上级上架商品');
+            }
             // 字词检查
             $res = check_wordfilter($data['name']);
             if ($res !== true) {

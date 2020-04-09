@@ -63,6 +63,16 @@ class Goods extends Base
         $res = $goods->save();
         if ($res !== false) {
             MerchantLogService::write('修改商品状态', '将ID为' . $goods_id . '的商品' . $statusStr);
+            $xj_goods = GoodsModel::where('duijie_id',$goods->id)->select();
+            //同时修改下级的对接商品上下架状态
+            if(!empty($xj_goods)){
+            	$datas[] = null;
+            	foreach($xj_goods as $k=>$val){ 
+            		$datas[] = ['id'=>$val['id'],'status'=>$status];
+				}
+				$GoodsModel = new GoodsModel();
+				$GoodsModel->saveAll($datas,true);
+            }
             return J(0, 'success');
         } else {
             return J(1, 'error');
@@ -87,7 +97,7 @@ class Goods extends Base
         if ($res !== false) {
             MerchantLogService::write('删除商品', '删除ID为' . $goods_id . '的商品');
             //删除该商品则清理下级对接用户的该商品id
-            //清空下级对接
+            //清空下级对接 软删除
             GoodsModel::where('duijie_id',$goods_id)->delete();
             return J(0, '删除成功！');
         } else {
@@ -159,7 +169,6 @@ class Goods extends Base
 
     /**
      * 恢复商品
-     * 对接功能此处修改恢复下级对接的用户商品
      */
     public function restore()
     {

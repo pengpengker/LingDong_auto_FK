@@ -90,6 +90,7 @@ class GoodsCard extends Base
     public function index()
     {
         $this->setTitle('虚拟卡列表');
+        
         ////////////////// 查询条件 //////////////////
         $query = [
             'cate_id' => input('cate_id/s', ''),
@@ -141,22 +142,61 @@ class GoodsCard extends Base
         $categorys = CategoryModel::where(['user_id' => $this->user->id])->order('sort desc,id desc')->select();
         $this->assign('categorys', $categorys);
         // 商品列表
-        $goodsList = GoodsModel::where(['user_id' => $this->user->id])->order('sort desc,id desc')->select();
+        $goodsList = GoodsModel::where(['user_id' => $this->user->id,'duijie_id' => null])->order('sort desc,id desc')->select();
         $this->assign('goodsList', $goodsList);
         return $this->fetch();
     }
 
+
+	//对接权限 ok
+	//new 按条件查询卡密
+	public function ca_cards()
+	{
+		if (!$this->request->isPost()) {
+			return "访问方式错误";
+		}
+		//判断必要参数
+		if(empty($this->request->param('goods_id')) || $this->request->param('carnum') < 0){
+			return "请求参数错误，请重新设置条件";
+		}
+		
+		$node = "查卡仅能查询当前未售出且可用，同时符合你输入的商品条件</br>若您选择了同时删除，则查出的卡密会被清空</br>数量0则为无限，其它则按您输入的数量显示</br></br></br>";
+		
+		//开始构造查询语句
+		$map['user_id'] = $this->user->id;
+		$map['status'] = 1;
+		$map['goods_id']  = array('eq', $this->request->param('goods_id'));
+		$cache = null;
+		if($this->request->param('carnum') > 0){
+			$card = CardModel::where($map)->limit($this->request->param('carnum'))->order('id desc')->select();
+		}else{
+			$card = CardModel::where($map)->order('id desc')->select();
+		}
+		$cache = $card;
+		if(empty($cache)){
+			$node = $node . '当前没有卡密,快去添加吧';
+		}
+		if($this->request->param('isdel')){
+			CardModel::where($map)->delete();
+		}
+		foreach ($cache as $key=>$val){
+			$node = $node . '</br>' . $val['number'] . '   ' . $val['secret'];
+		}
+		return $node;
+	}
+
+	//对接权限 ok
     public function add()
     {
         if (!$this->request->isPost()) {
             $this->setTitle('添加虚拟卡');
             // 商品列表
-            $goodsList = GoodsModel::where(['user_id' => $this->user->id])->order('sort desc,id desc')->select();
+            $goodsList = GoodsModel::where(['user_id' => $this->user->id,'duijie_id' => null])->order('sort desc,id desc')->select();
             $this->assign('goodsList', $goodsList);
             return $this->fetch();
         }
         $goods_id = input('goods_id/d', 0);
-        $goods = GoodsModel::get(['id' => $goods_id, 'user_id' => $this->user->id]);
+        $goods = GoodsModel::get(['id' => $goods_id, 'user_id' => $this->user->id,'duijie_id' => null]);
         if (!$goods) {
             $this->error('不存在该商品！');
         }
@@ -263,6 +303,7 @@ class GoodsCard extends Base
         }
     }
 
+	//对接权限 ok
     public function del()
     {
         $card_id = input('id/d', 0);
@@ -279,6 +320,7 @@ class GoodsCard extends Base
         }
     }
 
+	//对接权限 ok
     public function batch_del()
     {
         $card_ids = input('ids/a');
@@ -465,7 +507,7 @@ class GoodsCard extends Base
             if ($cid) {
                 $where['user_id'] = $this->user->id;
                 $where['cate_id'] = $cid;
-                $goodsList = GoodsModel::where($where)->field('id,name')->order('sort desc,id desc')->select();
+                $goodsList = GoodsModel::where($where)->where('duijie_id',null)->field('id,name')->order('sort desc,id desc')->select();
             }
             echo json_encode($goodsList);
             exit;
@@ -483,6 +525,9 @@ class GoodsCard extends Base
         if (!$goods) {
             $this->error('不存在该商品！');
         }
+        
+        //判断是否是对接商品
+        
         $status = input('status/s', '1,2');
         $range = input('range/d', 0);
         $number = input('number/d', 0);
