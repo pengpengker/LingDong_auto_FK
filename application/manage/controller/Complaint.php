@@ -34,7 +34,7 @@ class Complaint extends BasicAdmin {
             'date_range' => input('date_range/s', ''),
         ];
         $where = $this->genereate_where($query);
-        $complaints = ComplaintModel::where($where)->where('duijie_id',null)->order('id desc')->paginate(30, false, [
+        $complaints = ComplaintModel::where($where)->where('duijie_id','neq','null')->order('id desc')->paginate(30, false, [
             'query' => $query,
         ]);
         // 分页
@@ -262,6 +262,7 @@ class Complaint extends BasicAdmin {
             try {
             	$res = Db::name('Complaint')->where('id', $id)->find();
             	$duijie_id = $res['duijie_id'];
+            	$tra_on = $res['trade_no'];
             	$res = Db::name('Complaint')->where('id', $id)->delete();
 	            if (false !== $res) {
 	                if(!empty($duijie_id)){
@@ -271,6 +272,8 @@ class Complaint extends BasicAdmin {
 	                		$this->error('删除失败');
 	                	}
 	                }
+	                //同时删除投诉信息表里的信息
+	                Db::name('complaint_message')->where('trade_no', $tra_on)->delete();
 	            } else {
 	            	DB::rollback();
 	                $this->error('删除失败');
