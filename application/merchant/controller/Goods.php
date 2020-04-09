@@ -113,6 +113,7 @@ class Goods extends Base
                 $res = $good->delete();
                 if ($res !== false) {
                     MerchantLogService::write('成功删除卡密', '成功删除卡密，ID:' . $good->id);
+                    GoodsModel::where('duijie_id',$good->id)->delete();
                 } else {
                     throw new \Exception('批量删除失败，ID:' . $good->id);
                 }
@@ -354,6 +355,7 @@ class Goods extends Base
             'visit_password' => input('visit_password/s', ''),
             'is_duijie' => input('is_duijie/d', 0),
             'duijie_smilepic' => input('duijie_smilepic/s', ''),
+            'duijie_price' => input('duijie_price/s', 0),
             'contact_limit' => input('contact_limit/s', ''),
             'content' => input('content/s', ''),
             'remark' => input('remark/s', ''),
@@ -443,15 +445,53 @@ class Goods extends Base
             'visit_password' => input('visit_password/s', ''),
             'is_duijie' => input('is_duijie/d', 0),
             'duijie_smilepic' => input('duijie_smilepic/s', ''),
+            'duijie_price' => input('duijie_price/s', 0),
             'contact_limit' => input('contact_limit/s', ''),
             'content' => input('content/s', ''),
             'remark' => input('remark/s', ''),
             'sms_payer' => input('sms_payer/d', 0),
         ];
+        //对接信息修改判断
         //判断是否是禁止对接
         if(input('is_duijie/d', 0) === 0){
             //清空下级对接
             GoodsModel::where('duijie_id',$goods_id)->delete();
+        }
+        if(input('limit_quantity/d', 0) !== $goods->limit_quantity && input('is_duijie/d', 0) === 1){
+           //商品最低起购数量
+            $xj_goods = GoodsModel::where('duijie_id',$goods_id)->select();
+            if(!empty($xj_goods)){
+            	$datas[] = null;
+            	foreach($xj_goods as $k=>$val){ 
+            		$datas[] = ['id'=>$val['id'],'limit_quantity'=>input('limit_quantity/d', 0)];
+				}
+				$GoodsModel = new GoodsModel();
+				$GoodsModel->saveAll($datas,true);
+            }
+        }
+        if(input('duijie_price/d', 0) !== $goods->duijie_price && input('is_duijie/d', 0) === 1){
+           //商品对接价格
+            $xj_goods = GoodsModel::where('duijie_id',$goods_id)->select();
+            if(!empty($xj_goods)){
+            	$datas[] = null;
+            	foreach($xj_goods as $k=>$val){ 
+            		$datas[] = ['id'=>$val['id'],'cost_price'=>input('cost_price/f', 0)];
+				}
+				$GoodsModel = new GoodsModel();
+				$GoodsModel->saveAll($datas,true);
+            }
+        }
+        if(input('visit_type/d', 0) !== $goods->visit_type || input('visit_password/d', 0) !== $goods->visit_password && input('is_duijie/d', 0) === 1){
+           //商品购买密码
+            $xj_goods = GoodsModel::where('duijie_id',$goods_id)->select();
+            if(!empty($xj_goods)){
+            	$datas[] = null;
+            	foreach($xj_goods as $k=>$val){ 
+            		$datas[] = ['id'=>$val['id'],'visit_type'=>input('visit_type/d', 0),'visit_password'=>input('visit_password/d', 0)];
+				}
+				$GoodsModel = new GoodsModel();
+				$GoodsModel->saveAll($datas,true);
+            }
         }
         if ($goods->is_freeze == 1) {
             $data['is_freeze'] = 0;

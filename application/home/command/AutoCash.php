@@ -53,7 +53,6 @@ class AutoCash extends Command
         //每天自动提现时间
         $auto_cash_time = intval(sysconf('auto_cash_time'));
         $auto_cash_time = strtotime(date('Y-m-d') . ' ' . $auto_cash_time . ':0');
-
         //已开启提现和自动提现，今天未提现，同时到达设定的自动提现时间
         if ((empty($lastTriggerTime) || $lastTriggerTime < $todayTime) && sysconf('cash_status') == 1 && sysconf('auto_cash') == 1 && time() > $auto_cash_time) {
             Log::record("自动提现任务执行中", Log::INFO);
@@ -169,6 +168,7 @@ class AutoCash extends Command
 
                             Log::record("自动提现成功：user:" . $user['id'] . ', money:' . $money, Log::INFO);
                         }
+                        Log::record("自动提现失败：user:" . $user['id'] .'该用户已超过每天设置提现次数', Log::INFO);
                     }
                     Db::commit();
                 } catch (\Exception $e) {

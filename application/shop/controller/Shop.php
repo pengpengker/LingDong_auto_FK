@@ -99,15 +99,19 @@ class Shop extends Base
         $duijie_class_id = GoodsModel::where('user_id',$shop['id'])->where('duijie_id','neq',0)->select();
         //循环代理商品的分类
         foreach ($duijie_class_id as $k => $v){
-            //判断当前是否已有这个分类
-            if($this->class_rep_is($categorys,$duijie_class_id[$k]['cate_id']) === false) {
-                $catenum++;
-                //查询分类信息
-                $cache = GoodsCategory::where('id', $duijie_class_id[$k]['cate_id'])->find();
-                if ($cache) {
-                    $categorys[$catenum] = $cache;
-                }
-            }
+        	//判断上级该商品状态
+        	$cache_sj_shop_info = GoodsModel::where('id',$duijie_class_id[$k]['duijie_id'])->find();
+        	if($cache_sj_shop_info && $cache_sj_shop_info->status === 1 && $cache_sj_shop_info->is_duijie === 1){
+	            //判断当前是否已有这个分类
+	            if($this->class_rep_is($categorys,$duijie_class_id[$k]['cate_id']) === false) {
+	                $catenum++;
+	                //查询分类信息
+	                $cache = GoodsCategory::where('id', $duijie_class_id[$k]['cate_id'])->find();
+	                if ($cache) {
+	                    $categorys[$catenum] = $cache;
+	                }
+	            }
+        	}
         }
         $this->assign('categorys', $categorys);
 
@@ -318,7 +322,7 @@ class Shop extends Base
             }
             $cardsCount = $sjgoods->cards_stock_count;
             //金额
-            $price = round($sjgoods->price,3) + round($goods->price,3);
+            $price = round($sjgoods->duijie_price,3) + round($goods->price,3);
             $stockStr = '库存' . $cardsCount . '张';
             $data = [
                 // 'gonggao'         =>'测试',

@@ -83,20 +83,29 @@ class Order extends Base {
                     //获取已登录用户最近一次购买的卡密
                     if (session('last_order_trade_no')) {
                         $trade_no = session('last_order_trade_no');
-                        $order    = OrderModel::where(['trade_no' => $trade_no])->order('id DESC')->find();
+                        $order    = OrderModel::where(['trade_no' => $trade_no,'dj_is_see' => null])->order('id DESC')->find();
                     } else {
                         $order = false;
                     }
                     break;
                 case '2':
                     //按订单号方式获取
-                    $order = OrderModel::where(['trade_no' => $trade_no])->order('id DESC')->find();
-                    break;
+                    $order = OrderModel::where(['trade_no' => $trade_no,'dj_is_see' => null])->order('id DESC')->find();
+                	break;
                 case '3':
                     //按联系方式获取
-                    $count = OrderModel::where(['contact' => $trade_no, 'status' => 1])->count();
+                    $count = OrderModel::where(['contact' => $trade_no, 'status' => 1,'dj_is_see' => null])->count();
                     if ($count > 1) {
-                        $order = OrderModel::where(['contact' => $trade_no, 'status' => 1])->order('id DESC')->paginate(30);
+                        $order = OrderModel::where(['contact' => $trade_no, 'status' => 1,'dj_is_see' => null])->order('id DESC')->paginate(30);
+                        foreach ($order as $key => $value){
+                        	//判断是否是对接订单
+                        	if(!empty($order[$key]['dj_order_id'])){
+				            	$sj_order = OrderModel::where(['trade_no' => $order[$key]['dj_order_id']])->find();
+				            	if($sj_order){
+				            		$order[$key]['goods_price'] = round($order[$key]['goods_price'] + $sj_order->goods_price+ $order[$key]['fee'],3);
+				            	}
+				            }
+                        }
                         // 分页
                         $page = $order->render();
                         $this->assign('page', $page);
@@ -104,7 +113,7 @@ class Order extends Base {
                         $this->assign('order', $order);
                         return $this->fetch('querybycontact');
                     } else {
-                        $order = OrderModel::where(['contact' => $trade_no, 'status' => 1])->order('id DESC')->find();
+                        $order = OrderModel::where(['contact' => $trade_no, 'status' => 1,'dj_is_see' => null])->order('id DESC')->find();
                     }
 
                     break;
@@ -141,7 +150,13 @@ class Order extends Base {
 
         $this->assign('is_verify', $is_verify);
         if ($is_verify) {
-            $this->assign('order', $order);
+        	if(!empty($order->dj_order_id)){
+            	$sj_order = OrderModel::where(['trade_no' => $order->dj_order_id])->order('id DESC')->find();
+            	if($sj_order){
+            		$order->total_price = round($order->total_price + $sj_order->total_price,3);
+            	}
+            }
+	        $this->assign('order', $order);
             if (isset($order->channel)) {
                 $this->assign('channel', $order->channel);
             }
@@ -211,10 +226,16 @@ class Order extends Base {
         if ($order->status === 0) {
             $this->error('该订单未完成，暂不能受理投诉！');
         }
+        
+        //判断是否超过投诉时间
+        if(date('Ymd', $order->success_at) !== date('Ymd')){
+        	$this->error('该订单已超过投诉时间，投诉仅支持购买成功后当天投诉！');
+        }
 
         // 获取该手机号投诉次数
-        $count = ComplaintModel::where(['trade_no' => $trade_no, 'mobile' => $mobile])->count();
-
+        //$count = ComplaintModel::where(['trade_no' => $trade_no, 'mobile' => $mobile])->count();
+		$count = ComplaintModel::where(['trade_no' => $trade_no])->count();
+		
         //2018-06-22 限制只能投诉一次
 
 //        $limitNum = (int)sysconf('complaint_limit_num');
@@ -246,6 +267,9 @@ class Order extends Base {
                 'pwd'       => $code,
                 'expire_at' => time() + 86400,
             ]);
+            
+            //上级创建投诉的表id--缓存，不是代理则用不上
+            $cacha_duijie_id = $res->id;
             if ($res !== false) {
                 Db::table('complaint_message')->insert([
                     'trade_no'  => $trade_no,
@@ -271,26 +295,75 @@ class Order extends Base {
                             // 记录用户金额变动日志
                             record_user_money_log('freeze', $user['id'], $order->total_price, $balance, "T0订单被投诉，冻结金额：{$order->total_price}元");
                         }
-
-                        Db::commit();
-                        $sms = new Sms;
-                        // 向买家发送投诉短信
-                        $sms->sendComplaintPwd($mobile, $trade_no, $code);
-                        // 向卖家发送投诉成功短信
-                        $sms->sendComplaintNotify($order->user->mobile, $trade_no);
-                        $token = md5(md5(time()).rand(1000,5000));
-                        session('token',$token);
-                        $this->success('投诉成功！', url('Index/order/complaintpass', ['trade_no' => $trade_no, 'token' => $token]));
+                        
+                        //判断是否是对接商品，同时冻结上级订单
+						if(!empty($order->dj_order_id)){
+							$order = OrderModel::get(['trade_no' => $order->dj_order_id]);
+							if(!$order){
+								Db::rollback();
+			            		$this->error('操作失败，请重试！');
+							}
+							$trade_nos = $order->trade_no;
+							$res = ComplaintModel::create([
+				                'user_id'   => $order->user_id,
+				                'trade_no'  => $trade_nos,
+				                'type'      => $type,
+				                'qq'        => $qq,
+				                'mobile'    => $mobile,
+				                'desc'      => $desc,
+				                'status'    => 0,
+				                'create_at' => $_SERVER['REQUEST_TIME'],
+				                'create_ip' => $this->request->ip(),
+				                'pwd'       => $code,
+				                'duijie_is_see'	=> $cacha_duijie_id,
+				                'expire_at' => time() + 86400,
+				            ]);
+				            if ($res !== false) {
+				                Db::table('complaint_message')->insert([
+				                    'trade_no'  => $trade_nos,
+				                    'content'   => $desc,
+				                    'create_at' => time(),
+				                ]);
+				
+				                //投诉申请成功，指定的订单作废，不允许该订单的资金解冻。
+				                $res = Db::table('auto_unfreeze')->where(['trade_no' => $order->trade_no])->update(['status' => -1]);
+				
+				                if ($res) {
+				                    //冻结订单
+				                    $res = Db::table('order')->where(['trade_no' => $order->trade_no])->update(['is_freeze' => 1]);
+				                    if ($res) {
+				
+				                        //判断是否 T0 结算的订单，如果是，需要扣除商家余额
+				                        if (0 == $order->settlement_type) {
+				
+				                            $user    = Db::table('user')->where('id', $order->user->id)->lock(true)->find();
+				                            $balance = round($user['money'] - $order->total_price, 3);
+				                            Db::table('user')->where('id', $user['id'])->update(['money' => ['exp', 'money-' . $order->total_price], 'freeze_money' => ['exp', 'freeze_money+' . $order->total_price]]);
+				                            // 记录用户金额变动日志
+				                            record_user_money_log('freeze', $user['id'], $order->total_price, $balance, "T0订单被投诉，冻结金额：{$order->total_price}元");
+				                        }
+				                    }
+				                }
+				            }
+						}
                     }
                 }
             }
-
-            Db::rollback();
-            $this->error('操作失败，请重试！');
+            
+            $sms = new Sms;
+	        // 向买家发送投诉短信
+	        $sms->sendComplaintPwd($mobile, $trade_no, $code);
+	        // 向卖家发送投诉成功短信
+	        $sms->sendComplaintNotify($order->user->mobile, $trade_no);
+	        $token = md5(md5(time()).rand(1000,5000));
+	        session('token',$token);
         } catch (Exception $e) {
             Db::rollback();
             $this->error('操作失败，请重试！' . $e->getMessage());
         }
+        Db::commit();
+        $this->success('投诉成功！', url('Index/order/complaintpass', ['trade_no' => $trade_no, 'token' => $token]));
+        
     }
 
     /**

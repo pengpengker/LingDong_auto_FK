@@ -74,7 +74,7 @@ class Pay {
                         throw new Exception("商家余额不足以扣除手续费");
                     }
                     // 记录金额日志
-                    record_user_money_log('goods_sold', $user['id'], -$order->fee, $balance, "扣除交易手续费，订单：{$order->trade_no}");
+                    record_user_money_log('goods_sold', $user['id'], $order->fee, $balance, "扣除交易手续费，订单：{$order->trade_no}");
                     // 扣除上级佣金
                 }
                 if ($user['parent_id'] > 0) {

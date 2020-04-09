@@ -70,9 +70,9 @@
                         <td>{$v.category.name|default="未分类"}</td>
                         <th scope="row">{$v.name}</th>
                         <th scope="row">{$v.duijie_name}</th>
-                        <td>{$v.price}</td>
+                        <td>{$v.duijie_price}</td>
                         <td>{$v.duijia_secmoney}</td>
-                        <td>{$v.price+$v.duijia_secmoney}</td>
+                        <td>{$v.duijie_price+$v.duijia_secmoney}</td>
                         <td><?php echo $v->cards_stock_count; ?>张</td>
                         <td>
                             {if $v.duijie_status!=1}<a href="{:Url('start_duijie_shop',['shop_id'=>$v.id])}"><span class="label label-danger">开始对接</span></a>{else /} <a href="{:Url('stop_duijie_shop',['shop_id'=>$v.id])}"><span class="label label-info">停止对接</span></a>{/if}

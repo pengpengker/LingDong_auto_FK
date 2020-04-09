@@ -10,6 +10,7 @@ use think\Request;
 use app\common\Pay;
 use think\Loader;
 use think\Session;
+use think\Exception;
 
 class WxJsApi extends Pay{
     protected $code='';

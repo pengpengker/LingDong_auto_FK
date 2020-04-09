@@ -230,7 +230,7 @@ if (!function_exists('trait_uses_recursive')) {
      * @param string $trait Trait
      * @return array
      */
-    function trait_uses_recursive(string $trait): array
+    function trait_uses_recursive(string $trait)
     {
         $traits = class_uses($trait);
         foreach ($traits as $trait) {
@@ -248,7 +248,7 @@ if (!function_exists('class_basename')) {
      * @param mixed $class 类名
      * @return string
      */
-    function class_basename($class): string
+    function class_basename($class)
     {
         $class = is_object($class) ? get_class($class) : $class;
         return basename(str_replace('\\', '/', $class));
@@ -262,7 +262,7 @@ if (!function_exists('class_uses_recursive')) {
      * @param mixed $class 类名
      * @return array
      */
-    function class_uses_recursive($class): array
+    function class_uses_recursive($class)
     {
         if (is_object($class)) {
             $class = get_class($class);

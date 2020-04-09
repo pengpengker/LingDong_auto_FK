@@ -1,8 +1,23 @@
 $(function () {
-    console.log(userid);
 
     resize();
     $(window).resize(resize);
+    
+    function IsPC() {
+	    var userAgentInfo = navigator.userAgent;
+	    var Agents = ["Android", "iPhone",
+	                "SymbianOS", "Windows Phone",
+	                "iPad", "iPod","MicroMessenger"];
+	    var flag = true;
+	    for (var v = 0; v < Agents.length; v++) {
+	        if (userAgentInfo.indexOf(Agents[v]) > 0) {
+	            flag = false;
+	            break;
+	        }
+	    }
+	    return flag;
+	}
+
 
     function resize() {
         if ($(window).width() > 550) {
@@ -197,11 +212,13 @@ $(function () {
                 notice = '';
             }
             if (res.code == 200 && notice != "") {
-                layer.open({
-                    title: "商家公告",
-                    content: notice,
-                    btn: ["关闭"]
-                });
+            	if(IsPC()){
+            		layer.open({
+	                    title: "商家公告",
+	                    content: notice,
+	                    btn: ["关闭"]
+	                });
+            	}
             }
         },
         "json"
@@ -650,7 +667,7 @@ function submit() {
             break;
         case "email":
             var reg = /^([0-9a-zA-Z_-])+@([0-9a-zA-Z_-])+((\.[0-9a-zA-Z_-]{2,3}){1,2})$/;
-            if (!reg.test(email)) {
+            if (!reg.test(contact)) {
                 alert("联系方式必须是邮箱！");
                 $("[name=contact]").focus();
                 return false;

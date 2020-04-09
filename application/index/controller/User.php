@@ -559,7 +559,7 @@ class User extends Base
         }
         $data['password'] = md5($data['password']);
         $data['money'] = 0;
-        $data['duijie_key'] = strtoupper(md5($data['email'].time()));
+        $data['duijie_key'] = strtoupper('QSFK'.md5($data['email'].time(),true));
         // 检测注册是否自动审核
         if (sysconf('site_register_verify') == 1) {
             $data['status'] = 1;

@@ -34,8 +34,7 @@ class Complaint extends BasicAdmin {
             'date_range' => input('date_range/s', ''),
         ];
         $where = $this->genereate_where($query);
-
-        $complaints = ComplaintModel::where($where)->order('id desc')->paginate(30, false, [
+        $complaints = ComplaintModel::where($where)->where('duijie_id',null)->order('id desc')->paginate(30, false, [
             'query' => $query,
         ]);
         // 分页
@@ -259,13 +258,30 @@ class Complaint extends BasicAdmin {
     public function del() {
         if ($this->request->isPost()) {
             $id  = input('id/d', 0);
-            $res = Db::name('Complaint')->where('id', $id)->delete();
-            if (false !== $res) {
-                LogService::write('用户管理', '删除投诉成功，ID:' . $id);
-                $this->success('删除成功');
-            } else {
-                $this->error('删除失败');
+            DB::startTrans();
+            try {
+            	$res = Db::name('Complaint')->where('id', $id)->find();
+            	$duijie_id = $res['duijie_id'];
+            	$res = Db::name('Complaint')->where('id', $id)->delete();
+	            if (false !== $res) {
+	                if(!empty($duijie_id)){
+	                	$res = Db::name('Complaint')->where('id', $duijie_id)->delete();
+	                	if (false === $res) {
+	                		DB::rollback();
+	                		$this->error('删除失败');
+	                	}
+	                }
+	            } else {
+	            	DB::rollback();
+	                $this->error('删除失败');
+	            }
+            } catch (Exception $e) {
+                DB::rollback();
+	            $this->error('删除失败'.$e);
             }
+            LogService::write('用户管理', '删除投诉成功，ID:' . $id.'上级投诉id:'.$duijie_id);
+            DB::commit();
+            $this->success('删除成功');
         }
     }
 }

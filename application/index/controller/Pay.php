@@ -93,7 +93,12 @@ class Pay extends Base {
         if (!$channel) {
             return '该支付产品没有可用的支付渠道！';
         }
-
+		//判断是否是代理商品
+		if(!empty($order->dj_order_id)){
+			//修改金额
+			$order->total_price = round(OrderModel::get(['trade_no' => $order->dj_order_id])['total_price']+$order->total_price,3);
+		}
+		
         switch ($order->pay_content_type) {
             case 2:
                 // 跳转链接
@@ -296,7 +301,7 @@ class Pay extends Base {
             //定义对接下级的商品和用户信息
             $xj_goods_info = $goods;
             $xj_users_info = $user;
-            $goods = GoodsModel::get(['id' => $goods->duijie_id, 'status' => 1]);
+            $goods = GoodsModel::get(['id' => $goods->duijie_id, 'status' => 1,'is_duijie' => 1]);
             if (!$goods) {
                 return '对接商品不存在或下架';
             }
@@ -307,6 +312,8 @@ class Pay extends Base {
             if (!$user) {
                 return '对接不存在该商家！';
             }
+            //设置该订单为对接，不可查，不可显示
+            $data['dj_is_see'] = 1;
         }
         // 联系方式
         $data['contact'] = input('contact/s', '');
@@ -324,7 +331,12 @@ class Pay extends Base {
         // 商品名
         $data['goods_name'] = $goods->name;
         // 商品单价
-        $data['goods_price'] = $goods->price;
+        if($is_duijie_shop_bool){
+        	$goods->price = $goods->duijie_price;
+        	$data['goods_price'] = $goods->duijie_price;
+        }else{
+        	$data['goods_price'] = $goods->price;
+        }
         // 成本价
         $data['goods_cost_price'] = $goods->cost_price;
         // 商品数量
@@ -406,8 +418,7 @@ class Pay extends Base {
         $data['total_price'] = $data['total_product_price'] + $data['sms_price'];
         // 总成本价
         $data['total_cost_price'] = round($data['goods_cost_price'] * $data['quantity'], 2);
-        //  订单金额定义
-        $pirce = $data['total_price'];
+        
         // echo '<pre>';
         // var_export($data);
 
@@ -461,36 +472,55 @@ class Pay extends Base {
 
         ////////////////// 费率结算项 //////////////////
         // 手续费
-        $data['rate'] = get_user_rate($user->id, $channel->id);
-        $data['fee']  = round($data['rate'] * $data['total_product_price'], 3);
-        if ($data['fee'] < sysconf('transaction_min_fee')) {
-            $data['fee'] = sysconf('transaction_min_fee');
-        }
+        if($is_duijie_shop_bool){
+            $data['rate'] = get_user_rate($user->id, $channel->id);
+            $data['fee']  = 0;
+            $fee_payer = Db::name('user')->where('id', $data['user_id'])->value('fee_payer');
+            if (0 == $fee_payer) {
+                // 获取系统配置
+                $fee_payer = sysconf('fee_payer');
+            }
+            $data['fee_payer'] = $fee_payer;
+            //买家承担费率
+            if ($fee_payer == 2) {
+                $data['total_price'] = bcadd($data['total_price'], $data['fee'], 4);
+            }
+            
+            //消除短信费用
+            $data['sms_notify'] = 0;
+        }else{
+            $data['rate'] = get_user_rate($user->id, $channel->id);
+            $data['fee']  = round($data['rate'] * $data['total_product_price'], 3);
+            if ($data['fee'] < sysconf('transaction_min_fee')) {
+                $data['fee'] = sysconf('transaction_min_fee');
+            }
 
-        $fee_payer = Db::name('user')->where('id', $data['user_id'])->value('fee_payer');
-        if (0 == $fee_payer) {
-            // 获取系统配置
-            $fee_payer = sysconf('fee_payer');
-        }
-        $data['fee_payer'] = $fee_payer;
+            $fee_payer = Db::name('user')->where('id', $data['user_id'])->value('fee_payer');
+            if (0 == $fee_payer) {
+                // 获取系统配置
+                $fee_payer = sysconf('fee_payer');
+            }
+            $data['fee_payer'] = $fee_payer;
 
-        //买家承担费率
-        if ($fee_payer == 2) {
-            $data['total_price'] = bcadd($data['total_price'], $data['fee'], 4);
+            //买家承担费率
+            if ($fee_payer == 2) {
+                $data['total_price'] = bcadd($data['total_price'], $data['fee'], 4);
+            }
+            
+            // 创建订单前的检查
+	        // 检查商户余额是否足够抵扣短信费
+	        if (($data['sms_payer'] == 1) && ($data['total_product_price'] < $data['sms_price'])) {
+	            if ($user->money < $data['sms_price']) {
+	                return '商户余额不足以支付短信费用，请联系商家';
+	            }
+	        }
         }
 
         // 代理手续费
         $data['agent_rate'] = 0;
         $data['agent_fee']  = 0;
         $data['status']     = 0;
-
-        // 创建订单前的检查
-        // 检查商户余额是否足够抵扣短信费
-        if (($data['sms_payer'] == 1) && ($data['total_product_price'] < $data['sms_price'])) {
-            if ($user->money < $data['sms_price']) {
-                return '商户余额不足以支付短信费用，请联系商家';
-            }
-        }
+        
         ////////////////// 费率结算项 //////////////////
 
         // 获取当前商家的结算周期
@@ -499,6 +529,9 @@ class Pay extends Base {
         if ($data['settlement_type'] == -1) {
             $data['settlement_type'] = sysconf('settlement_type');
         }
+        
+        //  订单金额定义
+        $pirce = $data['total_price'];
 
         //对接商户订单创建
         if($is_duijie_shop_bool){
@@ -542,7 +575,7 @@ class Pay extends Base {
             $datas['total_price'] = $datas['total_product_price'] + $datas['sms_price'];
             // 总成本价
             $datas['total_cost_price'] = round($datas['goods_cost_price'] * $datas['quantity'], 2);
-            $pirce = round($pirce,2)+round($datas['total_price'],2);
+            
             ////////////////// 支付下单项 //////////////////
             // 支付渠道
             $channel = ChannelModel::get(['id' => input('pid/d', 0), 'status' => 1]);
@@ -589,7 +622,7 @@ class Pay extends Base {
             ////////////////// 费率结算项 //////////////////
             // 手续费
             $datas['rate'] = get_user_rate($xj_users_info->id, $channel->id);
-            $datas['fee']  = round($datas['rate'] * $datas['total_product_price'], 3);
+            $datas['fee']  = round($datas['rate'] * ($pirce+$datas['total_product_price']), 3);
             if ($datas['fee'] < sysconf('transaction_min_fee')) {
                 $datas['fee'] = sysconf('transaction_min_fee');
             }
@@ -622,6 +655,9 @@ class Pay extends Base {
             if ($datas['settlement_type'] == -1) {
                 $datas['settlement_type'] = sysconf('settlement_type');
             }
+            
+            //此处算总价
+            $pirce = round($pirce,2)+round($datas['total_price'],2);
 
             //设置data数据中的对接标识
             $datas['dj_order_id'] = $data['trade_no'];
@@ -654,22 +690,24 @@ class Pay extends Base {
 
         // 创建订单
         $order = OrderModel::create($data);
-        $order->total_price = $pirce;
+        if (!$order) {
+            return '订单创建失败，请重试！ -1';
+        }
+        $order->total_price = $pirce; //页面显示价格 -- 最终总价
         if($is_duijie_shop_bool){
             $order->goods_name = $datas['goods_name'];
             $order->trade_no = $datas['trade_no'];
             if(!OrderModel::create($datas)){
-                return '订单创建失败，请重试！ -1';
+                return '订单创建失败，请重试！ -2';
             }
         }
-        if (!$order) {
-            return '订单创建失败，请重试！ -2';
-        }
+        
         if($is_duijie_shop_bool){
             session('last_order_trade_no', $datas['trade_no']);
         }else{
             session('last_order_trade_no', $data['trade_no']);
         }
+        $order->total_price = $pirce;
         $this->assign('order', $order);
         $this->assign('channel', $channel);
         $this->assign('isMobile', $this->request->isMobile());

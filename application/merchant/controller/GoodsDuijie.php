@@ -47,7 +47,7 @@ class GoodsDuijie extends Base
                 $query = [
                     'cate_id' => input('cate_id/s', ''),
                     'name' => input('name/s', ''),
-                    'user_id' => \app\common\model\User::where('duijie_key',$this->user->sj_duijie_key)->find()['id'],
+                    'user_id' => $sj_uid,
                 ];
             }else{
                 $query = [
@@ -117,23 +117,26 @@ class GoodsDuijie extends Base
             if(empty($this->request->param('shop_id')) || empty($this->request->param('name')) || empty($this->request->param('price'))){
                 $this->error('参数缺失','myduijie');
             }
+            if($sjgoods['status'] !== 1){
+            	$this->error('上级已下架该商品，无法对接','myduijie');
+            }
             //把上级商品信息插入我的商品信息中
             $data = [
                 'user_id' => $this->user->id,
-                'cate_id' => $sjgoods['cate_id'],
-                'theme' => $sjgoods['theme'],
+                'cate_id' => input('cate_id/d', 0),
+                'theme' => input('theme/s', 'default'),
                 'sort' => input('sort/d', 0),
                 'name' => input('name/s', ''),
                 'price' => input('price/s', 0),
-                'cost_price' => $sjgoods['cost_price'],
+                'cost_price' => $sjgoods['duijie_price'],
                 'wholesale_discount' => $sjgoods['wholesale_discount'],
                 'wholesale_discount_list' => $sjgoods['wholesale_discount_list'],
-                'limit_quantity' => $sjgoods['limit_quantity'],
-                'inventory_notify' => $sjgoods['inventory_notify'],
-                'inventory_notify_type' => $sjgoods['inventory_notify_type'],
+                'limit_quantity' => input('limit_quantity/d', 1),
+                'inventory_notify' => input('inventory_notify/d', 0),
+                'inventory_notify_type' => input('inventory_notify_type/d', 1),
                 'coupon_type' =>  $sjgoods['coupon_type'],
                 'sold_notify' =>  $sjgoods['sold_notify'],
-                'take_card_type' => $sjgoods['take_card_type'],
+                'take_card_type' => input('take_card_type/d', 0),
                 'visit_type' => $sjgoods['visit_type'],
                 'visit_password' => $sjgoods['visit_password'],
                 'is_duijie' => 0,
@@ -141,7 +144,7 @@ class GoodsDuijie extends Base
                 'contact_limit' => $sjgoods['contact_limit'],
                 'content' => input('content/s', ''),
                 'remark' => input('remark/s', ''),
-                'sms_payer' => $sjgoods['sms_payer'],
+                'sms_payer' => input('sms_payer/d', 0),
                 'status' => 1,
                 'create_at' => $sjgoods['create_at'],
                 'duijie_id' => $sjgoods['id'],
@@ -173,6 +176,9 @@ class GoodsDuijie extends Base
             if(input('price/s', 0) < $sjgoods['duijie_smilepic']){
                 $this->error('加价价格必须高于'.$sjgoods['duijie_smilepic']);
             }
+            if(input('limit_quantity/d', 1) <$sjgoods['limit_quantity']){
+            	$this->error('起购数量必须高于或等于上级起购数量'.$sjgoods['limit_quantity']);
+            }
             $res = $this->validate($data, 'Goods');
             if ($res !== true) {
                 $this->error($res);
@@ -190,6 +196,8 @@ class GoodsDuijie extends Base
             if(empty($this->request->param('shop_id'))){
                 $this->error('参数缺失','myduijie');
             }
+            $categorys = CategoryModel::where(['user_id' => $this->user->id, 'status' => 1])->order('sort desc,id desc')->select();
+            $this->assign('categorys', $categorys);
             $this->assign('shop_id',$this->request->param('shop_id'));
             $this->assign('sjgoods',$sjgoods);
             return view();
