@@ -43,7 +43,8 @@ class Base extends BasicWechat
 
         // 站点关闭
         if(sysconf('site_status')==='0'){
-            die(sysconf('site_close_tips'));
+        	$this->redirect('Errors/info');
+            //die(sysconf('site_close_tips'));
         }
         $nav = Db::name('nav')->where('status=1')->order('sort DESC')->select();
         $this->assign('nav', $nav);

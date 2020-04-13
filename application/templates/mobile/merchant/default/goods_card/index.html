@@ -47,6 +47,13 @@
 				</select>
 			</div>
 			<div class="form-group">
+				<label for="cateid">名称是否显示(导出)：</label>
+				<select name="isname" class="form-control">
+					<option value="0" {if $Think.get.isname=='0'}selected{/if}>否</option>
+					<option value="1" {if $Think.get.isname=='1'}selected{/if}>是</option>
+				</select>
+			</div>
+			<div class="form-group">
 				<input type="hidden" name="do" value="search">
 				<button type="button" id="send" class="btn btn-primary btn-block">导出</button>
 				<button type="submit" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-search"></span>&nbsp;立即查询</button>

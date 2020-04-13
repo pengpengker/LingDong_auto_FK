@@ -1,0 +1,99 @@
+{extend name="base"}
+
+{block name="content"}
+<div class="row">
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        系统已经完善对接功能，若商户产生疑问，请及时联系管理员
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+            您的对接码:{$_user.duijie_key}                 使用该对接可轻松对接您的开放产品
+        </li>
+        <li class="list-group-item">
+            对接码无法更改，如您需要强制更改，请联系客服
+        </li>
+    </ul>
+
+    <div class="col-sm-12">
+        <div class="card-box">
+            <div class="row">
+                <div class="col-sm-6">
+                    <form class="form-inline" role="form" action="" method="get">
+                        <div class="form-group">
+                            <select name="cate_id" class="form-control">
+                                <option value="" {if $Think.get.cate_id=='' }selected{/if}>全部分类 </option> {foreach $categorys as $v} <option
+                                    value="{$v.id}" {if $Think.get.cate_id==$v.id}selected{/if}>{$v.name} </option> {/foreach} </select> </div>
+                        <div class="form-group">
+                            <input name="name" type="text" class="form-control" placeholder="商品名" value="{$Think.get.name|default=''}">
+                        </div>
+                        <button type="submit" class="btn btn-purple waves-effect waves-light"><i class="fa fa-search"></i> 搜索</button>
+                    </form>
+                </div>
+                <div class="col-sm-6">
+                    这是您开放对接的产品信息,请留意
+                </div>
+            </div>
+            <!-- end row -->
+            <div class="row">
+                <table class="table table-striped m-0">
+                    <thead>
+                    <tr>
+                        <th>商品分类</th>
+                        <th>排序</th>
+                        <th>商品名称</th>
+                        <th>价格</th>
+                        <th>库存</th>
+                        <th>卖出</th>
+                        <th>上下架</th>
+                        <th>创建时间</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {foreach $goodsList as $v}
+                    <tr>
+                        <td>{$v.category.name|default="未分类"}</td>
+                        <td>{$v.sort}</td>
+                        <th scope="row">{$v.name}
+                            {if $v.wholesale_discount==1}
+                            <span class="label label-success">批</span>
+                            {/if}
+                            {if $v.coupon_type==1}
+                            <span class="label label-pink">券</span>
+                            {/if}
+                            {if $v.take_card_type!=0}
+                            <span class="label label-primary">取</span>
+                            {/if}
+                            {if $v.visit_type==1}
+                            <span class="label label-danger">密</span>
+                            {/if}
+                        </th>
+                        <td>{$v.price}</td>
+                        <td>
+                            <?php echo $v->cards_stock_count; ?>张
+                        </td>
+                        <td>
+                            <?php echo $v->cards_sold_count; ?>张
+                        </td>
+                        <td>
+                            {if $v.status==1}<span class="label label-danger">上架</span>{else /} <span class="label label-danger">下架</span>{/if}
+                        </td>
+                        <td>
+                            {$v.create_at|date="Y-m-d H:i:s",###}
+                        </td>
+                    </tr>
+                    {/foreach}
+                    </tbody>
+                </table>
+            </div>
+            <!-- end row -->
+        </div>
+        {$page}
+    </div>
+</div>
+
+{/block}
+
+{block name="appendJS"}
+
+{/block}

@@ -73,7 +73,10 @@
     </section>
     <section class="box-zone">
         <div class="order_form">
-
+			<div class="alert alert-warning alert-dismissible" role="alert">
+			  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			  <strong>提示!</strong> 1：卡密为“联系QQ拿货，加QQ群拿货”2、卡密为“付款成功，等待充值”3、购买的商品有问题，卖家且不售后4、以各种理由推脱到第二天遇到以上或售后问题，请及时联系我们QQ客服：<a href="http://wpa.qq.com/msgrd?v=3&uin={:sysconf('site_info_qq')}&site=qq&menu=yes" target="_blank">{:sysconf('site_info_qq')}</a>
+			</div>
             <input type="hidden" id="query-type" value="{$querytype}">
 
             <ul class="nav nav-tabs" role="tablist">

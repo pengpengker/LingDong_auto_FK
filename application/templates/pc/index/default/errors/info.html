@@ -47,7 +47,8 @@
      </div> </li> 
     <li class="layer" data-depth="0.20"> 
      <div class="title">
-     <h2>骑士发卡<br /><br />{:sysconf('site_close_tips')}<font color="red">骑</font><font color="white">士</font>V2 <br /><br />所有的等待都是值得的。 </h2>       
+     	{:htmlspecialchars_decode(sysconf('site_close_tips'))}
+     <!--<h2>骑士发卡<br /><br />{:sysconf('site_close_tips')}<font color="red">骑</font><font color="white">士</font>V2 <br /><br />所有的等待都是值得的。 </h2>       -->
       <span class="line"></span> 
      </div> </li> 
     <li class="layer" data-depth="0.25"> 
@@ -107,12 +108,12 @@
 	    var d = new Date();
 		d.setHours(d.getHours() + 1);
     	$('#countdown').countdown({
-    		date: d.toString(),
+    		date: "{:sysconf('site_close_endtime')}",
     		render: function(data) {
         		var el = $(this.el);
         		el.empty().append("<div>" + this.leadingZeros(data.days, 2) + " <span>天</span></div>").append("<div>" + this.leadingZeros(data.hours, 2) + " <span>时</span></div>").append("<div>" + this.leadingZeros(data.min, 2) + " <span>分</span></div>").append("<div>" + this.leadingZeros(data.sec, 2) + " <span>秒</span></div>");
-    }
-});
+		    }
+		});
     </script>
    </ul>
   </div>

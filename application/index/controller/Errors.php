@@ -8,7 +8,11 @@ class Errors extends Controller
 {
     public function info()
     {
-        //站点关闭提示
-        return $this->fetch();
+    	if(sysconf('site_status') === '0'){
+    		//站点关闭提示
+        	return $this->fetch();
+    	}else{
+    		$this->redirect('Index/Index');
+    	}
     }
 }

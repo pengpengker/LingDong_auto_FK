@@ -18,7 +18,8 @@ class InviteCode extends Base
         parent::__construct();
         // 站点关闭
         if(sysconf('site_status')==='0'){
-            die(sysconf('site_close_tips'));
+        	$this->redirect('Errors/info');
+            //die(sysconf('site_close_tips'));
         }
         if(sysconf('spread_invite_code') === '0') {
             die('邀请码功能已关闭');

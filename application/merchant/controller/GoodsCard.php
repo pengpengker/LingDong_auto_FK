@@ -146,6 +146,16 @@ class GoodsCard extends Base
         $this->assign('goodsList', $goodsList);
         return $this->fetch();
     }
+    
+    //new 动态输出分类下的商品list
+    // public function ajax_get_goodlist_func()
+    // {
+    // 	if(empty($this->request->param('id'))){
+    // 		return json(['code'=>1,'msg'=>'id不能为空']);
+    // 	}
+    // 	$info = GoodsModel::where(['user_id' => $this->user->id,'duijie_id' => null,'cate_id' => $this->request->param('id')])->order('sort desc,id desc')->select();
+    // 	return json(['code'=>0,'msg'=>$info]);
+    // }
 
 
 	//对接权限 ok
@@ -179,8 +189,18 @@ class GoodsCard extends Base
 		if($this->request->param('isdel')){
 			CardModel::where($map)->delete();
 		}
+		if($this->request->param('isname')){
+			$name = GoodsModel::where(['user_id' => $this->user->id,'duijie_id' => null,'id' => $this->request->param('goods_id')])->find();
+		}else{
+			$name = null;
+		}
 		foreach ($cache as $key=>$val){
-			$node = $node . '</br>' . $val['number'] . '   ' . $val['secret'];
+			if(!empty($name)){
+				$node = $node . '</br>' . '商品名称:' . $name->name . '   ' . '卡号:'  . $val['number'] . '   ' . '卡密:' .$val['secret'];
+			}else{
+				$node = $node . '</br>' . '卡号:' . $val['number'] . '   ' . '卡密:' . $val['secret'];
+			}
+			
 		}
 		return $node;
 	}

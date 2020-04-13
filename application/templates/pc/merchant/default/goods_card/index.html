@@ -12,12 +12,12 @@
 								<option value="" {if $Think.get.cate_id=='' }selected{/if}>全部分类 </option> <!-- {foreach $categorys as $v} -->
 								<option value="{$v.id}" {if $Think.get.cate_id==$v.id}selected{/if}>{$v.name} </option> <!-- {/foreach} -->
 							</select> </div>
-						<div class="form-group">
-							<select name="goods_id" class="form-control">
-								<option value="" {if $Think.get.goods_id=='' }selected{/if}>全部商品 </option> <!-- {foreach $goodsList as $v} -->
-								<option value="{$v.id}" {if $Think.get.goods_id==$v.id}selected{/if}>{$v.name} </option> <!-- {/foreach} -->
-							</select> </div>
-						<div class="form-group">
+							<div class="form-group">
+								<select name="goods_id" class="form-control">
+									<option value="" {if $Think.get.goods_id=='' }selected{/if}>全部商品 </option> <!-- {foreach $goodsList as $v} -->
+									<option value="{$v.id}" {if $Think.get.goods_id==$v.id}selected{/if}>{$v.name} </option> <!-- {/foreach} -->
+								</select> </div>
+							<div class="form-group">
 							<select name="status" class="form-control">
 								<option value="" {if $Think.get.status=='' }selected{/if}>全部状态 </option> <option value="1" {if
 								 $Think.get.status=='1' }selected{/if}>未售出 </option> <option value="2" {if $Think.get.status=='2' }selected{/if}>已售出
@@ -236,6 +236,29 @@
 {block name="appendJS"}
 
 <script>
+	//new 获取分类下的商品列表
+	// function getgoodlist_func(){
+	// 	var vs = $('select  option:selected').val();  
+	// 	$.post('/merchant/goods_card/ajax_get_goodlist_func', {
+	// 		id: vs
+	// 	}, function (res) {
+	// 		if(res.code !== 0 && vs !== ''){
+	// 			layer.msg('查询失败，请刷新重试');
+	// 		}
+	// 		if(vs === ''){
+	// 			document.getElementById("goods_id_func").options.add(new Option('先选分类', '0'));
+	// 		}
+	// 		//清空选择框
+	// 		document.getElementById("goods_id_func").options.length=0;
+	// 		//遍历json填充
+	// 		for (var i = 0; i < res.msg.length; i++) {
+ //               var pro = res.msg[i];
+ //               document.getElementById("goods_id_func").options.add(new Option(pro.name, pro.id));
+ //           }
+	// 	});
+	// }
+
+	
 	$('#select_all').click(function () {
 		if ($(this).is(':checked')) {
 			$('tbody').find('input[type="checkbox"]').each(function () {

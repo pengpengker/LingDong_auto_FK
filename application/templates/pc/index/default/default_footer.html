@@ -1,7 +1,128 @@
+<style>
+	.fd-top {
+	    overflow: hidden;
+	    margin-bottom: 46px;
+	    padding-left: 10%;
+    	padding-right: 10%;
+	}
+	.fd-contact {
+	    float: left;
+	    margin-right: 45px;
+	}
+	.fd-contact .s1 {
+	    font-size: 18px;
+	    margin-bottom: 15px;
+	}
+	.fd-contact .s2 {
+	    font-weight: 700;
+	    font-size: 30px;
+	    color: #ff8d72;
+	    margin-bottom: 25px;
+	}
+	img {
+	    max-width: 100%;
+	    border: none;
+	}
+	.fd-contact .s3 {
+	    font-size: 14px;
+	    margin-bottom: 20px;
+	}
+	.fd-contact .s4 {
+	    font-size: 16px;
+	}
+	.fd-eq {
+	    float: left;
+	    padding: 4px 0 0;
+	    overflow: hidden;
+	}
+	.fd-eq li {
+	    float: left;
+	    width: 140px;
+	    text-align: center;
+	}
+	.fd-eq .pic {
+	    margin: 0 auto 18px;
+	    width: 92px;
+	    height: 92px;
+	}
+	.fd-eq p {
+	    font-size: 16px;
+	}
+	.fd-nv {
+	    float: right;
+	    overflow: hidden;
+	}
+	.fd-nv li {
+	    float: left;
+	    margin-left: 60px;
+	}
+	.fd-nv .tit {
+	    font-size: 18px;
+	}
+	.fd-nv li a {
+	    display: block;
+	    font-size: 16px;
+	    line-height: 44px;
+	    -webkit-transition: .3s;
+	    -moz-transition: .3s;
+	    -ms-transition: .3s;
+	    -o-transition: .3s;
+	    transition: .3s;
+	}
+	.fd-nv .tit {
+	    font-size: 18px;
+	}
 
+</style>
+		
+		
+	
 <footer class="row footer-area">
-
-    <div class="row m0 footer_bottom">
+	    <div class="row m0 footer_bottom">
+	    	<div class="fd-top">
+	        <div class="fd-contact">
+	            <div class="s1">企业联系方式</div>
+	            <div class="s2"><img src="https://im.qq.com/assets/images/logo.png"> <a href="http://wpa.qq.com/msgrd?v=3&uin={:sysconf('site_info_qq')}&site=qq&menu=yes" target="_blank">{:sysconf('site_info_qq')}</a> </div>
+	            <div class="s3">服务时间：10：00-22：00</div>
+	            <div class="s4">企业邮箱：{:sysconf('site_info_qq')}@qq.com</div>
+	        </div>
+	        <ul class="fd-eq">
+	            <li>
+	                <div class="pic">
+	                    <img src="" alt="暂无公众号">
+	                </div>
+	                <p>扫码关注公众号</p>
+	            </li>
+	        </ul>
+	        <ul class="fd-nv">
+	            <li>
+	                <div class="tit">快捷通道</div>
+	                <div class="con">
+						<a href="/login" target="_blank">商户登录</a>
+	                    <a href="/register" target="_blank">注册商户</a>
+						<a href="/orderquery" target="_blank">订单查询</a>
+	                    <a href="/complaintquery" target="_blank">投诉查询</a>
+	                </div>
+	            </li>
+	            <li>
+	                <div class="tit">法律条款</div>
+	                <div class="con">
+	                    <a href="/index/index/content/id/17.html" target="_blank">服务协议</a>
+	                    <a href="/index/index/content/id/18.html" target="_blank">法律声明</a>
+	                    <a href="/index/index/content/id/18.html" target="_blank">免责声明</a>
+						<a href="index/index/content/id/12" target="_blank">禁售列表</a>
+	                </div>
+	            </li>					
+	
+	
+	            <li>
+	                <div class="tit">关于{:sysconf('site_name')}</div>
+	                <div class="con">
+	                    <a href="/company/contact" target="_blank">联系我们</a>
+	                </div>
+	            </li>
+	        </ul>
+	    </div>
         <div class="container">
             <div class="row" style="padding: 0 20px;">
                 <div class="col-sm-12 text-center">

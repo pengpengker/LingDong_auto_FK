@@ -203,6 +203,44 @@
                 </div>
             </div>
             <div class="form-group">
+				<label class="col-md-2 control-label">对接控制</label>
+				<div class="col-md-4">
+					<div class="radio radio-primary radio-inline">
+						<input type="radio" name="is_duijie" id="is_duijie1" value="1" {if isset($goods) && $goods.is_duijie==1}checked{/if}>
+						<label for="is_duijie1">
+							开启
+						</label>
+					</div>
+					<div class="radio radio-primary radio-inline">
+						<input type="radio" name="is_duijie" id="is_duijie2" value="0" {if isset($goods)}{if $goods.is_duijie==0}checked{/if}{else/}checked{/if}>
+						<label for="is_duijie2">
+							关闭
+						</label>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<p class="form-control-static">留空为不开启，若开启后商品购买页面将提示输入设置的密码才能继续访问</p>
+				</div>
+			</div>
+			<div class="form-group block-duijie_smilepic" {if !isset($goods) || $goods.is_duijie==0}style="display:none"{/if}>
+				<label class="col-md-2 control-label">对接单价</label>
+				<div class="col-md-4">
+					<input name="duijie_price" type="text" class="form-control" placeholder="" value="{$goods.duijie_price|default='0'}">
+				</div>
+				<div class="col-md-6">
+					<p class="form-control-static">设置后代理商对接零售单价！</p>
+				</div>
+			</div>
+			<div class="form-group block-duijie_smilepic" {if !isset($goods) || $goods.is_duijie==0}style="display:none"{/if}>
+				<label class="col-md-2 control-label">最小加价</label>
+				<div class="col-md-4">
+					<input name="duijie_smilepic" type="text" class="form-control" placeholder="" value="{$goods.duijie_smilepic|default='0'}">
+				</div>
+				<div class="col-md-6">
+					<p class="form-control-static">设置后代理商最低加价价格！</p>
+				</div>
+			</div>
+            <div class="form-group">
                 <label class="col-md-2 control-label">提卡密码</label>
                 <div class="col-md-4">
                     <div class="radio-inline">
@@ -307,6 +345,14 @@
 {block name="appendJS"}
 
 <script>
+$('[name="is_duijie"]').change(function(){
+	var status=$(this).val();
+	if(status==1){
+		$('.block-duijie_smilepic').slideDown();
+	}else{
+		$('.block-duijie_smilepic').slideUp();
+	}
+});
 $('[name="visit_type"]').change(function(){
 	var status=$(this).val();
 	if(status==1){

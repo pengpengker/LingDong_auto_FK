@@ -165,7 +165,7 @@
                             layer.msg(ret.msg);
                             token = ret.data.token;
                             $('#click_checkcode_phone').html('<i class="times">80</i> 秒后重发');
-                            timeC(80, '#click_checkcode_phone');
+                            timeC_sms(80, '#click_checkcode_phone');
                         } else {
                             alert(ret.msg);
                             $('#click_checkcode_phone').on('click', getCode);
@@ -196,7 +196,7 @@
                         layer.closeAll();
                         layer.msg(ret.msg);
                         $('#click_checkcode_email').html('<i class="times">80</i> 秒后重发');
-                        timeC(80, "#click_checkcode_email");
+                        timeC_email(80, "#click_checkcode_email");
                     } else {
                         alert(ret.msg);
                         $('#click_checkcode_email').on('click', getEmailCode);
@@ -204,14 +204,25 @@
                 }, 'json');
             }
 
-            function timeC(t, obj) {
+            function timeC_sms(t, obj) {
                 if (t == 0) {
                     $(obj).on('click', getCode);
                     $(obj).text('获取验证码');
                 } else {
                     t = t - 1;
                     $(obj + ' i.times').text(t);
-                    setTimeout('timeC(' + t + ',"' + obj + '")', 1000);
+                    setTimeout('timeC_sms(' + t + ',"' + obj + '")', 1000);
+                }
+            }
+
+            function timeC_email(t, obj) {
+                if (t == 0) {
+                    $(obj).on('click', getEmailCode);
+                    $(obj).text('获取验证码');
+                } else {
+                    t = t - 1;
+                    $(obj + ' i.times').text(t);
+                    setTimeout('timeC_email(' + t + ',"' + obj + '")', 1000);
                 }
             }
 
