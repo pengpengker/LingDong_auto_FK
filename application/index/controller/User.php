@@ -97,7 +97,7 @@ class User extends Base
             $time_str = sec2Time($time);
             return J(200, '输入错误密码超限，账户已被锁定，将于' . $time_str . '后自动解锁!');
         }
-        if ($user->password != md5($password)) {
+        if (!password_verify($password,$user->password)) {
             $plog['login_name'] = $user['username'];
             $plog['password'] = $password;
             $plog['user_type'] = 0;
@@ -557,7 +557,7 @@ class User extends Base
                 $data['parent_id'] = $user['id'];
             }
         }
-        $data['password'] = md5($data['password']);
+        $data['password'] = password_hash($data['password'],PASSWORD_BCRYPT);
         $data['money'] = 0;
         $data['duijie_key'] = strtoupper('QSFK'.md5($data['email'].time()));
         // 检测注册是否自动审核
@@ -625,7 +625,7 @@ class User extends Base
         if (!$sms->verifyCode($mobile, $code, 'forget')) {
             $this->error($sms->getError());
         }
-        $user->password = md5($password);
+        $user->password = password_hash($password,PASSWORD_BCRYPT);
         $res = $user->save();
         if ($res !== false) {
             session('index.login', null);

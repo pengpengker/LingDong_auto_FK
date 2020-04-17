@@ -201,7 +201,7 @@ class User extends Base {
         $password      = input('password/s', '');
         $new_password  = input('new_password/s', '');
         $new_password2 = input('new_password2/s', '');
-        if ($this->user->password != md5($password)) {
+        if (!password_verify($password,$this->user->password)) {
             $this->error('旧密码不正确！');
         }
         if (!$new_password) {
@@ -210,7 +210,7 @@ class User extends Base {
         if ($new_password != $new_password2) {
             $this->error('两次新密码输入不一致！');
         }
-        $this->user->password = md5($new_password);
+        $this->user->password = password_hash($new_password,PASSWORD_BCRYPT);
         // 更新登录凭证
         $this->user->login_key = rand(1000000, 9999999);
         $res                   = $this->user->save();

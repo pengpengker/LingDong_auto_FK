@@ -393,8 +393,6 @@ function sendMail($to, $title, $content, $filePath = '', $throwExceptions = fals
     $from     = sysconf('email_user' . $configIndex);
     $password = sysconf('email_pass' . $configIndex);
 
-  
-
     $mail->Host       = $host; //设置邮件服务器的地址
     $mail->Port       = $port; //设置邮件服务器的端口，默认为25
     $mail->From       = $from; //设置发件人的邮箱地址
@@ -825,6 +823,9 @@ function get_sms_cost() {
             break;
         case '253sms': //创蓝253
             $cost = sysconf('253sms_cost');
+            break;
+        case 'huawei': //华为云短信
+            $cost = sysconf('huawei_sms_cost');
             break;
         default:
             $cost = 0;

@@ -1,0 +1,127 @@
+{extend name="base/detail"}
+
+{block name="content"}
+<div class="main">
+    <div class="content">
+
+        <ul class="nav nav-tabs">
+            <li>&nbsp;&nbsp;&nbsp;&nbsp;</li>
+            <li role="presentation" class="active"><a href="javascript:;">商品回收站</a></li>
+        </ul><br>
+
+        <form name="search" class="form-inline" method="get" action="">
+
+            <div class="form-group">
+                <select name="cate_id" class="form-control">
+                    <option value="" {if $Think.get.cate_id==''}selected{/if}>全部分类</option>
+                    {foreach $categorys as $v}
+                    <option value="{$v.id}" {if $Think.get.cate_id==$v.id}selected{/if}>{$v.name}</option>
+                    {/foreach}
+				</select>
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-control" name="name" value="{$Think.get.name|default=''}" maxlength="30" placeholder="商品名称">
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-search"></span>&nbsp;查询商品</button>
+            </div>
+        </form>
+        {foreach $goodsList as $v}
+        <div class="mt20">
+            <div class="selltable">
+                <table class="table table-hover">
+                    <tbody>
+                        <tr id="record_{$v.id}">
+                            <td colspan="6">
+                                <span>商品名：<a href="javascript:;" onclick="showContent('{$v.id}')">{$v.name}</a></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">单价：{$v.price}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">删除时间：{$v.delete_at|date="Y-m-d H:i:s",###}</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="javascript:void(0);" onclick="restore(this,{$v.id})">恢复该商品</a>&nbsp;
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {/foreach}
+        <div>
+            <style>
+                #wypage {
+                    font-size: 12px;
+                    padding: 10px auto;
+                    margin-left: 0px;
+                }
+
+                #wypage p {
+                    float: left;
+                    color: #333;
+                }
+
+                #wypage a {
+                    float: left;
+                    display: inline-block;
+                    border: 1px solid #ddd;
+                    padding: 6px 9px;
+                    margin-left: 4px;
+                    text-decoration: none;
+                    color: #333;
+                    background-color: #fff;
+                    border-radius: 0px;
+                }
+
+                #wypage a:hover {
+                    background-color: #248eff;
+                    color: #fff
+                }
+
+                #wypage a.no-hover:hover {
+                    color: #333
+                }
+
+                #wypage a.wy_page_current {
+                    background-color: #06a7ff;
+                    color: #fff
+                }
+            </style>
+            <form class="form-inline">
+                {$page}
+            </form>
+        </div><br><br>
+
+    </div>
+</div>
+{/block}
+
+{block name="appendJS"}
+<script>
+	function restore(obj,id)
+	{
+		layer.confirm('确定恢复吗？', {
+            btn: ['确定', '取消'] //按钮
+        }, function() {
+            $.post('/merchant/goods/restore',{
+				id:id
+			},function(res){
+				if(res.code!=0){
+					layer.msg('恢复失败'+res.msg);
+				}else{
+					layer.msg('恢复成功');
+					setTimeout(function(){
+						location.reload();
+					},200);
+				}
+			});
+        });
+	}
+</script>
+{/block}

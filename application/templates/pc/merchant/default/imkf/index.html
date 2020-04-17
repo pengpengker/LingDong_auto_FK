@@ -1,0 +1,72 @@
+{extend name="base"}
+
+{block name="content"}
+<link rel="stylesheet" type="text/css" href="__RES__/imkf/litewebchat.min.css" />
+<div class="row">
+    <!-- 主容器 -->
+    <div class="lite-chatbox"> 
+		<div class="tips">
+	        <span class="tips-danger">系统消息：连接服务器失败,Code:2007 咨询人数过多</span>
+	    </div>
+		
+	    <div class="tips">
+	        <span class="tips-warning">系统消息：当前人数较多，当前暂不支持发起聊天，如您想尽快解决您的问题，可联系企业微信或官方QQ</span>
+	    </div>
+        
+	</div>
+	<style>
+		form.convFormDynamic {
+    margin: 10px 10px;
+    padding: 0 !important;
+    position: relative;
+    border: 0px solid rgba(0, 40, 100, 0.12);
+}
+div.conv-form-wrapper div.options {
+    word-wrap: normal;
+    white-space: nowrap;
+    overflow-x: scroll;
+    position: absolute;
+    bottom: 100%;
+    width: 100%;
+    transform: translateY(-5px);
+}
+form.convFormDynamic textarea.userInputDynamic {
+    border: none;
+    padding: 7px 10px;
+    outline: none;
+    font-size: 0.905rem;
+    float: left;
+    width: calc(100% - 70px);
+    line-height: 1.3em;
+    min-height: 1.7em;
+    max-height: 10rem;
+    display: block;
+    max-width: 88%;
+    margin-right: 2.5%;
+}
+textarea.userInputDynamic {
+    border-radius: 3px;
+    margin: 7px 10px;
+}
+textarea {
+    overflow: auto;
+    resize: vertical;
+}
+button, select {
+    text-transform: none;
+}
+button, input {
+    overflow: visible;
+}
+	</style>
+	<form id="convForm" class="convFormDynamic">
+		<textarea id="userInput" rows="1" placeholder="Type Here" class="userInputDynamic" style="margin-top: 7px; margin-bottom: 7px; height: 118px;"></textarea>
+		<button type="submit" class="submit">发送</button>
+		<span class="clear"></span>
+		</form>
+</div>
+{/block}
+
+{block name="appendJS"}
+
+{/block}

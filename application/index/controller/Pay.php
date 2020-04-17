@@ -722,6 +722,7 @@ class Pay extends Base {
         $channel = input('channel/s', '');
         $params  = [];
         switch ($channel) {
+        	case 'UnionPay': //银联云闪付
             case 'JyWxPay':
             case 'JyWxGzhPay':
             case 'PayapiAli':
@@ -931,6 +932,9 @@ class Pay extends Base {
         // 渠道
         $channel = input('channel/s', '');
         switch ($channel) {
+        	case 'UnionPay': //银联云闪付
+        		$trade_no = isset($params['orderId']) ? $params['orderId'] : '';
+                break;
             case 'WsyhAliScan':
             case 'WsyhWxScan':
                 $trade_no = isset($params['request']['body']['OutTradeNo']) ? $params['request']['body']['OutTradeNo'] : '';
@@ -1139,6 +1143,7 @@ class Pay extends Base {
         // 渠道
         $channel = input('channel/s', '');
         switch ($channel) {
+        	case 'UnionPay': //银联云闪付
             case 'WsyhAliScan':
             case 'WsyhWxScan':
                 echo '<xml><RespInfo>SUCCESS</RespInfo></xml>';
@@ -1169,6 +1174,8 @@ class Pay extends Base {
             case 'CodePayQqScan':
             case 'WxpayH5':
             case 'WxJsApi':
+            	echo '<xml><RespInfo>SUCCESS</RespInfo></xml>';
+                break;
             case 'QgjfAlipayScan':
             case 'QgjfAlipayWap':
             case 'QgjfQqNative':
@@ -1305,7 +1312,7 @@ class Pay extends Base {
         }
         if ($order->status == 1) { //防止恶意刷新加钱
             // 记录错误订单
-            record_file_log('pay_error', $trade_no . '该订单已完成！');
+            record_file_log('pay_error', $trade_no . '该订单属于完成订单！');
             header('location:' . url('/orderquery') . '?orderid=' . $trade_no);
             die('该订单已完成！');
         }
@@ -1343,7 +1350,7 @@ class Pay extends Base {
         }
         if ($order->status == 1) { //防止恶意刷新加钱
             // 记录错误订单
-            record_file_log('pay_error', $trade_no . '该订单已完成！');
+            record_file_log('pay_error', $trade_no . '该订单属于完成订单！');
             //直接返回给上游 success 或者 OK 之类的
             return $this->repeat();
         }

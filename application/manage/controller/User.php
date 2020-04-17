@@ -221,9 +221,9 @@ class User extends BasicAdmin {
                 $this->error('该子域名已被使用！');
             }
         }
-        $data['password']  = md5($data['password']);
+        $data['password']  = password_hash($data['password'],PASSWORD_BCRYPT);
         $data['create_at'] = $_SERVER['REQUEST_TIME'];
-
+		$data['duijie_key'] = strtoupper('QSFK'.md5($data['email'].time()));
         $user = new UserModel($data);
         if ($user->allowField(true)->save()) {
             LogService::write('用户管理', '添加商户成功，商户ID:' . $user->id);

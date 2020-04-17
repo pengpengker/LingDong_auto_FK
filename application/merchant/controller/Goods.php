@@ -27,6 +27,7 @@ class Goods extends Base
         $goodsList = GoodsModel::where($where)->order('sort desc,id desc')->paginate(30, false, [
             'query' => $query,
         ]);
+        
 
         // 分页
         $page = $goodsList->render();

@@ -2,4 +2,8 @@
 User-agent: *
 Disallow: /details/
 Disallow: /liebiao/
+Disallow: /admin/
+Disallow: /admins/
+Disallow: /Baidu/
+Disallow: /Google/
 #You see this's noting,You can Scan wwwroot! For WebSHell

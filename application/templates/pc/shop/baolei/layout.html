@@ -551,6 +551,15 @@
                             <div class="choose-right">
                                 <input class="text text-tel contact-show" type="text" onmouseout="checkcontact2()" name="contact"
                                     placeholder="推荐填写QQ号或手机号 订单查询的重要凭证!" />
+                                <span class="choose-item-t choose_sms"><label class="lab1"><input type="checkbox" name="is_rev_sms"
+                                            value="1" id="is_rev_sms" onclick="checkis_rev_sms2()" data-cost="{if isset($goods) && $goods.sms_payer==1}0{else}{:get_sms_cost()}{/if}">
+                                        短信提醒[
+                                         {if isset($goods) && $goods.sms_payer==1} 
+                                        商家赠送
+                                         {else} 
+                                        收费{:get_sms_cost()}元
+                                         {/if} 
+                                        ]</label></span>
                                 <span class="choose-item-t choose_email"><label class="lab1"><input type="checkbox"
                                             name="isemail" value="1" id="email" onclick="checkis_email2()">邮箱提醒[免费]</label></span>
                             </div>

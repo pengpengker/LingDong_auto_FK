@@ -89,12 +89,12 @@ class GoodsDuijie extends Base
             return $this->fetch();
         }
         $duijie_key = $this->user->sj_duijie_key;
-        $this->user->sj_duijie_key = trim($this->request->param('sj_duijie_key'));
         if($this->request->param('sj_duijie_key')){
             if(!\app\common\model\User::where('duijie_key',$this->request->param('sj_duijie_key'))->find()){
                 $this->error('没有该对接码');
             }
         }
+        $this->user->sj_duijie_key = trim($this->request->param('sj_duijie_key'));
         if($this->user->save()){
             if(empty($this->request->param('sj_duijie_key'))){
                 //删除该商户下的全部对接商品

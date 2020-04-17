@@ -255,6 +255,9 @@ class GoodsCard extends Base
                 $split_type = "";
             }
         }
+        if(count($arr) > 2000){
+        	$this->error('一次导入卡密数量不能超过2000张');
+        }
         $cards = [];
         foreach ($arr as $v) {
             if (!empty($split_type)) {

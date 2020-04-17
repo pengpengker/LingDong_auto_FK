@@ -120,14 +120,14 @@ class WxJsApi extends Pay{
 	            $money=$params['total_fee']/100;
 	            if(empty($order->dj_order_id)){
 		            if($order->total_price>$money){
-		                record_file_log('alipay_page_error','金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$money}");
+		                record_file_log('wxpay_notify_error','金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$money}");
 		                die('金额异常！');
 			        }
 		        }else{
 		            $sj_order = Order::get(['trade_no' => $order->dj_order_id]);
 		            if($sj_order){
 		                if(round($order->total_price,3)+round($sj_order->total_price,3)>round($money,3)){
-		                    record_file_log('alipay_page_error','对接支付总金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$money}");
+		                    record_file_log('wxpay_notify_error','对接支付总金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$money}");
 		                    die('对接支付总金额异常！');
 		                }
 		            }else{
@@ -139,7 +139,7 @@ class WxJsApi extends Pay{
 	            $order->transaction_id =$params['transaction_id'];
 	            $this->completeOrder($order);
 	            record_file_log('wxpay_notify_success',$order->trade_no);
-	            echo '<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
+	            // echo '<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
 	            return true;
         	}else{
 	            record_file_log('wxpay_notify_error','支付状态失败！'."\r\n".$params['out_trade_no']);
