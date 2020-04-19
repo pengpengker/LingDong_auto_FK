@@ -34,7 +34,6 @@ class Goods extends BasicAdmin
             'date_range' => input('date_range/s', ''),
         ];
         $where = $this->genereate_where($query);
-
         $goodsList = Db::name('goods')->alias('a')
             ->join('user b', 'a.user_id = b.id')
             ->join('link c', 'a.id = c.relation_id AND c.relation_type = "goods"')
@@ -44,7 +43,6 @@ class Goods extends BasicAdmin
             ->paginate(30, false, [
                 'query' => $query
             ]);
-
         // 分页
         $page = str_replace('href="', 'href="#', $goodsList->render());
         $this->assign('page', $page);
@@ -189,6 +187,8 @@ class Goods extends BasicAdmin
 
             $res = $goods->delete();
             if ($res !== false) {
+            	//清空下级对接商品
+            	GoodsModel::where('duijie_id',$goods_id)->delete();
                 LogService::write('商品管理', '成功' . '删除商品，商品ID:' . $id);
                 return J(200, '删除成功！');
             } else {

@@ -327,8 +327,8 @@ class Shop extends Base
             $data = [
                 // 'gonggao'         =>'测试',
                 'goodinvent' => '<span style="color:green">' . $stockStr . '</span><input type="hidden" name="kucun" value="' . $cardsCount . '">',
-                'is_coupon' => $sjgoods->coupon_type,
-                'is_discount' => $sjgoods->wholesale_discount,
+                'is_coupon' => $goods->coupon_type,
+                'is_discount' => $goods->wholesale_discount,
                 'is_pwdforbuy' => $sjgoods->visit_type,
                 'is_pwdforsearch' => $sjgoods->take_card_type,
                 'limit_quantity' => $sjgoods->limit_quantity,
@@ -368,8 +368,19 @@ class Shop extends Base
         if (!$goods) {
             return '不存在该商品！';
         }
-        $str = '<table class="registera"><tr><th>购买数量</th><th>优惠价格</th></tr>';
+        if(!empty($goods->duijie_id)){
+        	$sj_goods = GoodsModel::get(['id' => $goods->duijie_id]);
+        }
+        $str = '<table class="registera"><tr><th>购买数量</th><th>优惠单价</th></tr>';
         foreach ($goods->wholesale_discount_list as $v) {
+        	if(!empty($goods->duijie_id)){
+        		//判断是否低于最低对接价
+        		if(round($v['price'],3) < round($sj_goods->duijie_smilepic,3)){
+        			$v['price'] =  $sj_goods->duijie_price + $sj_goods->duijie_smilepic;
+        		}else{
+        			$v['price'] =  $v['price'] + $sj_goods->duijie_price;
+        		}
+	        }
             $str .= "<tr><td>{$v['num']}张</td><td>{$v['price']}元</td></tr>";
         }
         $str .= '</table>';
@@ -385,7 +396,21 @@ class Shop extends Base
             return '不存在该商品！';
         }
         $quantity = input('quantity/d', 0);
-        return $this->get_discount_price($goods, $quantity);
+        //判断是否是对接商品
+        $price = 0;
+        $finprice = 0;
+        $finprice = $this->get_discount_price($goods, $quantity);
+        if(!empty($goods->duijie_id)){
+        	$sj_goods = GoodsModel::get(['id' => $goods->duijie_id]);
+        	$price = $sj_goods->duijie_price;
+        	//判断下级加价是否低于最低加价
+        	if($finprice < $sj_goods->duijie_smilepic){
+        		$finprice = $sj_goods->duijie_price + $sj_goods->duijie_smilepic;
+        	}else{
+        		$finprice = $finprice + $price;
+        	}
+        }
+        return $finprice;
     }
 
     // 获取优惠价

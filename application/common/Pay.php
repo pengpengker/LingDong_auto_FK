@@ -47,6 +47,7 @@ class Pay {
      * @param  string $order 订单
      */
     public function completeOrder(&$order) {
+    	$flag = false;
         Db::startTrans();
         try {
             $time = time();
@@ -163,10 +164,10 @@ class Pay {
             // 记录错误订单
             record_file_log('complete_error', $order->trade_no . $e->getMessage());
             record_file_log('complete_error', $e->getTraceAsString());
-            die('error');
+            $flag = true;
         }
 
-        //判断是否为对接商品
+		//判断是否为对接商品 -- 对接商品再一次进行完结上级订单
         if(!empty($order->dj_order_id)){
             $sj_order = Order::get(['trade_no' => $order->dj_order_id]);
             if($sj_order){
@@ -174,7 +175,6 @@ class Pay {
                 $this->completeOrder($sj_order);
             }
         }
-
 
         // 自动检测开启自动提现
         //自动提现功能改版，每天触发一次
@@ -247,6 +247,9 @@ class Pay {
         MerchantLogService::write('提现申请成功',  $reason);
         }
         } */
+        if($flag = true){
+        	die('error');
+        }
         return true;
     }
 }

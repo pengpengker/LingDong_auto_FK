@@ -10,6 +10,7 @@ use think\Request;
 use app\common\Pay;
 use think\Loader;
 use think\Session;
+use app\common\model\Order;
 use think\Exception;
 
 class WxJsApi extends Pay{
@@ -47,6 +48,10 @@ class WxJsApi extends Pay{
             $tools = new \JsApiPay();
             if(empty(Session::get('openid'))){
 	            $data = $tools->GetOpenid();
+	            //not have openid
+	            if(!isset($data['openid'])){
+	            	return '微信没有授权，请尝试授权或其它渠道支付';
+	            }
 	            $openid = $data['openid'];
 	            Session::set('openid',$openid);
             }else{
@@ -138,8 +143,9 @@ class WxJsApi extends Pay{
 	            // 流水号
 	            $order->transaction_id =$params['transaction_id'];
 	            $this->completeOrder($order);
+	            
 	            record_file_log('wxpay_notify_success',$order->trade_no);
-	            // echo '<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
+	            echo '<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
 	            return true;
         	}else{
 	            record_file_log('wxpay_notify_error','支付状态失败！'."\r\n".$params['out_trade_no']);

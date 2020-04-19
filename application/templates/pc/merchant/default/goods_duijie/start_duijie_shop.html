@@ -132,6 +132,58 @@
                         </div>
                     </div>
                     <div class="form-group">
+						<label class="col-md-2 control-label">批发优惠</label>
+						<div class="col-md-4">
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="wholesale_discount" id="wholesale_discount1" value="1" {if isset($goods) && $goods.wholesale_discount==1}checked{/if}>
+                                <label for="wholesale_discount1">
+                                    使用
+                                </label>
+                            </div>
+							<div class="radio radio-primary radio-inline">
+                                <input type="radio" name="wholesale_discount" id="wholesale_discount2" value="0" {if isset($goods)}{if $goods.wholesale_discount==0}checked{/if}{else/}checked{/if} >
+                                <label for="wholesale_discount2">
+                                    不使用
+                                </label>
+                            </div>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">是否设置批发购买时使用批发价格！</p>
+						</div>
+                    </div>
+                    <div class="form-group block-wholesale_discount" {if !isset($goods) || $goods.wholesale_discount==0}style="display:none"{/if}>
+						<label class="col-md-2 control-label"></label>
+						<div class="col-md-4">
+							<div class="block-discount_list">
+								{if isset($goods)}
+								{foreach $goods.wholesale_discount_list as $v}
+								<div class="form-group discount_item">
+									<div class="col-md-3">
+										<input name="wholesale_discount_list[num][]" type="number" class="form-control" value="{$v.num}" min=0>
+									</div>
+									<div class="col-md-1">
+										<p class="form-control-static">张</p>
+									</div>
+									<div class="col-md-3">
+										<input name="wholesale_discount_list[price][]" type="text" class="form-control" value="{$v.price}">
+									</div>
+									<div class="col-md-1">
+										<p class="form-control-static">元</p>
+									</div>
+									<div class="col-md-4">
+										<button type="button" class="btn btn-danger waves-effect waves-light" onclick="del_discount_item(this)">删除</button>
+									</div>
+								</div>
+								{/foreach}
+								{/if}
+							</div>
+							<button type="button" class="btn btn-primary waves-effect waves-light" onclick="add_discount_item()"><i class="zmdi zmdi-plus-circle"></i> 添加优惠</button>
+						</div>
+						<div class="col-md-6">
+							<p class="form-control-static">优惠价格为单价，并不是商品总价哦！</p>
+						</div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-2 control-label">商品说明</label>
                         <div class="col-md-4">
                             <input name="content" type="text" class="form-control" placeholder="商品说明" value="{$sjgoods.content}">
@@ -168,6 +220,21 @@
 {block name="appendJS"}
 
 <script>
+	$('[name="wholesale_discount"]').change(function(){
+		var status=$(this).val();
+		if(status==1){
+			$('.block-wholesale_discount').slideDown();
+		}else{
+			$('.block-wholesale_discount').slideUp();
+		}
+	});
+	function del_discount_item(obj){
+		$(obj).parents('.discount_item').remove();
+	}
+	function add_discount_item(){
+		var html='<div class="form-group discount_item"><div class="col-md-3"><input name="wholesale_discount_list[num][]" type="number" class="form-control" value="" min=0></div><div class="col-md-1"><p class="form-control-static">张 </p></div><div class="col-md-3"><input name="wholesale_discount_list[price][]" type="text" class="form-control" value=""></div><div class="col-md-1"><p class="form-control-static">元 </p></div><div class="col-md-4"><button type="button" class="btn btn-danger waves-effect waves-light" onclick="del_discount_item(this)">删除</button></div></div>';
+		$('.block-discount_list').append($(html));
+	}
     //检查参数
     $('.form-horizontal').submit(function(){
         var good_name = $(this).find("input[name='name']").val();

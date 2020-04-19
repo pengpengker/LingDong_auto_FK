@@ -14,6 +14,11 @@ class Index extends BasicAdmin
 {
     public function main()
     {
+    	
+    	if(empty(session('debug_sys'))){
+			session('debug_sys',1);
+		}
+    	
         $todayTime  =strtotime(date('Y-m-d'));
         $yesterTime =$todayTime-86400;
         /////////////////// 用户信息 ///////////////////

@@ -422,6 +422,9 @@ class Goods extends Base
         if (!$goods) {
             $this->error('不存在该商品！');
         }
+        if(!empty($goods->duijie_id)){
+        	$this->error('对接商品请前往我的对接修改！');
+        }
         if (!$this->request->isPost()) {
             $this->setTitle('添加商品');
             // 商品分类

@@ -189,6 +189,18 @@
                             <p class="help-block red" style="color: red;">最低交易手续费，手续费不足的按照此手续费计算，可以和商品价格区间配合使用。</p>
                         </div>
                     </div>
+                    
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">手续费承担方</label>
+                        <div class='col-sm-8'>
+                            <select name="fee_payer" class="layui-input" required>
+				                <option value="1" {if sysconf('fee_payer')==1}selected{/if}>商家 </option> 
+				                <option value="2" {if sysconf('fee_payer')==2}selected{/if}>买家 </option>
+				            </select>
+                            <p class="help-block red" style="color: red;">设置跟随系统的商户 手续费默认承当方。</p>
+                        </div>
+                    </div>
+                    
                     <div class="form-group layui-form-item">
                         <label class="col-sm-2 control-label">商品价格区间</label>
                         <div class='layui-input-inline' style="margin-left: 15px;">

@@ -187,20 +187,33 @@ class GoodsCard extends Base
 			$node = $node . '当前没有卡密,快去添加吧';
 		}
 		if($this->request->param('isdel')){
-			CardModel::where($map)->delete();
+			//批量软删除
+			Db::startTrans();
+	        try {
+	            foreach ($card as $key => $val) {
+	                $res = $val->delete();
+	                if ($res !== false) {
+	                    MerchantLogService::write('成功删除卡密', '成功删除卡密，ID:' . $val->id);
+	                } else {
+	                    throw new \Exception('批量删除失败，ID:' . $val->id);
+	                }
+	            }
+	            Db::commit();
+	        } catch (\Exception $e) {
+	            Db::rollback();
+	            return "删除时发生异常，此次操作失效";
+	        }
 		}
 		if($this->request->param('isname')){
 			$name = GoodsModel::where(['user_id' => $this->user->id,'duijie_id' => null,'id' => $this->request->param('goods_id')])->find();
 		}else{
 			$name = null;
 		}
+		if(!empty($name)){
+			$node = $node . '</br>' . '商品名称:' . $name->name;
+		}
 		foreach ($cache as $key=>$val){
-			if(!empty($name)){
-				$node = $node . '</br>' . '商品名称:' . $name->name . '   ' . '卡号:'  . $val['number'] . '   ' . '卡密:' .$val['secret'];
-			}else{
-				$node = $node . '</br>' . '卡号:' . $val['number'] . '   ' . '卡密:' . $val['secret'];
-			}
-			
+			$node = $node . '</br>' . $val['number'] . '   ' . $val['secret'];
 		}
 		return $node;
 	}

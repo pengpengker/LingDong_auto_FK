@@ -98,7 +98,10 @@ class Pay extends Base {
 			//修改金额
 			$order->total_price = round(OrderModel::get(['trade_no' => $order->dj_order_id])['total_price']+$order->total_price,3);
 		}
-		
+		//判断商品是否存在
+		if(!GoodsModel::get(['id' => $order->goods_id,'status' => 1])){
+			return '该商户产品不存在，请刷新重试！';
+		}
         switch ($order->pay_content_type) {
             case 2:
                 // 跳转链接
@@ -345,14 +348,22 @@ class Pay extends Base {
         if ($goods->cards_stock_count < $quantity) { // 检测库存
             return '库存不足！';
         }
-        // 是否符合起够数量
-        if ($goods->limit_quantity > $quantity) {
-            return '起够数量不能少于' . $goods->limit_quantity . '张';
-        }
-        // 批发价
-        if ($goods->wholesale_discount == 1) { //判断是否符合优惠条件
-            $data['goods_price'] = $this->get_discount_price($goods, $quantity);
-        }
+        
+        if(!$is_duijie_shop_bool){
+			// 是否符合起够数量
+	        if ($goods->limit_quantity > $quantity) {
+	            return '起够数量不能少于' . $goods->limit_quantity . '张';
+	        }
+	        // 批发价
+	        if ($goods->wholesale_discount == 1) { //判断是否符合优惠条件
+	            $data['goods_price'] = $this->get_discount_price($goods, $quantity);
+	        }
+		}
+        //对接商品不使用上级优惠券
+		if($is_duijie_shop_bool){
+			$data['coupon_id']    = 0;
+            $data['coupon_price'] = 0;
+		}
 
         // 优惠券
         $data['coupon_type'] = input('is_coupon/d', '');
@@ -381,6 +392,12 @@ class Pay extends Base {
             $data['coupon_price'] = 0;
         }
 
+		//对接商品不使用上级优惠券
+		if(!empty($goods->duijie_id)){
+			$data['coupon_id']    = 0;
+            $data['coupon_price'] = 0;
+		}
+		
         ////////////////// 功能项 //////////////////
         // 售出通知
         $data['sold_notify'] = (int)$goods->sold_notify;
@@ -566,15 +583,28 @@ class Pay extends Base {
             $datas['sms_price'] = $data['sms_price'];
             //清空上级短信费
             $data['sms_price'] = 0;
-
-
+			
+			//算批发价
+			if ($xj_goods_info->wholesale_discount == 1) { //判断是否符合优惠条件
+				//判断设置批发价是否低于上级设置最低加价
+				$price_cache_pf = $this->get_discount_price($xj_goods_info, $quantity);
+				if($price_cache_pf < $goods->duijie_smilepic){
+					$price_cache_pf = $goods->duijie_smilepic;
+				}
+	            $datas['goods_price'] = $price_cache_pf;
+	        }
+			
             ////////////////// 计算总价 //////////////////
             // 商品总价（单价*数量）
-            $datas['total_product_price'] = round($datas['goods_price'] * $datas['quantity'], 2);
+            $datas['total_product_price'] = round($datas['goods_price'] * $datas['quantity'], 3);
+            //判断此处是否为负数 -- 防止恶搞对接
+            if($datas['total_product_price'] < 0){
+            	$datas['total_product_price'] = 0;
+            }
             // 总价（商品总价+短信费）
             $datas['total_price'] = $datas['total_product_price'] + $datas['sms_price'];
             // 总成本价
-            $datas['total_cost_price'] = round($datas['goods_cost_price'] * $datas['quantity'], 2);
+            $datas['total_cost_price'] = round($datas['goods_cost_price'] * $datas['quantity'], 3);
             
             ////////////////// 支付下单项 //////////////////
             // 支付渠道
@@ -827,8 +857,16 @@ class Pay extends Base {
             case 'WxpayH5':
             case 'WxJsApi':
             	$xml = file_get_contents('php://input');
-                libxml_disable_entity_loader(true);
-                $params = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
+            	//判断是不是xml
+            	$xml_parser = xml_parser_create(); 
+            	if(!xml_parse($xml_parser,$xml,true)){ 
+            		xml_parser_free($xml_parser); 
+            		//不是xml,处理json
+            		$params = json_decode($xml,true);
+            	}else{
+            		libxml_disable_entity_loader(true);
+                	$params = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
+            	}
                 break;
             case 'QqNative':
             case 'SwiftAliScan':
@@ -1384,9 +1422,23 @@ class Pay extends Base {
         $list  = $goods->wholesale_discount_list;
         $sort  = array_column($list, 'num');
         array_multisort($sort, SORT_DESC, $list);
+        
+        //判断商品有没有对接
+        if(!empty($goods->duijie_id)){
+        	$sj_goods = GoodsModel::get(['id' => $goods->duijie_id]);
+        }
         foreach ($list as $v) {
             if ($quantity >= $v['num']) {
-                $price = $v['price'];
+            	if(!empty($goods->duijie_id)){
+            		//判断下级加价是否高于上级最低加价
+            		if($goods->price < $sj_goods->duijie_smilepic){
+            			$price = $sj_goods->duijie_smilepic + $sj_goods->duijie_price;
+            		}else{
+            			$price = $v['price'] + $sj_goods->duijie_price;
+            		}
+            	}else{
+            		$price = $v['price'];
+            	}
                 break;
             }
         }

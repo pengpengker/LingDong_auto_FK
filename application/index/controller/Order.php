@@ -290,11 +290,11 @@ class Order extends Base {
                     }
                 }else{
                 	Db::rollback();
-            		$this->error('操作失败，请重试！');
+            		$this->error('操作失败，请重试1！');
                 }
             }else{
             	Db::rollback();
-            	$this->error('操作失败，请重试！');
+            	$this->error('操作失败，请重试2！');
             }
             
             
@@ -304,7 +304,7 @@ class Order extends Base {
 				$sj_order = OrderModel::get(['trade_no' => $order->dj_order_id]);
 				if(!$sj_order){
 					Db::rollback();
-            		$this->error('操作失败，请重试！');
+            		$this->error('操作失败，请重试3！');
 				}
 				$sj_res = ComplaintModel::create([
 	                'user_id'   => $sj_order->user_id,
@@ -323,7 +323,7 @@ class Order extends Base {
 	            	//下级投诉传递上级投诉的id
 	            	if(!Db::table('complaint')->where(['trade_no' => $trade_no])->update(['duijie_id' => $sj_res->id])){
 	            		Db::rollback();
-            			$this->error('操作失败，请重试！');
+            			$this->error('操作失败，请重试4！');
 	            	}
 	            	
 	            	//投诉申请成功，指定的订单作废，不允许该订单的资金解冻。
@@ -341,11 +341,11 @@ class Order extends Base {
                         }
                 	}else{
                 		Db::rollback();
-            			$this->error('操作失败，请重试！');
+            			$this->error('操作失败，请重试5！');
                 	}
 	            }else{
 	            	Db::rollback();
-            		$this->error('操作失败，请重试！');
+            		$this->error('操作失败，请重试！6');
 	            }
 			}
             $sms = new Sms;
@@ -359,7 +359,7 @@ class Order extends Base {
 	        session('token',$token);
         } catch (Exception $e) {
             Db::rollback();
-            $this->error('操作失败，请重试！' . $e->getMessage());
+            $this->error('操作失败，请重试7！' . $e->getMessage());
         }
         Db::commit();
         $this->success('投诉成功！', url('Index/order/complaintpass', ['trade_no' => $trade_no, 'token' => $token]));

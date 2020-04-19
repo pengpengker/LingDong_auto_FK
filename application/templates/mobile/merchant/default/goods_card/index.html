@@ -177,6 +177,8 @@
 		$.post('/merchant/goods_card/ca_cards',d,function(res){
 	        layer.open({
 			  type: 1,
+			  title:'卡密导出',
+			  area: ['80%', '70%'], //宽高
 			  skin: 'layui-layer-rim',
 			  content: res
 			});
