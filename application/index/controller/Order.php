@@ -233,6 +233,11 @@ class Order extends Base {
         	$this->error('该订单已超过投诉时间，投诉仅支持购买成功后当天投诉！');
         }
 
+		//上级订单不能被投诉
+		if($order->dj_is_see === 1){
+			$this->error('对接商品请投诉下级，无法投诉上级！');
+		}
+
         // 获取该手机号投诉次数
         //$count = ComplaintModel::where(['trade_no' => $trade_no, 'mobile' => $mobile])->count();
 		$count = ComplaintModel::where(['trade_no' => $trade_no])->count();
@@ -314,6 +319,7 @@ class Order extends Base {
 	                'mobile'    => $mobile,
 	                'desc'      => $desc,
 	                'status'    => 0,
+	                'is_duijie' => 1,
 	                'create_at' => $_SERVER['REQUEST_TIME'],
 	                'create_ip' => $this->request->ip(),
 	                'pwd'       => $code,

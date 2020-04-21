@@ -233,6 +233,9 @@ class GoodsCard extends Base
         if (!$goods) {
             $this->error('不存在该商品！');
         }
+        if(!empty($goods->duijie_id)){
+        	$this->error('对接商品无法加卡，请让上级加卡！');
+        }
         $import_type = input('import_type/s', 1);
         $split_type = input('split_type/s', ' ');
         $content = input('content/s', '');

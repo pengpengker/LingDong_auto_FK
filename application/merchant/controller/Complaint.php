@@ -23,9 +23,16 @@ class Complaint extends Base
             'status'  => input('status/s',''),
         ];
         $where = $this->genereate_where($query);
-        $complaints=ComplaintModel::where($where)->order('id desc')->paginate(30,false,[
-            'query'=>$query
-        ]);
+        //判断自营还是代理
+        if(input('c_type') === 'ziying'){
+        	$complaints=ComplaintModel::where($where)->where('is_duijie',0)->order('id desc')->paginate(30,false,[
+	            'query'=>$query
+	        ]);
+        }else{
+        	$complaints=ComplaintModel::where($where)->where('is_duijie',1)->order('id desc')->paginate(30,false,[
+	            'query'=>$query
+	        ]);
+        }
         // 分页
         $page=$complaints->render();
         $this->assign('page',$page);

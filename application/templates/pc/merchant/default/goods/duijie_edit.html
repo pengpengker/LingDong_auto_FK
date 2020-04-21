@@ -11,7 +11,7 @@
 						<div class="col-md-4">
 							<select name="cate_id" class="form-control" required>
 								{foreach $categorys as $v}
-								<option value="{$v.id}" {if isset($sjgoods) && $sjgoods.cate_id==$v.id}selected{/if}>{$v.name}</option>
+								<option value="{$v.id}" {if isset($goods) && $goods.cate_id==$v.id}selected{/if}>{$v.name}</option>
 								{/foreach}
 							</select>
 						</div>
@@ -24,7 +24,7 @@
 						<div class="col-md-4">
 							<select name="theme" class="form-control" required>
 								{foreach :config('pay_themes') as $theme}
-								<option value="{$theme.alias}" {if isset($sjgoods) && $sjgoods.theme==$theme.alias}selected{/if}>{$theme.name}</option>
+								<option value="{$theme.alias}" {if isset($goods) && $goods.theme==$theme.alias}selected{/if}>{$theme.name}</option>
 								{/foreach}
 							</select>
 						</div>
@@ -35,7 +35,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">商品名称</label>
                         <div class="col-md-4">
-                            <input name="name" type="text" class="form-control" placeholder="商品名称" value="{$sjgoods.name}">
+                            <input name="name" type="text" class="form-control" placeholder="商品名称" value="{$goods.name}">
                         </div>
                         <div class="col-md-6">
                             <p class="form-control-static">好的名字有利于销售哦！</p>
@@ -44,7 +44,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">商品排序</label>
                         <div class="col-md-4">
-                            <input name="sort" type="number" class="form-control" placeholder="商品排序" value="{$sjgoods.sort}" min=0>
+                            <input name="sort" type="number" class="form-control" placeholder="商品排序" value="{$goods.sort}" min=0>
                         </div>
                         <div class="col-md-6">
                             <p class="form-control-static">	数字越大越靠前！</p>
@@ -54,13 +54,13 @@
 						<label class="col-md-2 control-label">短信费用</label>
 						<div class="col-md-4">
 							<div class="radio radio-primary radio-inline">
-								<input type="radio" name="sms_payer" id="sms_payer1" value="0" {if isset($sjgoods)}{if $sjgoods.sms_payer==0}checked{/if}{else/}checked{/if}>
+								<input type="radio" name="sms_payer" id="sms_payer1" value="0" {if isset($goods)}{if $goods.sms_payer==0}checked{/if}{else/}checked{/if}>
 								<label for="sms_payer1">
 									买家承担
 								</label>
 							</div>
 							<div class="radio radio-primary radio-inline">
-								<input type="radio" name="sms_payer" id="sms_payer2" value="1" {if isset($sjgoods) && $sjgoods.sms_payer==1}checked{/if}>
+								<input type="radio" name="sms_payer" id="sms_payer2" value="1" {if isset($goods) && $goods.sms_payer==1}checked{/if}>
 								<label for="sms_payer2">
 									商户承担
 								</label>
@@ -70,23 +70,23 @@
 					<div class="form-group">
 						<label class="col-md-2 control-label">起购数量</label>
 						<div class="col-md-4">
-							<input name="limit_quantity" type="number" class="form-control" placeholder="起购数量" value="{$sjgoods.limit_quantity|default=1}" min=1>
+							<input name="limit_quantity" type="number" class="form-control" placeholder="起购数量" value="{$goods.limit_quantity|default=1}" min=1>
 						</div>
 						<div class="col-md-6">
-							<p class="form-control-static">每次购买 最少购买多少件！</p>
+							<p class="form-control-static">每次购买 最少购买多少件！ 上级起购:{$sjgoods.limit_quantity}</p>
 						</div>
                     </div>
                      <div class="form-group">
 						<label class="col-md-2 control-label">售出通知</label>
 						<div class="col-md-4">
 							<div class="radio radio-primary radio-inline">
-                                <input type="radio" name="sold_notify" id="sold_notify1" value="1" {if isset($sjgoods) && $sjgoods.sold_notify==1}checked{/if}>
+                                <input type="radio" name="sold_notify" id="sold_notify1" value="1" {if isset($goods) && $goods.sold_notify==1}checked{/if}>
                                 <label for="sold_notify1">
                                     开启
                                 </label>
                             </div>
 							<div class="radio radio-primary radio-inline">
-                                <input type="radio" name="sold_notify" id="sold_notify2" value="0" {if isset($sjgoods)}{if $sjgoods.sold_notify==0}checked{/if}{else/}checked{/if}>
+                                <input type="radio" name="sold_notify" id="sold_notify2" value="0" {if isset($goods)}{if $goods.sold_notify==0}checked{/if}{else/}checked{/if}>
                                 <label for="sold_notify2">
                                     关闭
                                 </label>
@@ -100,19 +100,19 @@
 						<label class="col-md-2 control-label">提卡密码</label>
 						<div class="col-md-4">
 							<div class="radio radio-primary radio-inline">
-                                <input type="radio" name="take_card_type" id="take_card_type1" value="1" {if isset($sjgoods) && $sjgoods.take_card_type==1}checked{/if}>
+                                <input type="radio" name="take_card_type" id="take_card_type1" value="1" {if isset($goods) && $goods.take_card_type==1}checked{/if}>
                                 <label for="take_card_type1">
                                     必填
                                 </label>
                             </div>
 							<div class="radio radio-primary radio-inline">
-                                <input type="radio" name="take_card_type" id="take_card_type2" value="2" {if isset($sjgoods) && $sjgoods.take_card_type==2}checked{/if}>
+                                <input type="radio" name="take_card_type" id="take_card_type2" value="2" {if isset($goods) && $goods.take_card_type==2}checked{/if}>
                                 <label for="take_card_type2">
                                     选填
                                 </label>
                             </div>
 							<div class="radio radio-primary radio-inline">
-                                <input type="radio" name="take_card_type" id="take_card_type3" value="0" {if isset($sjgoods)}{if $sjgoods.take_card_type==0}checked{/if}{else/}checked{/if}>
+                                <input type="radio" name="take_card_type" id="take_card_type3" value="0" {if isset($goods)}{if $goods.take_card_type==0}checked{/if}{else/}checked{/if}>
                                 <label for="take_card_type3">
                                     关闭
                                 </label>
@@ -125,7 +125,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">加价价格</label>
                         <div class="col-md-4">
-                            <input name="price" type="text" class="form-control" placeholder="加价价格" value="{$sjgoods.duijie_smilepic}">
+                            <input name="price" type="text" class="form-control" placeholder="加价价格" value="{$goods.price}">
                         </div>
                         <div class="col-md-6">
                             <p class="form-control-static">对接成本价上加价！最低加价不能低于:{$sjgoods.duijie_smilepic}</p>
@@ -186,7 +186,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">商品说明</label>
                         <div class="col-md-4">
-                            <input name="content" type="text" class="form-control" placeholder="商品说明" value="{$sjgoods.content}">
+                            <input name="content" type="text" class="form-control" placeholder="商品说明" value="{$goods.content}">
                         </div>
                         <div class="col-md-6">
                             <p class="form-control-static">商品说明将显示在商品购买页面</p>
@@ -195,7 +195,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">使用说明</label>
                         <div class="col-md-4">
-                            <input name="remark" type="text" class="form-control" placeholder="使用说明" value="{$sjgoods.remark}">
+                            <input name="remark" type="text" class="form-control" placeholder="使用说明" value="{$goods.remark}">
                         </div>
                         <div class="col-md-6">
                             <p class="form-control-static">使用说明将显示在订单查询结果中，一般设置售后QQ群，或者下载地址类</p>

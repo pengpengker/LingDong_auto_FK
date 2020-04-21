@@ -259,7 +259,7 @@
 							</div>
 						</div>
 						<div class="col-md-6">
-							<p class="form-control-static">留空为不开启，若开启后商品购买页面将提示输入设置的密码才能继续访问</p>
+							<p class="form-control-static">开启后其它商户可通过全网资源功能对接，或使用您的对接码对接</p>
 						</div>
 					</div>
 					<div class="form-group block-duijie_smilepic" {if !isset($goods) || $goods.is_duijie==0}style="display:none"{/if}>
@@ -268,7 +268,7 @@
 							<input name="duijie_price" type="text" class="form-control" placeholder="" value="{$goods.duijie_price|default='0'}">
 						</div>
 						<div class="col-md-6">
-							<p class="form-control-static">设置后代理商对接零售单价！</p>
+							<p class="form-control-static">设置后代理商对接零售单价！如果写0则不要钱，后果自行承担</p>
 						</div>
 					</div>
 					<div class="form-group block-duijie_smilepic" {if !isset($goods) || $goods.is_duijie==0}style="display:none"{/if}>

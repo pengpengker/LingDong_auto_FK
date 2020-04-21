@@ -32,10 +32,18 @@ class Order extends Base
             }
         }
         $where = $this->genereate_where($query);
-
-        $orders=OrderModel::where($where)->order('id desc')->paginate(30,false,[
-            'query'=>$query
-        ]);
+		
+		//判断查询对接还是自营
+		if(input('c_type') === 'duijie'){
+			$orders=OrderModel::where($where)->where('dj_is_see is not null')->order('id desc')->paginate(30,false,[
+	            'query'=>$query
+	        ]);
+		}else{
+	        $orders=OrderModel::where($where)->where('dj_is_see is null')->order('id desc')->paginate(30,false,[
+	            'query'=>$query
+	        ]);
+		}
+        
         //获取商品分类
         $categorys = Db::table('goods_category')->where(['user_id'=>$this->user->id])->field('id, name')->select();
         $this->assign('categorys', $categorys);

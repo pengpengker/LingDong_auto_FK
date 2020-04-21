@@ -15,6 +15,12 @@ class Goods extends Model
     {
         return $this->belongsTo('User', 'user_id');
     }
+    
+    //对接输出用
+    public function sjuser()
+    {
+    	return $this->belongsTo('Goods','duijie_id','id')->field('id,name,duijie_price');;
+    }
 
     public function category()
     {

@@ -137,6 +137,7 @@ class Base extends BasicWechat {
         $this->assign('_user', $this->user);
         $this->assign('_controller', $this->request->controller());
         $this->assign('_action', $this->request->action());
+        $this->assign('_type', $this->request->param('c_type'));
     }
 
     protected function setTitle($title) {

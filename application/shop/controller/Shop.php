@@ -94,25 +94,6 @@ class Shop extends Base
         //自己的商品分类
         $categorys = $shop->categorys()->where('status', 1)->order('sort DESC')->select();
         $catenum = count($categorys);
-        //代理上级的商品分类
-        //取出商户的全部代理商品
-        $duijie_class_id = GoodsModel::where('user_id',$shop['id'])->where('duijie_id','neq',0)->select();
-        //循环代理商品的分类
-        foreach ($duijie_class_id as $k => $v){
-        	//判断上级该商品状态
-        	$cache_sj_shop_info = GoodsModel::where('id',$duijie_class_id[$k]['duijie_id'])->find();
-        	if($cache_sj_shop_info && $cache_sj_shop_info->status === 1 && $cache_sj_shop_info->is_duijie === 1){
-	            //判断当前是否已有这个分类
-	            if($this->class_rep_is($categorys,$duijie_class_id[$k]['cate_id']) === false) {
-	                $catenum++;
-	                //查询分类信息
-	                $cache = GoodsCategory::where('id', $duijie_class_id[$k]['cate_id'])->find();
-	                if ($cache) {
-	                    $categorys[$catenum] = $cache;
-	                }
-	            }
-        	}
-        }
         $this->assign('categorys', $categorys);
 
         // 获取支付渠道
@@ -263,6 +244,18 @@ class Shop extends Base
         $cate_id = input('cateid/d', 0);
         $str = '';
         $goodsList = GoodsModel::where(['cate_id' => $cate_id, 'status' => 1,'user_id' => $this->request->param('userid')])->order('sort DESC')->select();
+        //判断上级商品状态 状态不正常则不显示该商品
+        foreach ($goodsList as $k => $v){
+        	if(!empty($v->duijie_id)){
+        		$cin = GoodsModel::where('id',$v->duijie_id)->find();
+        		if(!$cin){
+        			unset($goodsList[$k]);
+        		}
+        		if($cin->status === 0 || $cin->is_freeze === 1){
+        			unset($goodsList[$k]);
+        		}
+        	}
+        }
         foreach ($goodsList as $v) {
             $str .= "<option value=\"{$v->id}\">{$v->name}</option>";
         }

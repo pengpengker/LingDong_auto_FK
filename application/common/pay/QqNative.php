@@ -23,37 +23,73 @@ class QqNative extends Pay
 
     public function order($outTradeNo,$subject,$totalAmount)
     {
-        $params = array();
-        $params["mch_id"] = $this->account->params->mch_id;
-        $params["nonce_str"] = QpayMchUtil::createNoncestr();
-        $params["body"] = $subject;
-        $params["out_trade_no"] = $outTradeNo;
-        $params["fee_type"] = "CNY";
-        $params["total_fee"] = $totalAmount*100;
-        $params["spbill_create_ip"] = Request::instance()->ip();
-        $params["trade_type"] = "NATIVE";
-        $params["notify_url"] = Request::instance()->domain().'/pay/notify/QqNative';
-        $params["sign"] = QpayMchUtil::getSign($params,$this->account->params->key);
-        $xml = QpayMchUtil::arrayToXml($params);
-        $ret =  QpayMchUtil::reqByCurlSSLPost($xml, $this->gateway, 10, $this->account->params->refer);
-        $result = QpayMchUtil::xmlToArray($ret);
-        if($result['return_code'] == 'SUCCESS') {
-            if($result['result_code'] == 'SUCCESS') {
-                $this->code    =0;
-                $obj           =new \stdClass();
-                $obj->pay_url  =$result['code_url'];
-                $obj->content_type = 1;
-                return $obj;
-            } else {
-                $this->code=202;
-                $this->error = $result['err_code_des'];
-                return false;
-            }
-        } else {
-            $this->code=201;
-            $this->error = '通信失败';
-            return false;
-        }
+    	//$ua = $_SERVER["HTTP_USER_AGENT"];
+    	// if(strstr($ua,"QQ/")){
+    	// 	$params = array();
+	    //     $params["mch_id"] = $this->account->params->mch_id;
+	    //     $params["nonce_str"] = QpayMchUtil::createNoncestr();
+	    //     $params["body"] = $subject;
+	    //     $params["out_trade_no"] = $outTradeNo;
+	    //     $params["fee_type"] = "CNY";
+	    //     $params["total_fee"] = $totalAmount*100;
+	    //     $params["spbill_create_ip"] = Request::instance()->ip();
+	    //     $params["trade_type"] = "JSAPI";
+	    //     $params["notify_url"] = Request::instance()->domain().'/pay/notify/QqNative';
+	    //     $params["sign"] = QpayMchUtil::getSign($params,$this->account->params->key);
+	    //     $xml = QpayMchUtil::arrayToXml($params);
+	    //     $ret =  QpayMchUtil::reqByCurlSSLPost($xml, $this->gateway, 10, $this->account->params->refer);
+	    //     $result = QpayMchUtil::xmlToArray($ret);
+	    //     if($result['return_code'] == 'SUCCESS') {
+	    //         if($result['result_code'] == 'SUCCESS') {
+	    //             $this->code    =0;
+	    //             $obj           =new \stdClass();
+	    //             $obj->pay_url  =$result['prepay_id'];
+	    //             $obj->content_type = 8;
+	    //             return $obj;
+	    //         } else {
+	    //             $this->code=202;
+	    //             $this->error = $result['retmsg'];
+	    //             return false;
+	    //         }
+	    //     } else {
+	    //         $this->code=201;
+	    //         $this->error = '通信失败';
+	    //         return false;
+	    //     }
+    	// }else{
+    		//QQ外
+    		$params = array();
+	        $params["mch_id"] = $this->account->params->mch_id;
+	        $params["nonce_str"] = QpayMchUtil::createNoncestr();
+	        $params["body"] = $subject;
+	        $params["out_trade_no"] = $outTradeNo;
+	        $params["fee_type"] = "CNY";
+	        $params["total_fee"] = $totalAmount*100;
+	        $params["spbill_create_ip"] = Request::instance()->ip();
+	        $params["trade_type"] = "NATIVE";
+	        $params["notify_url"] = Request::instance()->domain().'/pay/notify/QqNative';
+	        $params["sign"] = QpayMchUtil::getSign($params,$this->account->params->key);
+	        $xml = QpayMchUtil::arrayToXml($params);
+	        $ret =  QpayMchUtil::reqByCurlSSLPost($xml, $this->gateway, 10, $this->account->params->refer);
+	        $result = QpayMchUtil::xmlToArray($ret);
+	        if($result['return_code'] == 'SUCCESS') {
+	            if($result['result_code'] == 'SUCCESS') {
+	                $this->code    =0;
+	                $obj           =new \stdClass();
+	                $obj->pay_url  =$result['code_url'];
+	                $obj->content_type = 1;
+	                return $obj;
+	            } else {
+	                $this->code=202;
+	                $this->error = $result['err_code_des'];
+	                return false;
+	            }
+	        } else {
+	            $this->code=201;
+	            $this->error = '通信失败';
+	            return false;
+	        }
+    	// }
     }
 
     /**

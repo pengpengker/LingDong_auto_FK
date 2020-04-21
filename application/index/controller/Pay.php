@@ -247,6 +247,11 @@ class Pay extends Base {
                 header('location:' . $url);
                 exit;
                 break;
+            case 8:
+            	//QQ jsapi支付页面
+            	$this->assign('prepay_id', $order->pay_url);
+            	return $this->fetch('qq_native');
+            	break;
         }
         //是否免签渠道
         if ($channel['code'] == 'QPayAli' || $channel['code'] == 'QPayWx') {
@@ -295,7 +300,7 @@ class Pay extends Base {
             return '不存在该商家！';
         }
         ////////////////// 业务项 //////////////////
-        $goods = GoodsModel::get(['id' => input('goodid/d', 0), 'user_id' => $user->id, 'status' => 1]);
+        $goods = GoodsModel::get(['id' => input('goodid/d', 0), 'user_id' => $user->id, 'status' => 1,'is_freeze' => 0]);
         if (!$goods) {
             return '不存在该商品！';
         }
@@ -304,9 +309,9 @@ class Pay extends Base {
             //定义对接下级的商品和用户信息
             $xj_goods_info = $goods;
             $xj_users_info = $user;
-            $goods = GoodsModel::get(['id' => $goods->duijie_id, 'status' => 1,'is_duijie' => 1]);
+            $goods = GoodsModel::get(['id' => $goods->duijie_id, 'status' => 1,'is_duijie' => 1,'is_freeze' => 0]);
             if (!$goods) {
-                return '对接商品不存在或下架';
+                return '商品不存在或下架';
             }
             if($xj_goods_info->price < $goods->duijie_smilepic){
                 $xj_goods_info->price = $goods->duijie_smilepic;
@@ -315,6 +320,7 @@ class Pay extends Base {
             if (!$user) {
                 return '对接不存在该商家！';
             }
+            
             //设置该订单为对接，不可查，不可显示
             $data['dj_is_see'] = 1;
         }

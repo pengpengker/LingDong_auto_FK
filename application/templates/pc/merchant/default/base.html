@@ -154,6 +154,9 @@
                                 	<li class="waves-effect {if $_controller=='User' && $_action=='link'}active{/if}">
                                         <a href="/merchant/user/link">店铺链接</a>
                                     </li>
+                                    <li class="waves-effect {if $_controller=='User' && $_action=='wechat_bind'}active{/if}">
+                                        <a href="/merchant/user/wechat_bind">绑定微信</a>
+                                    </li>
                                 </ul>
                             </li>
 
@@ -164,8 +167,11 @@
                                     <span class="menu-arrow"></span>
                                 </a>
                                 <ul class="list-unstyled">
-                                	<li class="waves-effect {if $_controller=='Complaint' && $_action=='index' && $Think.get.status===null}active{/if}">
-                                        <a href="/merchant/complaint/index">全部投诉</a>
+                                	<li class="waves-effect {if $_controller=='Complaint' && $_action=='index' && $_type=='ziying' && $Think.get.status===null}active{/if}">
+                                        <a href="/merchant/complaint/index/c_type/ziying">自营商品投诉</a>
+                                    </li>
+                                    <li class="waves-effect {if $_controller=='Complaint' && $_action=='index' && $_type=='duijie' && $Think.get.status===null}active{/if}">
+                                        <a href="/merchant/complaint/index/c_type/duijie">对接商品投诉</a>
                                     </li>
                                 	<li class="waves-effect {if $_controller=='Complaint' && $_action=='index' && $Think.get.status==1}active{/if}">
                                         <a href="/merchant/complaint/index?status=1">已处理</a>
@@ -184,36 +190,25 @@
                                 </a>
                                 <ul class="list-unstyled">
                                 	<li class="waves-effect {if $_controller=='GoodsCategory' && $_action=='index'}active{/if}">
-                                        <a href="/merchant/goods_category/index">商品分类</a>
+                                        <a href="/merchant/goods_category/index">添加商品分类</a>
                                     </li>
                                 	<li class="waves-effect {if $_controller=='Goods' && $_action=='add'}active{/if}">
-                                        <a href="/merchant/goods/add">添加商品</a>
+                                        <a href="/merchant/goods/add">添加自营商品</a>
                                     </li>
                                 	<li class="waves-effect {if $_controller=='Goods' && $_action=='index'}active{/if}">
-                                        <a href="/merchant/goods/index">商品列表</a>
+                                        <a href="/merchant/goods/index">自营商品列表</a>
+                                    </li>
+                                    <li class="waves-effect {if $_controller=='Goods' && $_action=='duijie_index'}active{/if}">
+                                        <a href="/merchant/goods/duijie_index">对接商品列表</a>
+                                    </li>
+                                    <li class="waves-effect {if $_controller=='Goods' && $_action=='agentlist'}active{/if}">
+                                        <a href="/merchant/goods/agentlist">全网资源对接</a>
                                     </li>
                                     <li class="waves-effect {if $_controller=='Goods' && $_action=='trash'}active{/if}">
-                                        <a href="/merchant/goods/trash">回收站</a>
+                                        <a href="/merchant/goods/trash">商品回收站</a>
                                     </li>
                                 </ul>
                             </li>
-
-                            <li class="has_sub">
-                                <a href="javascript:void(0);" class="waves-effect {if $_controller=='GoodsDuijie' || $_controller=='GoodsDuijie'}active{/if}">
-                                    <i class="fa fa-podcast"></i>
-                                    <span>对接管理</span>
-                                    <span class="menu-arrow"></span>
-                                </a>
-                                <ul class="list-unstyled">
-                                    <li class="waves-effect {if $_controller=='GoodsDuijie' && $_action=='index'}active{/if}">
-                                        <a href="/merchant/goods_duijie/index">对接中心</a>
-                                    </li>
-                                    <li class="waves-effect {if $_controller=='GoodsDuijie' && $_action=='myduijie'}active{/if}">
-                                        <a href="/merchant/goods_duijie/myduijie">我的对接</a>
-                                    </li>
-                                </ul>
-                            </li>
-
                             <li class="has_sub">
                                 <a href="javascript:void(0);" class="waves-effect {if $_controller=='GoodsCard'}active{/if}">
                                     <i class="fa fa-cc-discover"></i>
@@ -274,14 +269,17 @@
                                     <span class="menu-arrow"></span>
                                 </a>
                                 <ul class="list-unstyled">
+                                	<li class="waves-effect {if $_controller=='Order' && $_action=='index' && $_type=='ziying' && $Think.get.status===null}active{/if}">
+                                        <a href="/merchant/order/index/c_type/ziying">自营订单列表</a>
+                                    </li>
+                                    <li class="waves-effect {if $_controller=='Order' && $_action=='index' && $_type=='duijie' && $Think.get.status===null}active{/if}">
+                                        <a href="/merchant/order/index/c_type/duijie">对接订单列表</a>
+                                    </li>
                                     <li class="waves-effect {if $_controller=='User' && $_action=='channel'}active{/if}">
                                         <a href="/merchant/user/channel">付款方式</a>
                                     </li>
                                     <li class="waves-effect {if $_controller=='Order' && $_action=='channelstatis'}active{/if}">
                                         <a href="/merchant/order/channelStatis">渠道分析</a>
-                                    </li>
-                                    <li class="waves-effect {if $_controller=='Order' && $_action=='index' && $Think.get.status===null}active{/if}">
-                                        <a href="/merchant/order/index">订单列表</a>
                                     </li>
                                     <li class="waves-effect {if $_controller=='Order' && $_action=='analysis' && $Think.get.status===null}active{/if}">
                                         <a href="/merchant/order/analysis">收益分析</a>

@@ -1,0 +1,35 @@
+{extend name="base"}
+
+{block name="content"}
+<div class="row">
+	<div class="col-sm-12">
+		<div class="card-box">
+			<div class="row">
+				<div class="alert alert-info alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>						
+				绑定微信公众号后，每笔交易都可以通知到您的微信，也可以当APP使用额！
+				</div>
+				<div class="col-sm-12">
+					<form class="form-horizontal" role="form" action="" method="post">
+					状态：{$status}					<button type="submit" class="btn btn-purple waves-effect waves-light">解绑</button>
+					<a href="/merchant/user/wechat_bind.html" class="btn btn-purple waves-effect waves-light">刷新</a>					
+					</form>
+				</div>
+				<br/>
+				<div class="col-sm-12">
+					公众号：
+					<img src="__RES__/theme/default/img/qrcode_gzh.jpg" />
+				</div>
+				<div class="col-sm-12">
+					教程：
+				</div>
+				<img src="__RES__/app/images/wechat_bind_help.jpg"/>
+			</div>
+
+		</div>
+	</div>
+</div>
+{/block}
+
+{block name="appendJS"}
+{/block}

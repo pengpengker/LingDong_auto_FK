@@ -342,4 +342,24 @@ class User extends Base {
         $str = $status == 1 ? '关闭' : '开启';
         $this->success('操作成功，该店铺已' . $str . '！');
     }
+    
+    //微信绑定教程
+    public function wechat_bind()
+    {
+    	if($this->request->ispost()){
+    		$this->user->openid = '';
+    		if($this->user->save()){
+    			$this->success('解绑成功，请换新微信按流程操作');
+    		}else{
+    			$this->error('解绑失败，您还没有绑定或者无法解绑');
+    		}
+    	}else{
+    		if(empty($this->user->openid)){
+    			$this->assign('status','未绑定');
+	    	}else{
+	    		$this->assign('status','已绑定');
+	    	}
+	    	return $this->fetch();
+    	}
+    }
 }

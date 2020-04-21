@@ -282,7 +282,7 @@ File: Menu
   color: #71b6f9;
 }
 #sidebar-menu ul ul a {
-  color: #63747c;
+  color: #000000;;
   -webkit-transition: all 0.3s ease-out;
   -moz-transition: all 0.3s ease-out;
   -o-transition: all 0.3s ease-out;

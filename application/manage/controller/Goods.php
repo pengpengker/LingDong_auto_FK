@@ -184,7 +184,6 @@ class Goods extends BasicAdmin
             if (!$goods) {
                 return J(1, '不存在该商品！');
             }
-
             $res = $goods->delete();
             if ($res !== false) {
             	//清空下级对接商品
