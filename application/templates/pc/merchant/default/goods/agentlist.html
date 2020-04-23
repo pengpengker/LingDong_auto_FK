@@ -35,7 +35,14 @@
 					<tbody>
 						{foreach $goodsList as $v}
 						<tr>
-							<th scope="row"><span class="label" style="background-color: #f9c851;">热门</span>{$v.name}
+							<th scope="row">
+								{switch name="$v.goodorder.type"}
+								     {case value="1"}<a style="color:#ff0000"><span class="label" style="background-color: #f9c851;">热门推荐</span></a>{/case}
+								     {case value="2"}<a style="color:#ff0000"><span class="label" style="background-color: #ff0101;">官方推荐</span></a>{/case}
+								     {case value="3"}<a style="color:#ff0000"><span class="label" style="background-color: #a601ff;">年费置顶</span></a>{/case}
+								     {default /}
+								{/switch}
+								{$v.name}
 								{if $v.wholesale_discount==1}
 								<span class="label label-success">批</span>
 								{/if}

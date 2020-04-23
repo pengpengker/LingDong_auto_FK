@@ -756,8 +756,6 @@ class Goods extends Base
         $where['is_duijie'] = ['=','1'];
         //非冻结状态
         $where['is_freeze'] = ['=','0'];
-        //不输出自己的商品
-        $where['user_id'] = ['neq',$this->user->id];
         //秘钥搜索
         if(!empty(input('duijie_key/s', ''))){
         	//对接秘钥转上级id
@@ -768,9 +766,13 @@ class Goods extends Base
         		$where['user_id'] = ['=',0];
         	}
         }
-        $goodsList = GoodsModel::where($where)->where("duijie_id is null or duijie_id=''")->order('sort desc,id desc')->paginate(30, false, [
+        // $goodsList = GoodsModel::where($where)->where("duijie_id is null or duijie_id=''")->order('id desc')->paginate(30, false, [
+        //     'query' => $query,
+        // ]);
+        $goodsList = GoodsModel::with(['goodorder'],'LEFT')->where($where)->where("duijie_id is null or duijie_id=''")->order('type desc,id desc')->paginate(30, false, [
             'query' => $query,
         ]);
+        //halt($goodsList->toarray());
         //将本人已对接的商品排除
         $myduijiegoodslist = GoodsModel::where('user_id',$this->user->id)->where("duijie_id is not null or duijie_id != ''")->select();
         foreach ($goodsList as $key => $val){
@@ -812,6 +814,9 @@ class Goods extends Base
     	}
     	if(GoodsModel::where(['duijie_id' => input('shop_id/s', 0), 'user_id' => $this->user->id])->find()){
     		$this->error('该商品已对接，不能重复对接');
+    	}
+    	if(GoodsModel::where(['id' => input('shop_id/s', 0), 'user_id' => $this->user->id])->find()){
+    		$this->error('不能对接自己的商品');
     	}
     	if($info->user_id === $this->user->id){
     		$this->error('无法对接自己的商品');

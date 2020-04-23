@@ -54,6 +54,11 @@
                                     <tr>
                                         <td colspan="2">备注：{$v.remark}</td>
                                     </tr>
+                                    <tr>
+                                        <td>
+			                                <a href="javascript:;" onclick="delData({$v.id})" data-toggle="tooltip" title="删除优惠券"><span class="glyphicon glyphicon-trash"></span></a>&nbsp;
+			                            </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -116,4 +121,20 @@
 {/block}
 
 {block name="appendJS"}
+<script>
+	var delData = function(id) {
+        if (confirm('是否要删除优惠券信息？')) {
+			$.post('/merchant/goods_coupon/del', {
+				id: id
+			}, function(res) {
+				if (res.code == 0) {
+                    alert('删除成功！');
+					$('#record_' + id).parents('.selltable').fadeOut();
+				} else {
+					alert(data);
+				}
+			});
+		};
+    };
+</script>
 {/block}

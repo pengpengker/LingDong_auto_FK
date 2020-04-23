@@ -202,6 +202,8 @@ class Common extends ApiBase {
      * 上传文件，返回 url
      */
     function upload() {
+    	//此处有Bug,禁用
+    	die('upload/fuck you .jpg');
         $upload = getUploadFile('file', true);
         if ($upload['status']) {
             success($upload['data']['file']);

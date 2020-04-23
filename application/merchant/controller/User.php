@@ -40,7 +40,7 @@ class User extends Base {
         $qq                      = input('qq/s', '');
         $subdomain               = strtolower(input('subdomain/s', ''));
         $shop_name               = input('shop_name/s', '');
-        $shop_notice             = input('shop_notice/s', '');
+        $shop_notice             = str_replace(PHP_EOL, '', input('shop_notice/s', ''));
         $shop_notice_auto_pop    = input('shop_notice_auto_pop/s', '');
         $user_notice_auto_pop    = input('user_notice_auto_pop/s', '');
         $shop_gouka_protocol_pop = input('shop_gouka_protocol_pop/s', '');

@@ -1,5 +1,5 @@
 <?php
-namespace unionpay\sdk;;
+namespace unionpay\sdk;
 include_once 'log.class.php';
 include_once 'common.php';
 

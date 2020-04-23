@@ -27,6 +27,8 @@ class ApiBase extends Controller
         if(1 != $siteStatus){
             error(500, '网站维护中，请稍候再试');
         }
+        
+        die('暂不使用API');
 
         //检查参数
         $res = $this->checkSign();

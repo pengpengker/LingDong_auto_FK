@@ -44,9 +44,14 @@
                                 <span>原商品名：<a href="javascript:;">{$v.sjuser.name}</a></span>
                             </td>
                         </tr>
+                        <tr id="record_365220">
+                            <td colspan="6">
+                                <span>上级联系方式:<a href="javascript:;" onclick="qq_info(this,{$v.id})">查询上级QQ</a></span>
+                            </td>
+                        </tr>
                         <tr>
-                            <td colspan="3">单价：{$v.sjuser.duijie_price + $v.price}</td>
-                            <td colspan="3">原商品单价：{$v.sjuser.duijie_price}</td>
+                            <td colspan="3">现销售价：{$v.sjuser.duijie_price + $v.price}</td>
+                            <td colspan="3">原对接单价：{$v.sjuser.duijie_price}</td>
 
                         </tr>
                         <tr>
@@ -157,6 +162,16 @@
             });
         });
     };
+    
+    function qq_info(obj,id){
+		$.post('/merchant/goods/qq_info', {
+			id: id,
+		}, function (res) {
+			console.log(obj.href);
+			obj.href = 'http://wpa.qq.com/msgrd?v=3&uin='+res+'&site=qq&menu=yes';
+			obj.text = res;
+		});
+	}
 
     function selectcateid() {
         var cateid = $('#cateid').val();

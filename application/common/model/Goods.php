@@ -16,10 +16,16 @@ class Goods extends Model
         return $this->belongsTo('User', 'user_id');
     }
     
-    //对接输出用
+    //资源列表对接输出用
     public function sjuser()
     {
-    	return $this->belongsTo('Goods','duijie_id','id')->field('id,name,duijie_price');;
+    	return $this->belongsTo('Goods','duijie_id','id')->field('id,name,duijie_price');
+    }
+    
+    //资源列表对接输出用 排序
+    public function goodorder()
+    {
+    	return $this->hasOne('GoodsAgentSoft','goods_id','id','','LEFT')->field('goods_id,type')->setEagerlyType(0);
     }
 
     public function category()

@@ -303,4 +303,70 @@ class Order extends Base
         $this->assign('data', $data);
         return $this->fetch();
     }
+    
+    /**
+     * 提卡
+     */
+    public function ck_my_order()
+    {
+    	if($this->request->ispost()){
+    		$order_tra = $this->request->param('tra');
+    		if(empty($order_tra)){
+    			return "请输入订单号";
+    		}
+    		//查询订单数据库
+    		$info = OrderModel::where(['trade_no'=>$order_tra,'user_id'=>$this->user->id])->find();
+    		if(!$info){
+    			return "没有找到该订单";
+    		}
+    		//判断订单状态
+    		if($info->status === 1){
+    			if(empty($info->dj_order_id) && $info->dj_is_see !== 1){
+    				$type = '自营订单';
+    			}else{
+    				$type = '对接订单';
+    			}
+    			return "该订单已完成 订单类型: ".$type." 完成时间:".date('Y-m-d H:i:s',$info->success_at)." 订单收益:".$info->total_price;
+    		}
+    		if($info->status === 0){
+    			if(empty($info->dj_order_id) && $info->dj_is_see !== 1){
+    				$type = '自营订单';
+    			}else{
+    				$type = '对接订单';
+    			}
+    			if(empty($info->node)){
+    				$node = '订单没有错误或错误在下级代理';
+    			}else{
+    				$node = $info->node;
+    			}
+    			if(!empty($info->dj_order_id)){
+    				$gl_tra = $info->dj_order_id;
+    			}else if($info->dj_is_see === 1){
+    				$gl_tra = OrderModel::where(['dj_order_id'=>$order_tra])->find();
+    			}else{
+    				$gl_tra = '没有关联订单或已被清理';
+    			}
+    			return "该订单未完成 订单类型: ".$type." 创建时间:".date('Y-m-d H:i:s',$info->create_at)." 订单收益:".$info->total_price." 错误分析:".$node." 关联订单(自营商品请忽略):".$gl_tra;
+    		}
+    		if($info->status === 2){
+    			if(empty($info->dj_order_id) && $info->dj_is_see !== 1){
+    				$type = '自营订单';
+    			}else{
+    				$type = '对接订单';
+    			}
+    			if(!empty($info->dj_order_id)){
+    				$gl_tra = $info->dj_order_id;
+    			}else if($info->dj_is_see === 1){
+    				$gl_tra = OrderModel::where(['dj_order_id'=>$order_tra])->find();
+    			}else{
+    				$gl_tra = '没有关联订单或已被清理';
+    			}
+    			return "该订单已关闭 订单类型: ".$type." 创建时间:".date('Y-m-d H:i:s',$info->create_at)." 订单收益:".$info->total_price." 关联订单(自营商品请忽略):".$gl_tra;
+    		}
+    		return "系统尽力了；但没有您想要的";
+    	}else{
+    		$this->setTitle('订单自检排错');
+    		return $this->fetch();
+    	}
+    }
 }

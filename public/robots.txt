@@ -1,4 +1,4 @@
-# Robots For LingDongFk
+# Robots For QiShiFk
 User-agent: *
 Disallow: /details/
 Disallow: /liebiao/

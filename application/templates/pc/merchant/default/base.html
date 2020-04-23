@@ -275,6 +275,9 @@
                                     <li class="waves-effect {if $_controller=='Order' && $_action=='index' && $_type=='duijie' && $Think.get.status===null}active{/if}">
                                         <a href="/merchant/order/index/c_type/duijie">对接订单列表</a>
                                     </li>
+                                    <li class="waves-effect {if $_controller=='Order' && $_action=='ck_my_order'}active{/if}">
+                                        <a href="/merchant/order/ck_my_order">订单自检排错</a>
+                                    </li>
                                     <li class="waves-effect {if $_controller=='User' && $_action=='channel'}active{/if}">
                                         <a href="/merchant/user/channel">付款方式</a>
                                     </li>

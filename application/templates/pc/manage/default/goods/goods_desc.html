@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Layui</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="__RES__/plugs/layui/css/layui.css"></link>
+  <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+<form class="layui-form" action="" method="post" lay-filter="example">
+	<input hidden="hidden" name="goods_id" value="{$goods_id}">
+  <div class="layui-form-item">
+    <label class="layui-form-label">置顶状态</label>
+    <div class="layui-input-block">
+      <select name="type" id="type">
+        <option value="0" >不置顶</option>
+        <option value="1">包月置顶</option>
+        <option value="2">官方推荐</option>
+        <option value="3">包年置顶</option>
+      </select>
+    </div>
+  </div>
+  <div class="layui-inline">
+      <label class="layui-form-label">到期时间</label>
+      <div class="layui-input-inline">
+        <input type="text" name="end_time" id="end_time"placeholder="YYYY-MM-DD HH:MM:SS" value="{$info.end_time}" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">确认修改</button>
+    </div>
+  </div>
+</form>
+<script src="__RES__/plugs/layui/layui.js" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+layui.use(['form', 'laydate'], function(){
+  var form = layui.form
+  ,$ = layui.$
+  ,layer = layui.layer
+  ,laydate = layui.laydate;
+  
+  //日期
+  laydate.render({
+    elem: '#end_time'
+    ,type: 'datetime'
+  });
+  
+  $("#type").val("{$info.type}");
+  form.render();
+});
+</script>
+
+</body>
+</html>

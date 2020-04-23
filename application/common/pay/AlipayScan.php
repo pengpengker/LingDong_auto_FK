@@ -94,6 +94,7 @@ class AlipayScan extends Pay{
                     die('对接支付总金额异常！');
                 }
             }else{
+            	 record_file_log('alipay_page_error','上级订单不存在！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$params['total_amount']}");
                 die('上级订单不存在');
             }
         }

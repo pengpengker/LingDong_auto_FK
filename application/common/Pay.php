@@ -162,10 +162,15 @@ class Pay {
         } catch (\Exception $e) {
             Db::rollback();
             // 记录错误订单
+            $order->node = $e->getMessage();
+            $order->save();
+            
             record_file_log('complete_error', $order->trade_no . $e->getMessage());
             record_file_log('complete_error', $e->getTraceAsString());
             $flag = true;
         }
+        
+        
 
 		//判断是否为对接商品 -- 对接商品再一次进行完结上级订单
         if(!empty($order->dj_order_id)){
@@ -176,77 +181,6 @@ class Pay {
             }
         }
 
-        // 自动检测开启自动提现
-        //自动提现功能改版，每天触发一次
-        /* $user= UserModel::get($order->user_id);
-
-        if($user->is_freeze != 1 && $user->collect && sysconf('cash_status') == 1 && sysconf('auto_cash') == 1 && sysconf('auto_cash_money') <= $user->money){
-        // 今日可提现次数
-        $todayTime=strtotime(date('Y-m-d'));
-        $todayCount=CashModel::where(['user_id'=>$user->id,'create_at'=>['>=',$todayTime]])->count();
-        $limitNum=(int)sysconf('cash_limit_num');
-        $todayCanCashNum = $limitNum - $todayCount;
-        $todayCanCashNum = $todayCanCashNum<0?0:$todayCanCashNum;
-
-        // 检测今日提现次数
-        if($todayCanCashNum > 0){
-        $money=$user->money;
-        // 收款信息
-        $collect_info='';
-        $collect=$user->collect;
-        switch($collect->type){
-        case 1: //支付宝
-        $collect_info .="支付宝账号：{$collect->info['account']}<br>";
-        $collect_info .="真实姓名：{$collect->info['realname']}<br>";
-        $collect_info .="身份证号：{$collect->info['idcard_number']}";
-        break;
-        case 2: //微信
-        $collect_info .="微信账号：{$collect->info['account']}<br>";
-        $collect_info .="真实姓名：{$collect->info['realname']}<br>";
-        $collect_info .="身份证号：{$collect->info['idcard_number']}";
-        break;
-        case 3: //银行
-        $collect_info .="开户银行：{$collect->info['bank_name']}<br>";
-        $collect_info .="开户地址：{$collect->info['bank_branch']}<br>";
-        $collect_info .="收款账号：{$collect->info['bank_card']}<br>";
-        $collect_info .="真实姓名：{$collect->info['realname']}<br>";
-        $collect_info .="身份证号：{$collect->info['idcard_number']}";
-        break;
-        }
-
-        // 申请提现
-        Db::startTrans();
-        try{
-        $user->money-=$money;
-        $user->save();
-
-        // 记录用户金额变动日志
-        $reason = "申请提现金额{$money}元";
-        record_user_money_log('apply_cash',$user->id,-$money,$user->money,$reason);
-        // 获取提现手续费
-        $fee=get_cash_fee($money);
-        // 记录提现日志
-        CashModel::create([
-        'user_id'      =>$user->id,
-        'type'         =>$collect->type,
-        'collect_info' =>$collect_info,
-        'collect_img'  => $collect->collect_img,
-        'auto_cash'    => 1,
-        'money'        =>$money,
-        'fee'          =>$fee,
-        'actual_money' =>round($money-$fee,2),
-        'status'       =>0,
-        'create_at'    =>$_SERVER['REQUEST_TIME'],
-        ]);
-
-        Db::commit();
-        }catch(\Exception $e){
-        Db::rollback();
-        record_user_money_log('apply_cash',$user->id,-$money,$user->money, "自动提现失败，原因" . $e->getMessage());
-        };
-        MerchantLogService::write('提现申请成功',  $reason);
-        }
-        } */
         if($flag = true){
         	die('error');
         }
