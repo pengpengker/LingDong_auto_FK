@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>QQ支付</title>
+</head>
+<body οnlοad="pay();">
+	
+<script src="https://open.mobile.qq.com/sdk/qqapi.js?_bid=152"></script>
+<script>
+    function pay(){
+		//验证是否是QQ
+		mqq.device.isMobileQQ(function(result){
+			if(result) {
+				var isIos = mqq.iOS;
+				//alert("是否是IOS:" + isIos);
+				var isAndroid = mqq.android;
+				//alert("是否是Android:" + isAndroid);
+				var qqVersion = mqq.QQVersion;
+				//alert("QQVersion:" + qqVersion);
+				//唤起QQ钱包 
+				this.callPay()
+			} else {
+				alert("请在手机QQ中打开此页面");
+				return false;
+			}
+		});
+	}
+	
+	
+	function callPay(){
+		mqq.tenpay.pay({
+			tokenId: "{$prepay_id}",
+		}, function(result, resultCode){
+			if(result == "Permission denied") {
+				alert("无权限 ");	
+			} else {
+				alert(result.resultCode);
+				document.location.href = "${redirectUrl}";
+			}
+		});
+	}
+</script>
+</body>
+</html>

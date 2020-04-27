@@ -132,8 +132,8 @@
 		var editor, $item;
 
 		/*! 默认编辑第一篇图文 */
-		editor = window.createEditor('[name="content"]');
-
+		// editor = window.createEditor('[name="content"]');
+		editor = CKEDITOR.replace( 'content' );
 
 
 		var $form = $('form[name="news"]'), $body = $('body');

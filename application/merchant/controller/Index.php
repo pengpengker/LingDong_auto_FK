@@ -12,6 +12,7 @@ use app\common\model\Cash as CashModel;
 use app\common\model\Order as OrderModel;
 use app\common\model\Article as ArticleModel;
 use app\common\model\ArticleCategory as ArticleCategoryModel;
+use app\common\model\Complaint as ComplaintModel;
 use think\Config;
 use think\Session;
 
@@ -195,7 +196,12 @@ class Index extends Base {
             'user_id' => $this->user->id,
             'status'  => 1,
         ])->order('id desc')->value('money');
-
+		
+		//输出未处理投诉数量
+		//自营
+		$this->assign('zy_complaint', count(ComplaintModel::where(['user_id' => $this->user->id,'status' => 0,'is_duijie'=> 0])->select()));
+		//代理
+		$this->assign('dl_complaint', count(ComplaintModel::where(['user_id' => $this->user->id,'status' => 0,'is_duijie'=> 1])->select()));
         $this->assign('dealStat', $dealStat);
         $this->assign('articles', $articles);
         return $this->fetch();

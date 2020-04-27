@@ -80,7 +80,8 @@
     //     form.render();
     // });
     require(['ckeditor'], function () {
-        var editor = window.createEditor('[name="content"]');
+        // var editor = window.createEditor('[name="content"]');
+        var editor = CKEDITOR.replace( 'content' );
         // 获取内容
         var content = editor.getData();
         console.log(content);

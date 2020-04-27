@@ -93,6 +93,8 @@ class Order extends Base {
                     $order = OrderModel::where(['trade_no' => $trade_no,'dj_is_see' => null])->order('id DESC')->find();
                 	break;
                 case '3':
+                	$this->error('请使用浏览器缓存或订单号查询');
+                	
                     //按联系方式获取
                     $count = OrderModel::where(['contact' => $trade_no, 'status' => 1,'dj_is_see' => null])->count();
                     if ($count > 1) {
@@ -209,7 +211,9 @@ class Order extends Base {
         $mobile   = input('mobile/s', '');
         $email	  = input('email/s', '');
         $desc     = input('desc/s', '');
-
+		$zfbxm     = input('zfbxm/s', '');
+		$zfb     = input('zfb/s', '');
+		
         if (!$qq) {
             $this->error('请输入联系QQ！');
         }
@@ -219,6 +223,12 @@ class Order extends Base {
         if (!$desc) {
             $this->error('请输入投诉说明！');
         }
+        if (!$zfbxm) {
+            $this->error('请输入支付宝姓名！');
+        }
+        if (!$zfb) {
+            $this->error('请输入支付宝账号！');
+        }
 
         $order = OrderModel::get(['trade_no' => $trade_no]);
         if (!$order) {
@@ -227,148 +237,142 @@ class Order extends Base {
         if ($order->status === 0) {
             $this->error('该订单未完成，暂不能受理投诉！');
         }
-        
         //判断是否超过投诉时间
         if(date('Ymd', $order->success_at) !== date('Ymd')){
         	$this->error('该订单已超过投诉时间，投诉仅支持购买成功后当天投诉！');
         }
-
 		//上级订单不能被投诉
 		if($order->dj_is_see === 1){
 			$this->error('对接商品请投诉下级，无法投诉上级！');
 		}
-
-        // 获取该手机号投诉次数
-        //$count = ComplaintModel::where(['trade_no' => $trade_no, 'mobile' => $mobile])->count();
 		$count = ComplaintModel::where(['trade_no' => $trade_no])->count();
-		
-        //2018-06-22 限制只能投诉一次
-
-//        $limitNum = (int)sysconf('complaint_limit_num');
-        //        if ($count >= $limitNum) {
-        //            $this->error('您已投诉过该订单！');
-        //        }
         if ($count > 0) {
             $token = md5(md5(time()).rand(1000,5000));
             session('token',$token);
             $this->error('您已投诉过该订单！', url('Index/order/complaintpass', ['trade_no' => $trade_no, 'token' => $token]));
         }
-		
 		Db::startTrans();
         try {
             //投诉查看密码，需要发送到投诉人联系手机中
             $code = rand(100000, 999999);
-            $res = ComplaintModel::create([
+            $complaint_data = [
                 'user_id'   => $order->user_id,
                 'trade_no'  => $trade_no,
                 'type'      => $type,
                 'qq'        => $qq,
                 'mobile'    => $mobile,
                 'desc'      => $desc,
+                'zfbxm'      => $zfbxm,
+                'zfb'      => $zfb,
                 'status'    => 0,
                 'create_at' => $_SERVER['REQUEST_TIME'],
                 'create_ip' => $this->request->ip(),
                 'pwd'       => $code,
                 'expire_at' => time() + 86400,
-            ]);
-            if ($res !== false) {
-                Db::table('complaint_message')->insert([
-                    'trade_no'  => $trade_no,
-                    'content'   => $desc,
-                    'create_at' => time(),
-                ]);
-
-                //投诉申请成功，指定的订单作废，不允许该订单的资金解冻。
-                $res = Db::table('auto_unfreeze')->where(['trade_no' => $order->trade_no])->update(['status' => -1]);
-                if ($res) {
-                    //冻结订单
-                    $res = Db::table('order')->where(['trade_no' => $order->trade_no])->update(['is_freeze' => 1]);
-                    if ($res) {
-                        //判断是否 T0 结算的订单，如果是，需要扣除商家余额
-                        if (0 == $order->settlement_type) {
-                            $user    = Db::table('user')->where('id', $order->user->id)->lock(true)->find();
-                            $balance = round($user['money'] - $order->total_price, 3);
-                            Db::table('user')->where('id', $user['id'])->update(['money' => ['exp', 'money-' . $order->total_price], 'freeze_money' => ['exp', 'freeze_money+' . $order->total_price]]);
-                            // 记录用户金额变动日志
-                            record_user_money_log('freeze', $user['id'], $order->total_price, $balance, "T0订单被投诉，冻结金额：{$order->total_price}元");
-                        }
-                    }
-                }else{
-                	Db::rollback();
-            		$this->error('操作失败，请重试1！');
-                }
-            }else{
+            ];
+            $res = $this->complaint_doing($complaint_data,$order);
+            if(!$res){
             	Db::rollback();
-            	$this->error('操作失败，请重试2！');
+            	$this->error('操作失败，请重试 - Code:1！');
             }
-            
-            
-
 			//判断是否属于对接的商品被投诉
 			if(!empty($order->dj_order_id)){
 				$sj_order = OrderModel::get(['trade_no' => $order->dj_order_id]);
 				if(!$sj_order){
 					Db::rollback();
-            		$this->error('操作失败，请重试3！');
+            		$this->error('操作失败，请重试 - Code:2！');
 				}
-				$sj_res = ComplaintModel::create([
+				$complaint_data = [
 	                'user_id'   => $sj_order->user_id,
 	                'trade_no'  => $sj_order->trade_no,
 	                'type'      => $type,
 	                'qq'        => $qq,
 	                'mobile'    => $mobile,
 	                'desc'      => $desc,
+	                'zfbxm'     => $zfbxm,
+                	'zfb'       => $zfb,
 	                'status'    => 0,
 	                'is_duijie' => 1,
 	                'create_at' => $_SERVER['REQUEST_TIME'],
 	                'create_ip' => $this->request->ip(),
 	                'pwd'       => $code,
 	                'expire_at' => time() + 86400,
-	            ]);
-	            if($sj_res){
-	            	//下级投诉传递上级投诉的id
-	            	if(!Db::table('complaint')->where(['trade_no' => $trade_no])->update(['duijie_id' => $sj_res->id])){
-	            		Db::rollback();
-            			$this->error('操作失败，请重试4！');
-	            	}
-	            	
-	            	//投诉申请成功，指定的订单作废，不允许该订单的资金解冻。
-                	$sj_res = Db::table('auto_unfreeze')->where(['trade_no' => $sj_order->trade_no])->update(['status' => -1]);
-                	if($sj_res){
-                		//冻结订单
-                    	$res = Db::table('order')->where(['trade_no' => $sj_order->trade_no])->update(['is_freeze' => 1]);
-                		//判断是否 T0 结算的订单，如果是，需要扣除商家余额
-                        if (0 == $sj_order->settlement_type) {
-                            $user    = Db::table('user')->where('id', $sj_order->user->id)->lock(true)->find();
-                            $balance = round($user['money'] - $order->total_price, 3);
-                            Db::table('user')->where('id', $user['id'])->update(['money' => ['exp', 'money-' . $sj_order->total_price], 'freeze_money' => ['exp', 'freeze_money+' . $sj_order->total_price]]);
-                            // 记录用户金额变动日志
-                            record_user_money_log('freeze', $user['id'], $sj_order->total_price, $balance, "此订单为上级代理-T0订单被投诉，冻结金额：{$sj_order->total_price}元");
-                        }
-                	}else{
-                		Db::rollback();
-            			$this->error('操作失败，请重试5！');
-                	}
-	            }else{
+	            ];
+	            $res = $this->complaint_doing($complaint_data,$sj_order,true);
+	            if(!$res){
 	            	Db::rollback();
-            		$this->error('操作失败，请重试！6');
+	            	$this->error('操作失败，请重试 - Code:3！');
+	            }
+	            if(!Db::table('complaint')->where(['trade_no' => $trade_no])->update(['duijie_id' => $res->id])){
+	            	Db::rollback();
+	            	$this->error('操作失败，请重试 - Code:4！');
 	            }
 			}
+			// 实例化投诉短信SDK
             $sms = new Sms;
 	        // 向买家发送投诉信息
 	        $sms->sendComplaintPwd($mobile, $trade_no, $code);
 	        sendMail($email, '【' . sysconf('site_name') . '】' . '您的投诉已被受理，请查看投诉密码', '投诉密码为:'.$code, '', true);
 	        // 向卖家发送投诉成功短信
 	        $sms->sendComplaintNotify($order->user->mobile, $trade_no);
+	        // 向被投诉的卖家发送投诉通知
 	        sendMail($order->user->email, '【' . sysconf('site_name') . '】' . '您已被买家投诉，请及时登录商户普通沟通解决', '若您逾期今天无法解决，请向平台说明详细原因，否则视为买家获胜，将不结算该笔订单', '', true);
+	        // 向被投诉的卖家上级用户发送被投诉通知
+	        if(!empty($order->dj_order_id)){
+	        	sendMail($sj_order->user->email, '【' . sysconf('site_name') . '】' . '您的下级对接的商品已被买家投诉，请及时联系您的下级对接商户沟通解决', '请您今天内与下级商户共同协商解决该投诉，下级商户订单号:'.$trade_no.' 本人订单号:'.$sj_order->trade_no, '', true);
+	        }
 	        $token = md5(md5(time()).rand(1000,5000));
 	        session('token',$token);
         } catch (Exception $e) {
             Db::rollback();
-            $this->error('操作失败，请重试7！' . $e->getMessage());
+            $this->error('操作失败，请重试- Code:5!' . $e->getTraceAsString());
         }
         Db::commit();
         $this->success('投诉成功！', url('Index/order/complaintpass', ['trade_no' => $trade_no, 'token' => $token]));
+    }
+    
+    /**
+     * 投诉锁定资金解冻 和 增加投诉数据
+     * param $complaint_data 投诉表添加的数据
+     * param $order 订单数据
+     * param $isagent 是否为上级代理
+     */
+    public function complaint_doing($complaint_data,$order,$isagent = false) {
+        $falg = false;
+        //增加投诉表数据
+        $res = ComplaintModel::create($complaint_data);
+        if(!$res){
+        	return $falg;
+        }
+        //发送投诉信息 投诉信息表  代理则不创建投诉信息表
+        if(!$isagent){
+        	 if(!Db::table('complaint_message')->insert([
+	            'trade_no'  => $complaint_data['trade_no'],
+	            'content'   => $complaint_data['desc'],
+	            'create_at' => time(),
+	        ])){
+	        	return $falg;
+	        }
+        }
+        //投诉申请成功，指定的订单作废，不允许该订单的资金解冻。
+        if(!Db::table('auto_unfreeze')->where(['trade_no' => $order->trade_no])->update(['status' => -1])){
+        	return $falg;
+        }
+        //冻结订单
+        if(!Db::table('order')->where(['trade_no' => $order->trade_no])->update(['is_freeze' => 1])){
+        	return $falg;
+        }
+        //判断是否 T0 结算的订单，如果是，需要扣除商家余额
+	    if (0 == $order->settlement_type) {
+	        $user    = Db::table('user')->where('id', $order->user->id)->lock(true)->find();
+	        $balance = round($user['money'] - $order->total_price, 3);
+	        if(!Db::table('user')->where('id', $user['id'])->update(['money' => ['exp', 'money-' . $order->total_price], 'freeze_money' => ['exp', 'freeze_money+' . $order->total_price]])){
+	        	return $falg;
+	        }
+	        // 记录用户金额变动日志
+	        record_user_money_log('freeze', $user['id'], $order->total_price, $balance, "T0订单被投诉，冻结金额：{$order->total_price}元");
+	    }
+	    return $res;
     }
 
     /**

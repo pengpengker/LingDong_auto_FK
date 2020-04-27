@@ -337,10 +337,11 @@
     }
 
     require(['ckeditor'], function () {
-        var editor = window.createEditor('[name="buy_protocol"]');
-        // 获取内容
-        var content = editor.getData();
-        console.log(content);
+    	CKEDITOR.replace('buy_protocol');
+        // var editor = window.createEditor('[name="buy_protocol"]');
+        // // 获取内容
+        // var content = editor.getData();
+        // console.log(content);
     });
 </script>
 {/block}

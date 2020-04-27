@@ -69,8 +69,6 @@
 							</td>
 							<td>
 								<?php echo $v->cards_sold_count; ?>张
-								<a href="/merchant/goods_card/index?goods_id={$v.id}&status=2">查看</a>
-								<a href="/merchant/goods/dumpCards?goods_id={$v.id}&status=2" target="_blank">导出</a>
 							</td>
 							<td>
 								<input onchange="change_status(this,{$v.id})" type="checkbox" data-plugin="switchery" data-color="#2bb309"
@@ -114,7 +112,6 @@
 		$.post('/merchant/goods/qq_info', {
 			id: id,
 		}, function (res) {
-			console.log(obj.href);
 			obj.href = 'http://wpa.qq.com/msgrd?v=3&uin='+res+'&site=qq&menu=yes';
 			obj.text = res;
 		});

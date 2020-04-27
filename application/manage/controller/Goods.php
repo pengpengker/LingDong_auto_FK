@@ -125,7 +125,8 @@ class Goods extends BasicAdmin
     			if(!GoodsModel::where('id',$this->request->param('goods_id'))->find()){
     				$this->error('失败3');
     			}
-    			if(GASModel::save(['goods_id'=>$this->request->param('goods_id'),'type'=>$this->request->param('type'),'end_time'=>$this->request->param('end_time')])){
+    			$gas = new GASModel();
+    			if($gas->save(['goods_id'=>$this->request->param('goods_id'),'type'=>$this->request->param('type'),'end_time'=>$this->request->param('end_time')])){
     				$this->success('成功');
     			}else{
     				$this->error('失败4');

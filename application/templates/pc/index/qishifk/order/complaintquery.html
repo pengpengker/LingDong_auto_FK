@@ -1,0 +1,45 @@
+{extend name="main" /}
+{block name="header"}
+    {include file='header' title='投诉查询'}
+{/block}
+
+{block name="content"}
+<br>
+<br>
+<br>
+<div class="odsrch-wp">
+    <div class="wrapper" style="min-height: 300px;">
+        <form action="/Index/order/complaintpass.html" method="get" style="padding: 0 20px;" onsubmit="return checker()">
+            <input type="hidden" name="token" value="{$token}">
+            <div class="odsrch-bd">
+                <div class="odsrch-type">
+                    <h3>订单编号</h3>
+                </div>
+                <div class="odsrch-txt">
+                    <input type="text" class="txt" name="trade_no" id="orderid_input2" value="{$Request.get.id}"/>
+                </div>
+                <div class="odsrch-btn">
+                    <input type="submit" value="查 询"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<br>
+<br>
+<br>
+{/block}
+
+{block name='appendJS'}
+<script>
+    function checker(){
+        var trade_no = $('[name=trade_no]').val();
+        if(trade_no.length === 0) {
+            layer.msg('请填写订单号');
+            return false;
+        }
+
+        return true;
+    }
+</script>
+{/block}

@@ -34,7 +34,7 @@ class Complaint extends BasicAdmin {
             'date_range' => input('date_range/s', ''),
         ];
         $where = $this->genereate_where($query);
-        $complaints = ComplaintModel::where($where)->where('duijie_id','neq','null')->order('id desc')->paginate(30, false, [
+        $complaints = ComplaintModel::where($where)->where("duijie_id is not null or duijie_id != ''")->order('id desc')->paginate(30, false, [
             'query' => $query,
         ]);
         // 分页

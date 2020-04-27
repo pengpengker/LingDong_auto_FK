@@ -87,6 +87,12 @@
             </a>
             </dl>
             <dl>
+            <a data-ajax="false" href="/merchant/goods/lower_goods" class="ui-link">
+            <img src="__RES__/merchant/mobile/images/pro-img03.png">
+            <dd>查看下级</dd>
+            </a>
+            </dl>
+            <dl>
             <a data-ajax="false" href="/merchant/user/link" class="ui-link">
             <img src="__RES__/merchant/mobile/images/pro-img04.png">
             <dd>店铺链接</dd>
@@ -149,13 +155,21 @@
             <dl>
             <a data-ajax="false" href="/merchant/complaint/index/c_type/ziying" class="ui-link">
             <img src="__RES__/merchant/mobile/images/pro-img111.png">
-            <dd>投诉管理<strong style="color: red !important">&nbsp;</strong></dd>
+            <dd>投诉管理
+            {if $zy_complaint !== 0}
+            <strong style="color: red !important">{$zy_complaint}</strong>
+            {/if}
+            </dd>
             </a>
             </dl>
             <dl>
             <a data-ajax="false" href="/merchant/complaint/index/c_type/duijie" class="ui-link">
             <img src="__RES__/merchant/mobile/images/pro-img11.png">
-            <dd>对接投诉<strong style="color: red !important">&nbsp;</strong></dd>
+            <dd>对接投诉
+            {if $dl_complaint !== 0}
+            <strong style="color: red !important">{$dl_complaint}</strong>
+            {/if}
+            </dd>
             </a>
             </dl>
             <dl>
@@ -234,9 +248,6 @@
     })
 </script>
 <script src="__RES__/merchant/mobile/js/layer.js"></script>
-<script>
-	layer.alert('亲，手机APP即将上线，使用APP可以解锁全部功能奥');
-</script>
 <script>
 var news_title =""	;
 var news_id = 0;

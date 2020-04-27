@@ -482,6 +482,7 @@ class Goods extends Base
             'coupon_type' => input('coupon_type/d', 0),
             'sold_notify' => input('sold_notify/d', 0),
             'take_card_type' => input('take_card_type/d', 0),
+            'card_sequence' => input('card_sequence/d', 0),
             'visit_type' => input('visit_type/d', 0),
             'visit_password' => input('visit_password/s', ''),
             'is_duijie' => input('is_duijie/d', 0),
@@ -757,7 +758,7 @@ class Goods extends Base
         //非冻结状态
         $where['is_freeze'] = ['=','0'];
         //秘钥搜索
-        if(!empty(input('duijie_key/s', ''))){
+        if(!empty(trim(input('duijie_key/s', '')))){
         	//对接秘钥转上级id
         	$user = Db::table('user')->where('duijie_key',trim(input('duijie_key/s', '')))->find();
         	if($user){
@@ -769,9 +770,18 @@ class Goods extends Base
         // $goodsList = GoodsModel::where($where)->where("duijie_id is null or duijie_id=''")->order('id desc')->paginate(30, false, [
         //     'query' => $query,
         // ]);
-        $goodsList = GoodsModel::with(['goodorder'],'LEFT')->where($where)->where("duijie_id is null or duijie_id=''")->order('type desc,id desc')->paginate(30, false, [
-            'query' => $query,
-        ]);
+        
+        //如果用对接码搜索的话排序规则sort优先
+        if(empty(trim(input('duijie_key/s', '')))){
+        	$goodsList = GoodsModel::with(['goodorder'],'LEFT')->where($where)->where("duijie_id is null or duijie_id=''")->order('type desc,id desc,sort desc')->paginate(30, false, [
+	            'query' => $query,
+	        ]);
+        }else{
+        	$goodsList = GoodsModel::with(['goodorder'],'LEFT')->where($where)->where("duijie_id is null or duijie_id=''")->order('sort desc,type desc,id desc')->paginate(30, false, [
+	            'query' => $query,
+	        ]);
+        }
+        
         //halt($goodsList->toarray());
         //将本人已对接的商品排除
         $myduijiegoodslist = GoodsModel::where('user_id',$this->user->id)->where("duijie_id is not null or duijie_id != ''")->select();
@@ -852,6 +862,7 @@ class Goods extends Base
                 'inventory_notify' => input('inventory_notify/d', 0),
                 'inventory_notify_type' => input('inventory_notify_type/d', 1),
                 'coupon_type' =>  0,
+                'card_sequence' => $info['card_sequence'],
                 'sold_notify' =>  input('sold_notify/d', 0),
                 'take_card_type' => input('take_card_type/d', 0),
                 'visit_type' => input('visit_type/d', 0),
@@ -917,5 +928,117 @@ class Goods extends Base
             $this->assign('sjgoods',$info);
             return view();
     	}
+    }
+    
+    //下级对接信息查询
+    public function lower_goods()
+    {
+    	$query = [
+            'name' => input('name/s', ''),
+            'user_id' => $this->user->id,
+        ];
+        if(!empty(input('name/s', ''))){
+        	$where['name'] =  ['like', '%' . input('name/s', '') . '%'];
+        }
+    	$where['user_id'] =  ['=', $this->user->id];
+    	//可被对接
+        $where['is_duijie'] = ['=','1'];
+    	//查出本人可对接的商品
+    	$goodsList = Db::table('goods')->alias('a')
+    		->where('a.user_id = '.$this->user->id)
+    		->where('a.is_duijie = 1')
+    		->join('goods b','b.duijie_id = a.id')
+    		->field('a.*,b.id as lid,b.name as lname,b.price as lprice,b.status as lstatus,b.create_at as lcreate_at,b.wholesale_discount as lwholesale_discount,b.coupon_type as lcoupon_type,b.take_card_type as ltake_card_type,b.visit_type as lvisit_type')
+    		->order('sort desc,id desc')->paginate(30, false, [
+	            'query' => $query,
+        ]);
+        // 分页
+        $page = $goodsList->render();
+        $this->assign('page', $page);
+        $this->assign('goodsList', $goodsList);
+    	return view();
+    }
+    
+    //查询下级对接的QQ
+    public function loweruser_qq_info()
+    {
+    	if($this->request->ispost()){
+    		$g = GoodsModel::where('id',input('id',''))->find();
+    		if(!$g){
+    			return "商品不存在";
+    		}
+    		$gs = GoodsModel::where('id',$g->duijie_id)->find();
+    		if(!$gs){
+    			return "上级商品不存在";
+    		}
+    		if($gs['user_id'] !== $this->user->id){
+    			return "没有该下级，无法查询";
+    		}
+    		return Db::table('user')->where('id',$g->user_id)->find()['qq'];
+    	}
+    	return "方式错误";
+    }
+    
+    //下级商品删除
+    public function lower_goods_delete()
+    {
+    	if($this->request->ispost()){
+    		$goods_id = input('id/d', 0);
+	        $goods = GoodsModel::get(['id' => $goods_id]);
+	        if (!$goods) {
+	            return J(1, '不存在该商品！');
+	        }
+	        $gs = GoodsModel::where('id',$goods->duijie_id)->find();
+    		if(!$gs){
+    			return "上级商品不存在";
+    		}
+    		if($gs->user_id !== $this->user->id){
+    			return "没有该下级，无法删除他人商品";
+    		}
+			if (GoodsModel::where(['id' => $goods_id])->delete()) {
+	            MerchantLogService::write('删除下级对接的商品', '删除ID为' . $goods_id . '的商品');
+	            return J(0, '删除成功！');
+	        } else {
+	            return J(1, '删除失败！');
+	        }
+    	}
+    	return J(1, '访问方式错误！');
+    }
+    
+    //改变下级对接商品的状态
+    public function lowseruser_changeStatus()
+    {
+    	if($this->request->ispost()){
+	        $goods_id = input('id/d', 0);
+	        $goods = GoodsModel::get(['id' => $goods_id]);
+	        if (!$goods) {
+	            $this->error('不存在该商品！');
+	        }
+	        if ($goods->is_freeze == 1) {
+	            $this->result('', 1, '该商品已被冻结，如果要上架，请修改相关商品信息再上架', 'json');
+	        }
+	        $sj_goods = GoodsModel::get(['id' => $goods->duijie_id]);
+	        if(empty($sj_goods)){
+	        	$this->result('', 1, '该商品上级商户已删除，请及时下架并删除，此处修改不生效', 'json');
+	        }
+	        if($sj_goods->user_id !== $this->user->id){
+	        	$this->result('', 1, '该下级商品上级不属于您，请不要操作他人商品', 'json');
+	        }
+	        if ($sj_goods->is_freeze == 1) {
+	            $this->result('', 1, '该上级商品已被冻结，如果要上架，请修改相关商品信息再上架', 'json');
+	        }
+	        $status = input('status/d', 0);
+	        $status = $status ? 1 : 0;
+	        $statusStr = $status == 1 ? '上架' : '下架';
+	        $goods->status = $status;
+	        $res = $goods->save();
+	        if ($res !== false) {
+	            MerchantLogService::write('修改下级商品状态', '将ID为' . $goods_id . '的商品' . $statusStr);
+	            return J(0, 'success');
+	        } else {
+	            return J(1, 'error');
+	        }
+    	}
+    	return J(1, '访问方式错误！');
     }
 }

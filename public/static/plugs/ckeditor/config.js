@@ -1,37 +1,38 @@
-// 定义编辑器标准配置
-CKEDITOR.editorConfig = function (config) {
-    config.language = 'zh-cn';
-    config.toolbar = [
-        {name: 'document', items: ['Source']},
-        {name: 'clipboard', items: ['Undo', 'Redo']},
-        {name: 'styles', items: ['Font', 'FontSize']},
-        {name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'RemoveFormat', 'CopyFormatting', 'TextColor', 'BGColor']},
-        {name: 'align', items: ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock']},
-        {name: 'paragraph', items: ['NumberedList', 'BulletedList', 'Outdent', 'Indent', 'Blockquote', 'Link', 'Unlink']},
-        {name: 'uimage', items: ['Table', 'UploadImage']},
-        {name: 'tools', items: ['Maximize']}
-    ];
-    config.allowedContent = true;
-    config.extraPlugins = 'uimage';
-    config.format_tags = 'p;h1;h2;h3;pre';
-    config.removeButtons = 'Underline,Subscript,Superscript';
-    config.removeDialogTabs = 'image:advanced;link:advanced';
-    config.font_names = '宋体/SimSun;新宋体/NSimSun;仿宋_GB2312/FangSong_GB2312;楷体_GB2312/KaiTi_GB2312;黑体/SimHei;微软雅黑/Microsoft YaHei;' + config.font_names;
+/**
+ * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see https://ckeditor.com/legal/ckeditor-oss-license
+ */
+
+CKEDITOR.editorConfig = function( config ) {
+	// Define changes to default configuration here.
+	// For complete reference see:
+	// https://ckeditor.com/docs/ckeditor4/latest/api/CKEDITOR_config.html
+
+	// The toolbar groups arrangement, optimized for two toolbar rows.
+	config.toolbarGroups = [
+		{ name: 'clipboard',   groups: [ 'clipboard', 'undo' ] },
+		{ name: 'editing',     groups: [ 'find', 'selection', 'spellchecker' ] },
+		{ name: 'links' },
+		{ name: 'insert' },
+		{ name: 'forms' },
+		{ name: 'tools' },
+		{ name: 'document',	   groups: [ 'mode', 'document', 'doctools' ] },
+		{ name: 'others' },
+		'/',
+		{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
+		{ name: 'paragraph',   groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ] },
+		{ name: 'styles' },
+		{ name: 'colors' },
+		{ name: 'about' }
+	];
+
+	// Remove some buttons provided by the standard plugins, which are
+	// not needed in the Standard(s) toolbar.
+	config.removeButtons = 'Underline,Subscript,Superscript';
+
+	// Set the most common block elements.
+	config.format_tags = 'p;h1;h2;h3;pre';
+
+	// Simplify the dialog windows.
+	config.removeDialogTabs = 'image:advanced;link:advanced';
 };
-// 自定义图片上传插件
-CKEDITOR.plugins.add("uimage", {
-    init: function (editor) {
-        editor.ui.addButton("UploadImage", {label: "上传图片", command: 'uimage', icon: 'image', toolbar: 'insert,10'});
-        editor.addCommand('uimage', {
-            exec: function (editor) {
-                var field = '_editor_upload_' + Math.floor(Math.random() * 100000);
-                var url = window.ROOT_URL + '/admin/plugs/upfile.html?mode=one&type=png,jpg,gif,jpeg&field=' + field;
-                $('<input type="hidden">').attr('name', field).appendTo(editor.element.$).on('change', function () {
-                    var element = CKEDITOR.dom.element.createFromHtml('<img src="' + this.value + '" style="max-width:500px" border="0" title="image" />');
-                    editor.insertElement(element), $(this).remove();
-                });
-                $.form.iframe(url, '插入图片');
-            }
-        });
-    }
-});

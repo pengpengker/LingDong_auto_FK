@@ -1,0 +1,160 @@
+{extend name="base/detail"}
+
+{block name="content"}
+<div class="main">
+    <div class="content">
+        <ul class="nav nav-tabs">
+            <li>&nbsp;&nbsp;&nbsp;&nbsp;</li>
+            <li role="presentation" class="active"><a href="javascript:;">下级商品列表</a></li>
+        </ul><br>
+
+        <form name="search" class="form-inline" method="get" action="">
+            <div class="form-group">
+                <input type="text" class="form-control" name="name" value="{$Think.get.name}" maxlength="30" placeholder="商品名称">
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-search"></span>&nbsp;查询商品</button>
+            </div>
+        </form>
+        {foreach $goodsList as $v}
+        <div class="mt20">
+            <div class="selltable">
+                <table class="table table-hover">
+                    <tbody>
+                        <tr id="record_{$v.id}">
+                            <td colspan="12">
+                                <span>原商品名：<a href="javascript:;">{$v.name}</a></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12">
+                                <span>下级商品名：<a href="javascript:;">{$v.lname}</a></span>
+                            </td>
+                        </tr>
+                        <tr id="record_365220">
+                            <td colspan="12">
+                                <span>下级QQ:<a href="javascript:;" onclick="qq_info(this,{$v.lid})">点我查询</a></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4">对接单价：{$v.duijie_smilepic}</td>
+                            <td colspan="4">下级零售单价：{$v.duijie_smilepic+$v.lprice}</td>
+                            <td colspan="4">状态：
+                                {if $v.lstatus==1}
+                                上架中
+                                <a href="javascript:;" onclick="change_status({$v.lid},0)" title="点击下架" class="btn btn-danger btn-xs">下架</a>&nbsp;
+                                {else/}
+                                下架中
+                                <a href="javascript:;" onclick="change_status({$v.lid},1)" title="点击上架" class="btn btn-success btn-xs">上架</a>&nbsp;
+                                {/if}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="javascript:;" onclick="delData({$v.lid})" data-toggle="tooltip" title="删除下级"><span class="glyphicon glyphicon-trash"></span></a>&nbsp;
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {/foreach}
+        <div>
+            <style>
+                #wypage {
+                    font-size: 12px;
+                    padding: 10px auto;
+                    margin-left: 0px;
+                }
+
+                #wypage p {
+                    float: left;
+                    color: #333;
+                }
+
+                #wypage a {
+                    float: left;
+                    display: inline-block;
+                    border: 1px solid #ddd;
+                    padding: 6px 9px;
+                    margin-left: 4px;
+                    text-decoration: none;
+                    color: #333;
+                    background-color: #fff;
+                    border-radius: 0px;
+                }
+
+                #wypage a:hover {
+                    background-color: #248eff;
+                    color: #fff
+                }
+
+                #wypage a.no-hover:hover {
+                    color: #333
+                }
+
+                #wypage a.wy_page_current {
+                    background-color: #06a7ff;
+                    color: #fff
+                }
+            </style>
+            <form class="form-inline">
+                {$page}
+            </form>
+        </div><br><br>
+
+    </div>
+</div>
+{/block}
+
+{block name="appendJS"}
+<script>
+    var delData = function(id) {
+        layer.confirm('确定要删除下级商品吗？', {
+            btn: ['确定', '取消'] //按钮
+        }, function() {
+            $.get('/merchant/goods/lower_goods_delete', {
+                id: id
+            }, function(res) {
+				if(res.code==0){
+                    layer.msg('删除成功', {
+                        icon: 1
+                    });
+					setTimeout(function(){
+						location.reload();
+					},200);
+				}else{
+                    layer.msg(res.msg, {
+                        icon: 2
+                    });
+					setTimeout(function(){
+						location.reload();
+					},2000);
+				}
+            });
+        });
+    };
+
+
+	function change_status(id,status)
+	{
+		$.post('/merchant/goods/lowseruser_changeStatus',{
+			id:id,
+			status:status
+		},function(res){
+		    location.reload();
+		});
+	}
+	
+	function qq_info(obj,id){
+		$.post('/merchant/goods/loweruser_qq_info', {
+			id: id,
+		}, function (res) {
+			console.log(obj.href);
+			obj.href = 'http://wpa.qq.com/msgrd?v=3&uin='+res+'&site=qq&menu=yes';
+			obj.text = res;
+		});
+	}
+</script>
+{/block}

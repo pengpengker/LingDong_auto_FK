@@ -37,24 +37,12 @@
 						<tr>
 							<th scope="row">
 								{switch name="$v.goodorder.type"}
-								     {case value="1"}<a style="color:#ff0000"><span class="label" style="background-color: #f9c851;">热门推荐</span></a>{/case}
+								     {case value="1"}<a style="color:#ff0000"><span class="label" style="background-color: #f9c851;">包月置顶</span></a>{/case}
 								     {case value="2"}<a style="color:#ff0000"><span class="label" style="background-color: #ff0101;">官方推荐</span></a>{/case}
 								     {case value="3"}<a style="color:#ff0000"><span class="label" style="background-color: #a601ff;">年费置顶</span></a>{/case}
 								     {default /}
 								{/switch}
 								{$v.name}
-								{if $v.wholesale_discount==1}
-								<span class="label label-success">批</span>
-								{/if}
-								{if $v.coupon_type==1}
-								<span class="label label-pink">券</span>
-								{/if}
-								{if $v.take_card_type!=0}
-								<span class="label label-primary">取</span>
-								{/if}
-								{if $v.visit_type==1}
-								<span class="label label-danger">密</span>
-								{/if}
 							</th>
 							<td>
 								{$v.create_at|date="Y-m-d H:i:s",###}

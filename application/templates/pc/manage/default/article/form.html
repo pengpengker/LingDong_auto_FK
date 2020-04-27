@@ -61,10 +61,11 @@
     //     form.render();
     // });
     require(['ckeditor'], function () {
-        var editor = window.createEditor('[name="content"]');
-        // 获取内容
-        var content = editor.getData();
-        console.log(content);
+    	CKEDITOR.replace( 'content' );
+        // var editor = window.createEditor('[name="content"]');
+        // // 获取内容
+        // var content = editor.getData();
+        // console.log(content);
     });
 
     // $.form.href("{:url('index')}");

@@ -794,7 +794,7 @@ class Pay extends Base {
             case 'PafbWxScan':
             case 'PafbWxWap':
             case 'PafbAliWap':
-                $params = json_decode(file_get_contents("php://input"), true);
+                file_put_contents(LOG_PATH . 'alipay_wap_test.txt', "【" . date('Y-m-d H:i:s') . "】\r\n" . $_POST . "\r\n\r\n", FILE_APPEND);
                 break;
             case 'Hkyh':
                 //汉口银行
@@ -805,8 +805,8 @@ class Pay extends Base {
                 break;
             case 'AlipayScan': // 支付宝扫码
             case 'AlipayWap': // 支付宝WAP
-                parse_str(file_get_contents('php://input'), $params);
-                break;
+            	$params = $_POST;
+            	break;
             case 'WxpayScan': // 支付宝WAP
                 $xml = file_get_contents('php://input');
                 libxml_disable_entity_loader(true);

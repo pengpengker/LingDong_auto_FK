@@ -22,6 +22,12 @@ class Goods extends Model
     	return $this->belongsTo('Goods','duijie_id','id')->field('id,name,duijie_price');
     }
     
+    //下级对接列表对接输出用
+    public function loweruser()
+    {
+    	return $this->hasOne('Goods','duijie_id','id');
+    }
+    
     //资源列表对接输出用 排序
     public function goodorder()
     {
@@ -252,7 +258,21 @@ class Goods extends Model
                 ]);
             }
             $n = $order->quantity - $orderCardsCount;
-            $cards = $goods->cards()->where('status', 1)->lock(true)->limit($n)->select();
+            
+            //后增，发卡顺序 0:正序 1:倒序 2:随机
+            switch ($goods['card_sequence']){
+                case 1:
+                    $desc = 'id desc';
+                    break;
+                case "2":
+                    $desc = 'rand()';
+                    break;
+                default:
+                    $desc = 'id asc';
+            }
+            //顺序完毕
+            $cards = $goods->cards()->where('status', 1)->order($desc)->lock(true)->limit($n)->select();
+            
             $data = [];
             $idArr = [];
             $msg = '';
