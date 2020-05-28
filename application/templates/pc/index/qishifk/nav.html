@@ -10,8 +10,13 @@
                 {/foreach}
             </ul>
             <div class="btn">
+            	{if session('?merchant.user')}
+            	<a class="btn-login" href="/merchant">商户中心</a>
+            	<a class="btn-logout" href="/logout">退出登录</a>
+            	{else}
                 <a class="btn-login" href="/login">登录</a>
                 <a class="btn-resg" href="/register">快速注册</a>
+                {/if}
             </div>
         </div>
     </div>

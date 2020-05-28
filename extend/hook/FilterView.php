@@ -47,12 +47,12 @@ class FilterView
 \n<!-- 百度统计 开始 -->
 <script>
     var _hmt = _hmt || [];
-    (function() {
-        var hm = document.createElement("script");
-        hm.src = "{$https}://hm.baidu.com/hm.js?{$key}";
-        var s = document.getElementsByTagName("script")[0]; 
-        s.parentNode.insertBefore(hm, s);
-    })();
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "https://hm.baidu.com/hm.js?{$key}";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
 </script>
 <!-- 百度统计 结束 -->\n\n
 SCRIPT;

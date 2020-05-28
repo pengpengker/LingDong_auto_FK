@@ -284,7 +284,7 @@ class User extends BasicAdmin {
             $this->error($res);
         }
         if (isset($data['password'])) {
-            $data['password'] = md5($data['password']);
+            $data['password'] = password_hash(trim($data['password']),PASSWORD_BCRYPT);
             $data['login_key'] = rand(1000000, 9999999);
         }
         if (!is_mobile_number($data['mobile'])) {

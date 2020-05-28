@@ -249,6 +249,26 @@
 				</div>
 			</div>
 			<div class="form-group block-duijie_smilepic" {if !isset($goods) || $goods.is_duijie==0}style="display:none"{/if}>
+				<label class="col-md-2 control-label">全网资源控制</label>
+				<div class="col-md-4">
+					<div class="radio-inline">
+                        <input type="radio" name="is_agent_show" id="is_agent_show1" value="1" {if isset($goods)}{if $goods.is_agent_show==1}checked{/if}{else/}checked{/if}>
+                        <label for="is_agent_show1">
+                            开启
+                        </label>
+                    </div>
+                    <div class="radio-inline">
+                        <input type="radio" name="is_agent_show" id="is_agent_show2" value="0" {if isset($goods) && $goods.is_agent_show==0}checked{/if}>
+                        <label for="is_agent_show2">
+                            关闭
+                        </label>
+                    </div>
+				</div>
+				<div class="col-md-6">
+					<p class="form-control-static">设置后全网资源对接中是否显示该对接商品！</p>
+				</div>
+			</div>
+			<div class="form-group block-duijie_smilepic" {if !isset($goods) || $goods.is_duijie==0}style="display:none"{/if}>
 				<label class="col-md-2 control-label">对接单价</label>
 				<div class="col-md-4">
 					<input name="duijie_price" type="text" class="form-control" placeholder="" value="{$goods.duijie_price|default='0'}">

@@ -83,22 +83,27 @@ class Order extends Base {
                     //获取已登录用户最近一次购买的卡密
                     if (session('last_order_trade_no')) {
                         $trade_no = session('last_order_trade_no');
-                        $order    = OrderModel::where(['trade_no' => $trade_no,'dj_is_see' => null])->order('id DESC')->find();
+                        //$order    = OrderModel::where(['trade_no' => $trade_no,'dj_is_see' => null])->order('id DESC')->find();
+                        $order    = OrderModel::where(['trade_no' => $trade_no])->order('id DESC')->find();
                     } else {
                         $order = false;
                     }
                     break;
                 case '2':
                     //按订单号方式获取
-                    $order = OrderModel::where(['trade_no' => $trade_no,'dj_is_see' => null])->order('id DESC')->find();
+                    //$order = OrderModel::where(['trade_no' => $trade_no,'dj_is_see' => null])->order('id DESC')->find();
+                    $order = OrderModel::where(['trade_no' => $trade_no])->order('id DESC')->find();
                 	break;
                 case '3':
                 	$this->error('请使用浏览器缓存或订单号查询');
                 	
                     //按联系方式获取
-                    $count = OrderModel::where(['contact' => $trade_no, 'status' => 1,'dj_is_see' => null])->count();
+                    //此处dj_is_see为上级对接订单标识，加上则不可查，dj_is_see有内容说明是上级订单
+                    //$count = OrderModel::where(['contact' => $trade_no, 'status' => 1,'dj_is_see' => null])->count();
+                    $count = OrderModel::where(['contact' => $trade_no, 'status' => 1])->count();
                     if ($count > 1) {
-                        $order = OrderModel::where(['contact' => $trade_no, 'status' => 1,'dj_is_see' => null])->order('id DESC')->paginate(30);
+                    	//$order = OrderModel::where(['contact' => $trade_no, 'status' => 1,'dj_is_see' => null])->order('id DESC')->paginate(30);
+                        $order = OrderModel::where(['contact' => $trade_no, 'status' => 1])->order('id DESC')->paginate(30);
                         foreach ($order as $key => $value){
                         	//判断是否是对接订单
                         	if(!empty($order[$key]['dj_order_id'])){
@@ -115,7 +120,8 @@ class Order extends Base {
                         $this->assign('order', $order);
                         return $this->fetch('querybycontact');
                     } else {
-                        $order = OrderModel::where(['contact' => $trade_no, 'status' => 1,'dj_is_see' => null])->order('id DESC')->find();
+                        //$order = OrderModel::where(['contact' => $trade_no, 'status' => 1,'dj_is_see' => null])->order('id DESC')->find();
+                        $order = OrderModel::where(['contact' => $trade_no, 'status' => 1])->order('id DESC')->find();
                     }
 
                     break;

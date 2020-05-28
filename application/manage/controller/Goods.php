@@ -40,6 +40,7 @@ class Goods extends BasicAdmin
             ->join('link c', 'a.id = c.relation_id AND c.relation_type = "goods"')
             ->field('a.*,b.username,c.token as link')
             ->where($where)
+            ->where("duijie_id is NULL or duijie_id = ''")
             ->order('id desc')
             ->paginate(30, false, [
                 'query' => $query

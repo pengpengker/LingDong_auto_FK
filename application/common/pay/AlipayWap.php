@@ -89,14 +89,14 @@ class AlipayWap extends Pay{
             }
             // 金额异常检测
             if(empty($order->dj_order_id)){
-                if(bccomp($order->total_price,$params['total_amount']) !== 0){
+                if(bccomp($order->total_price,$params['total_amount'],4) === 1){
                     record_file_log('alipay_page_error','金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$params['total_amount']}");
                     die('金额异常！');
                 }
             }else{
                 $sj_order = Order::get(['trade_no' => $order->dj_order_id]);
                 if($sj_order){
-                    if(bccomp(round($order->total_price,3)+round($sj_order->total_price,3),round($params['total_amount'],3)) !== 0){
+                    if(bccomp(round($order->total_price,3)+round($sj_order->total_price,3),round($params['total_amount'],3),4)  === 1){
                         record_file_log('alipay_page_error','对接支付总金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$params['total_amount']}");
                         die('对接支付总金额异常！');
                     }

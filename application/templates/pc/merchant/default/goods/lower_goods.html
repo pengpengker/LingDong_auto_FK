@@ -22,6 +22,7 @@
 							<th>原商品名称</th>
 							<th>下级商品名称</th>
 							<th>下级QQ</th>
+							<th>成交量</th>
 							<th>对接价格</th>
 							<th>下级零售单价</th>
 							<th>下级上下架</th>
@@ -61,6 +62,7 @@
 								{/if}
 							</th>
 							<td><a href="#" onclick="qq_info(this,{$v.lid})">点我查询</a></td>
+							<td><a href="#" onclick="double_info(this,{$v.lid})">点我查询</a></td>
 							<td>{$v.duijie_smilepic}</td>
 							<td>{$v.duijie_smilepic+$v.lprice}</td>
 							<td>
@@ -90,6 +92,14 @@ function qq_info(obj,id){
 		id: id,
 	}, function (res) {
 		obj.href = 'http://wpa.qq.com/msgrd?v=3&uin='+res+'&site=qq&menu=yes';
+		obj.text = res;
+	});
+}
+
+function double_info(obj,id){
+	$.post('/merchant/goods/loweruser_double_info', {
+		id: id,
+	}, function (res) {
 		obj.text = res;
 	});
 }

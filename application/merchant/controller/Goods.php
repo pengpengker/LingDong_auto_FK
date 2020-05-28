@@ -392,6 +392,7 @@ class Goods extends Base
             'visit_type' => input('visit_type/d', 0),
             'visit_password' => input('visit_password/s', ''),
             'is_duijie' => input('is_duijie/d', 0),
+            'is_agent_show' => input('is_agent_show/d', 0),
             'duijie_smilepic' => input('duijie_smilepic/s', ''),
             'duijie_price' => input('duijie_price/s', 0),
             'contact_limit' => input('contact_limit/s', ''),
@@ -486,6 +487,7 @@ class Goods extends Base
             'visit_type' => input('visit_type/d', 0),
             'visit_password' => input('visit_password/s', ''),
             'is_duijie' => input('is_duijie/d', 0),
+            'is_agent_show' => input('is_agent_show/d', 0),
             'duijie_smilepic' => input('duijie_smilepic/s', ''),
             'duijie_price' => input('duijie_price/s', 0),
             'contact_limit' => input('contact_limit/s', ''),
@@ -757,8 +759,11 @@ class Goods extends Base
         $where['is_duijie'] = ['=','1'];
         //非冻结状态
         $where['is_freeze'] = ['=','0'];
+        //全网对接控制
+        $where['is_agent_show'] = ['=','1'];
         //秘钥搜索
         if(!empty(trim(input('duijie_key/s', '')))){
+        	unset($where['is_agent_show']);
         	//对接秘钥转上级id
         	$user = Db::table('user')->where('duijie_key',trim(input('duijie_key/s', '')))->find();
         	if($user){
@@ -868,6 +873,7 @@ class Goods extends Base
                 'visit_type' => input('visit_type/d', 0),
             	'visit_password' => input('visit_password/s', ''),
                 'is_duijie' => 0,
+                'is_agent_show' => 0,
                 'duijie_smilepic' => 0,
                 'contact_limit' => $info->contact_limit,
                 'content' => input('content/s', ''),
@@ -975,6 +981,27 @@ class Goods extends Base
     			return "没有该下级，无法查询";
     		}
     		return Db::table('user')->where('id',$g->user_id)->find()['qq'];
+    	}
+    	return "方式错误";
+    }
+    
+    //查询下级成交数
+    public function loweruser_double_info()
+    {
+    	if($this->request->ispost()){
+    		$g = GoodsModel::where('id',input('id',''))->find();
+    		if(!$g){
+    			return "商品不存在";
+    		}
+    		$gs = GoodsModel::where('id',$g->duijie_id)->find();
+    		if(!$gs){
+    			return "上级商品不存在";
+    		}
+    		if($gs['user_id'] !== $this->user->id){
+    			return "没有该下级，无法查询";
+    		}
+    		//查询下级成交数
+    		return count(Db::table('order')->where(['goods_id' => input('id',''),'status' => 1])->select());
     	}
     	return "方式错误";
     }

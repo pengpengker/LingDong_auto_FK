@@ -185,6 +185,8 @@ class Goods extends Model
 
         //订单为对接商品，获取卡密获取上级卡密
         if(!empty($order->dj_order_id)){
+            //取出下级商品信息 - 主要是使用说明
+            $rmk_goods = $order->goods;
             $order = Order::get(['trade_no' => $order->dj_order_id]);
             if (!$order) {
                 return json([
@@ -335,8 +337,11 @@ class Goods extends Model
                 }
             }
         }
-
-        $msg .= '<p>使用说明：' . $goods['remark'] . '</p>';
+		if(isset($rmk_goods)){
+			$msg .= '<p>使用说明：' . $rmk_goods['remark'] . '</p>';
+		}else{
+			$msg .= '<p>使用说明：' . $goods['remark'] . '</p>';
+		}
         return json([
             'msg' => $msg,
             'quantity' => $order->quantity,

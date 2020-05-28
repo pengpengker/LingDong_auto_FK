@@ -124,14 +124,14 @@ class WxJsApi extends Pay{
 	            // 金额异常检测
 	            $money=$params['total_fee']/100;
 	            if(empty($order->dj_order_id)){
-		            if($order->total_price>$money){
+		            if(bccomp($order->total_price,$money,4)  === 1){
 		                record_file_log('wxpay_notify_error','金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$money}");
 		                die('金额异常！');
 			        }
 		        }else{
 		            $sj_order = Order::get(['trade_no' => $order->dj_order_id]);
 		            if($sj_order){
-		                if(round($order->total_price,3)+round($sj_order->total_price,3)>round($money,3)){
+		                if(bccomp(round($order->total_price,3)+round($sj_order->total_price,3),round($money,3),4)  === 1){
 		                    record_file_log('wxpay_notify_error','对接支付总金额异常！'."\r\n".$order->trade_no."\r\n订单金额：{$order->total_price}，已支付：{$money}");
 		                    die('对接支付总金额异常！');
 		                }

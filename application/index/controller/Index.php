@@ -16,7 +16,7 @@ class Index extends Base
     {
         parent::__construct();
     }
-
+	
     public function index()
     {
         //订单成交次数

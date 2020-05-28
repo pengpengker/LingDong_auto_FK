@@ -76,9 +76,9 @@ class Pay {
                     }
                     // 记录金额日志
                     record_user_money_log('goods_sold', $user['id'], $order->fee, $balance, "扣除交易手续费，订单：{$order->trade_no}");
-                    // 扣除上级佣金
                 }
-                if ($user['parent_id'] > 0) {
+                //上级返佣 - 从平台手续费里抽  判断dj_is_see是否为1，如果为1说明是对接商品的上级订单，对接商品上级无返佣的情况，只返佣下级的邀请人
+                if ($user['parent_id'] > 0 && empty($order->dj_is_see)) {
                     $parent           = Db::table('user')->lock(true)->where('id', $user['parent_id'])->find();
                     $spreadRebateRate = get_spread_rebate_rate();
                     $rebate           = round($order->fee * $spreadRebateRate, 3);
@@ -87,6 +87,7 @@ class Pay {
                         Db::table('user')->where('id', $parent['id'])->update(['money' => ['exp', 'money+' . $rebate], 'rebate' => ['exp', 'rebate+' . $rebate]]);
                         // 记录金额日志
                         record_user_money_log('sub_sold_rebate', $parent['id'], $rebate, round($parent['money'] + $rebate, 3), "下级[{$user['username']}]售出商品，返佣{$rebate}元");
+                    }else{
                     }
                 }
                 //扣除短信费，只在选择“商家承担”短信费时需要扣除，否则是由用户承担，在付款时就付到平台了

@@ -6,7 +6,12 @@
 		<div class="card-box">
 			<div class="row">
 				<div class="col-sm-12">
-					分成比例：{:get_spread_rebate_rate()*100}% | 已返利总额：{$_user->rebate}元
+					分成比例：{:get_spread_rebate_rate()*100}% | 已返利总额：{$_user->rebate}元<br>
+					返利算法：<br>
+					返利金额=好友商品出售价格*平台手续费(请查阅平台手续费)*25%<br>
+					比如（好友出售商品的价格为1000）：<br>
+					1000*3%*≈33.3333%=10元<br>
+					邀友过来的每笔交易，您均会有返利额
 				</div>
 			</div>
 			<!-- end row -->

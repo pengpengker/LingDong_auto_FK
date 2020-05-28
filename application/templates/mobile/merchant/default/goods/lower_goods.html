@@ -35,6 +35,7 @@
                         <tr id="record_365220">
                             <td colspan="12">
                                 <span>下级QQ:<a href="javascript:;" onclick="qq_info(this,{$v.lid})">点我查询</a></span>
+                                <span>下级成交量:<a href="javascript:;" onclick="double_info(this,{$v.lid})">点我查询</a></span>
                             </td>
                         </tr>
                         <tr>
@@ -151,8 +152,15 @@
 		$.post('/merchant/goods/loweruser_qq_info', {
 			id: id,
 		}, function (res) {
-			console.log(obj.href);
 			obj.href = 'http://wpa.qq.com/msgrd?v=3&uin='+res+'&site=qq&menu=yes';
+			obj.text = res;
+		});
+	}
+	
+	function double_info(obj,id){
+		$.post('/merchant/goods/loweruser_double_info', {
+			id: id,
+		}, function (res) {
 			obj.text = res;
 		});
 	}
