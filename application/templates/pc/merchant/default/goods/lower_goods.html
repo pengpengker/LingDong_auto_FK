@@ -61,10 +61,10 @@
 								<span class="label label-danger">密</span>
 								{/if}
 							</th>
-							<td><a href="#" onclick="qq_info(this,{$v.lid})">点我查询</a></td>
-							<td><a href="#" onclick="double_info(this,{$v.lid})">点我查询</a></td>
+							<td><a href="#" onclick="qq_info(this,{$v.lid});return false;">点我查询</a></td>
+							<td><a href="#" onclick="double_info(this,{$v.lid});return false;">点我查询</a></td>
 							<td>{$v.duijie_smilepic}</td>
-							<td>{$v.duijie_smilepic+$v.lprice}</td>
+							<td>{$v.duijie_price+$v.lprice}</td>
 							<td>
 								<input onchange="change_status(this,{$v.lid})" type="checkbox" data-plugin="switchery" data-color="#2bb309"
 								 data-size="small" data-switchery="true" style="display: none;" {if $v.lstatus==1}checked{/if}> </td> 

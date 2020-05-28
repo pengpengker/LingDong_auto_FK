@@ -619,6 +619,7 @@ class Goods extends Base
         $page = $goodsList->render();
         $this->assign('page', $page);
         $this->assign('goodsList', $goodsList);
+        
 
         // 商品分类
         $categorys = CategoryModel::where(['user_id' => $this->user->id])->order('sort desc,id desc')->select();
